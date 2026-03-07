@@ -1,0 +1,667 @@
+﻿
+@{
+    Layout = "_ExtraLayout";
+}
+
+@model IEnumerable<EPROCUREMENT.SapResponse.PackagesResponse>;
+
+<style>
+    .highlighted {
+        background-color: #ffff99; /* or any other color */
+    }
+</style>
+<div class="container-fluid page-header">
+    <h1 class="display-3 text-uppercase text-white mb-3">New Packages</h1>
+    <div class="d-inline-flex text-white">
+        <h6 class="text-uppercase m-0"><a href="">Bidding on New Packages</a></h6>
+    </div>
+</div>
+
+<br />
+
+<div class="pd-20 card-box">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">PackageName</th>
+                <th scope="col">PackageFile</th>
+            </tr>
+        </thead>
+        <tbody id="tblheader">
+        </tbody>
+    </table>
+</div>
+
+
+<br />
+
+
+<h5 style="color:green">Prices Include all taxes and deductions,(excluding VAT for the Supply Only )</h5>
+
+
+<br />
+
+<div class="pd-20 card-box">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Material Desc.</th>
+                <th scope="col">Material requiested QTY</th>
+                <th scope="col">Material UOM</th>
+                <th scope="col">Price per Unit</th>
+                <th scope="col">Total</th>
+            </tr>
+        </thead>
+        <tbody id="tblbody">
+        </tbody>
+    </table>
+    <div class="form-group">
+        <p class="class="col-sm-12 col-md-2 col-form-label"">Grand Total</p>
+        <div class="col-sm-12 col-md-10">
+            <input type="text" class="form-control form-control-sm" readonly id="txtprice_sum" />
+        </div>
+    </div>
+</div>
+
+<br />
+
+<div class="pd-20 card-box">
+    <div class="clearfix">
+        <div class="pull-left">
+            <h4 class="text-blue h4">Mandatory Fields</h4>
+        </div>
+    </div>
+    <form id="biddingForm">
+ 
+        <div class="form-group row">
+
+            <p class="col-sm-12 col-md-2 col-form-label">Advanced Payment %</p>
+            <div class="col-sm-12 col-md-4">
+                <input class="form-control"
+                       type="text"
+                       placeholder="Enter here your Advanced Payment %" id="txtpayment" required />
+            </div>
+
+            <p class="col-sm-12 col-md-2 col-form-label">Material Delivery Payment %</p>
+            <div class="col-sm-12 col-md-4">
+                <input class="form-control payment-input"
+                       type="text"
+                       placeholder="Material Delivery Payment %" id="materialworks" required />
+            </div>
+
+            <p class="col-sm-12 col-md-2 col-form-label">Works/Service Payment %</p>
+            <div class="col-sm-12 col-md-4">
+                <input class="form-control payment-input"
+                       type="text"
+                       placeholder="Works/Service Payment %" id="workspayment" required />
+            </div>
+        </div>
+
+
+        <div class="form-group row">
+            <p class="col-sm-12 col-md-2 col-form-label">Please Upload your offer</p>
+            <div class="col-sm-12 col-md-10">
+                <label>
+                    <input type="file" id="FileName" accept=".pdf,.xlsx,.xls" required />
+                </label>
+
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <p class="col-sm-12 col-md-2 col-form-label">Transportation</p>
+            <div class="col-sm-12 col-md-10">
+                
+                <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;" id="transportation" required>
+                <option value="YES">YES</option>
+                <option value="NO">NO</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <p class="col-sm-12 col-md-2 col-form-label">Duration in Days</p>
+            <div class="col-sm-12 col-md-4">
+                <input class="form-control"
+                       type="text"
+                       placeholder="Enter your duration in Days" id="duration" required />
+            </div>
+
+            <p class="col-sm-12 col-md-2 col-form-label">Start From</p>
+            <div class="col-sm-12 col-md-4">
+                <input class="form-control"
+                       placeholder="Select Delivery Date"
+                       type="date" 
+                       id="txtdelivery" 
+                       required 
+                       onkeydown="return false;" />
+            </div>
+        </div>
+    </form>
+
+    <br />
+    <div class="text-center">
+    <button class="btn btn-outline-success" id="btnapply">Apply</button>
+    </div>
+</div>
+
+
+
+
+<script>
+
+    $(document).ready(function () {
+        var today = new Date().toISOString().split('T')[0];
+        $('#txtdelivery').attr('min', today);
+    });
+
+    $(document).ready(function () {
+        $('.payment-input').on('input', function () {
+            // Remove non-numeric characters
+            $(this).val($(this).val().replace(/\D/g, ''));
+
+            // Ensure the value is not greater than 100
+            if (parseInt($(this).val()) > 100) {
+                $(this).val('100');
+            }
+
+            // Calculate the total sum of payments
+            var total = 0;
+            $('.payment-input').each(function () {
+                total += parseInt($(this).val() || 0);
+            });
+
+            // Update the Advanced Payment input
+            var advancedPayment = 100 - total;
+            if (advancedPayment < 0) advancedPayment = 0; // Ensure advanced payment is not negative
+            $('#txtpayment').val(advancedPayment);
+        });
+
+        // Ensure the sum is 100% on load
+        $('.payment-input').trigger('input');
+    });
+
+
+    $(document).ready(function () {
+        $('#txtpayment').on('input', function () {
+            // Remove non-numeric characters
+            $(this).val($(this).val().replace(/\D/g, ''));
+
+            // Ensure the value is not greater than 100
+            if (parseInt($(this).val()) > 100) {
+                $(this).val('100');
+            }
+        });
+    });
+
+    $(document).ready(function () {
+
+        $('#duration').keypress(function () {
+            this.value = this.value.replace(/[^0-9\.]/g, '');
+        });
+    });
+
+    $(document).ready(function () {
+        // Highlight column when a row is clicked in #tblheader
+        $('#tblheader').on('click', 'tr', function () {
+            // Remove "highlighted" class from all rows
+            $('#tblheader tr').removeClass('highlighted');
+            // Add "highlighted" class to the clicked row
+            $(this).addClass('highlighted');
+        });
+    });
+
+    $(document).ready(function () {
+        $('#btnmanualassign').on('click', function () { // When the Manual Assign button is clicked
+            $('#searchTextBox').val(''); // Clear the search text box
+            $('#searchResultsBody').empty();
+            // fetchSearchResults(''); // Fetch search results with an empty search term
+        });
+
+        $('#searchTextBox').on('keyup', function (e) { // When a key is pressed in the search text box
+            if (e.keyCode === 13) { // Check if the pressed key is Enter (key code 13)
+                var searchTerm = $(this).val(); // Get the search term from the text box
+                fetchSearchResults(searchTerm); // Fetch search results
+            }
+        });
+
+        function fetchSearchResults(searchTerm) {
+            // Make an AJAX request to fetch search results
+            $.ajax({
+                type: 'GET',
+                url: '/Admin/Search',
+                data: { searchTerm: searchTerm },
+                success: function (response) {
+                    $('#searchResultsBody').empty();
+
+                    if (Array.isArray(response)) {
+                        // If response is an array, iterate through each record and append them to the table
+                        $.each(response, function (index, user) {
+                            $('#searchResultsBody').append('<tr><td>' + user.fname + '</td><td>' + user.tax_id + '</td><td><button class="btn btn-success" value="' + user.id + '">Select</button></td></tr>');
+                        });
+                    } else if (response === "No Data Found") {
+                        // If response is "No Data Found", display a message in the table
+                        $('#searchResultsBody').html('<tr><td colspan="3">No Data Found</td></tr>');
+                    } else {
+                        // If response is a single object, append it to the table
+                        $('#searchResultsBody').append('<tr><td>' + response.fname + '</td><td>' + response.tax_id + '</td><td><button class="btn btn-success" value="' + response.id + '">Select</button></td></tr>');
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        }
+
+        $(document).on('click', '#searchResultsBody button', function () {
+            var selectedRow = $(this).closest('tr');
+            selectedRow.hide();
+
+            var vendorName = $(this).closest('tr').find('td:first').text(); // Get the Vendor Name from the selected row
+            var taxId = $(this).closest('tr').find('td:eq(1)').text(); // Get the Tax ID from the selected row
+
+            var userId = selectedRow.find('.btn-success').val();
+
+            alert(userId);
+
+            // Append the selected values to the designated area in the modal
+            $('#selectedValues').append('<tr><td>' + vendorName + '</td><td>' + taxId + '</td><td hidden><input type="hidden" class="selected" value="' + userId + '"></td><td><button class="btn btn-danger cancelBtn">Cancel</button></td></tr>');
+        });
+
+        $(document).on('click', '.cancelBtn', function () {
+            var canceledRow = $(this).closest('tr'); // Get the canceled row
+            canceledRow.remove(); // Remove the canceled row from the selected values table
+
+            var vendorName = canceledRow.find('td:first').text(); // Get the Vendor Name from the canceled row
+            var taxId = canceledRow.find('td:eq(1)').text(); // Get the Tax ID from the canceled row
+
+            // Find the corresponding row in the search results table and show it
+            $('#searchResultsBody tr').each(function () {
+                var row = $(this);
+                if (row.find('td:first').text() === vendorName && row.find('td:eq(1)').text() === taxId) {
+                    row.show(); // Show the canceled row
+                    return false; // Exit the loop after finding the row
+                }
+            });
+        });
+
+    });
+
+
+    $(document).ready(function () {
+        // Make an AJAX request to fetch projects
+        $.ajax({
+            type: 'GET', // Use GET method to fetch data
+            url: '/ExternalUser/GetAllReleased',
+            success: function (response) {
+
+                console.log(response);
+                $('#tblheader').empty();
+                $.each(response, function (index, row) {
+                   // var filename = row.file_path.substring(row.file_path.lastIndexOf('/') + 1);
+                    // Find the index of "packages/" and add its length to get the start of the file name
+                    var start_index = row.file_path.indexOf("packages/") + "packages/".length;
+
+                    // Extract the file name using substring
+                    var file_name = row.file_path.substring(start_index);
+
+                    // Append each row to the table
+                    $('#tblheader').append(
+                        '<tr>' +
+                        '<td> <a href="#" data-id="' + row.id + '">' + row.pkg_name + ' </a> </td>' +
+                        '<td> <a class="fileuploaded" href="#" data-id="' + file_name + '">' + file_name + ' </a> </td>' +
+                        '</tr>'
+                    );
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+        // Your existing code for handling search button click and displaying table rows goes here
+    });
+
+
+
+    $(document).on('click', '#tblheader .fileuploaded', function () {
+        var rowId = $(this).data('id');
+        // Create a hidden iframe
+        var iframe = $('<iframe>', {
+            id: 'hiddenDownloader',
+            style: 'display: none'
+        });
+        $('body').append(iframe);
+
+        // Set the iframe source to the download URL
+        $('#hiddenDownloader').attr('src', '/ReleasedPackages/DownloadPackageFile?fileName=' + rowId);
+
+        // Remove the iframe after download
+        $('#hiddenDownloader').on('load', function () {
+            $(this).remove();
+        });
+
+    });
+    $(document).ready(function () {
+        $('#btnsearch').on('click', function () { // When the search button is clicked
+            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
+            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+            var fromDate = $('input[name="datefrom"]').val(); // Get the selected from date
+            var toDate = $('input[name="dateto"]').val(); // Get the selected to date
+
+             var projectId = project.split('|')[1];
+            var industryId = industry.split('|')[1];
+
+            // Make an AJAX request to your endpoint
+            $.ajax({
+                type: 'POST',
+                url: '/ExternalUser/GetPackages',
+                data: {
+                    project_id: projectId,
+                    industry_id: industryId
+                },
+                success: function (response) {
+                    // Assuming response is an array of objects containing data for each row
+                    $('#tblbody').empty(); // Clear the table body
+
+                    $.each(response, function (index, row) {
+                        // Append each row to the table
+                        $('#tblbody').append(
+                            '<tr>' +
+                            '<td>' + row.mtr_desc + '</td>' +
+                          //  '<td>' + row.mtr_long_desc + '</td>' +
+                            '<td>' + row.mtr_qty + '</td>' +
+                            '<td>' + row.mtr_uom + '</td>' +
+                            '<td><input type="textbox" class="txtprice"></td>' +
+                            '<td><input type="textbox" class="txttotal" disabled></td>' +
+                            '<td><input type="hidden" class="id" value="' + row.id + '"></td>' +
+                            '</tr>'
+                        );
+                    });
+                    // $('#tblbody').show(); // Show the table body
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        });
+    });
+
+    $(document).ready(function () {
+        $('#btnapply').on('click', function () {
+
+            event.preventDefault(); // Prevent the default form submission
+
+            var isValid = true;
+            $('#biddingForm input[required], #biddingForm select[required]').each(function () {
+                if ($(this).val() === '' || ($(this).attr('type') === 'file' && this.files.length === 0)) {
+                    isValid = false;
+                    $(this).addClass('is-invalid'); // Add a class to highlight the invalid input
+                } else {
+                    $(this).removeClass('is-invalid'); // Remove the class if input is valid
+                }
+            });
+
+            if (!isValid) {
+                alert('Please fill all required fields.');
+                return;
+            }
+            var BiddingSelectedRowsDTO = []; // Array to hold the data of selected rows
+
+
+            $('#tblbody tr').each(function () {
+                var price = $(this).find('.txtprice').val(); // Get the price value for this row
+                var id = $(this).find('.id').val(); // Get the ID value for this row
+
+                // Add the price and ID to the selectedRowsData array
+                BiddingSelectedRowsDTO.push({
+                    price: price,
+                    pkg_details_id: id
+                });
+            });
+
+            var advanced_payment = $('#txtpayment').val();
+            var delivery_date = $('#txtdelivery').val();
+
+            var workspayment = $('#workspayment').val();
+            var materialworks = $('#materialworks').val();
+            var transportation = $('#transportation').val();
+            var duration = $('#duration').val();
+
+            var formData = new FormData();
+
+
+            // public List < BiddingSelectedRowsDTO > biddingSelectedRowsDTOs { get; set; }
+            // public DateTime ? delivery_date { get; set; }
+            // public string advanced_payment { get; set; }
+
+            formData.append('advanced_payment', advanced_payment);
+            formData.append('delivery_date', delivery_date);
+            formData.append('workspayment', workspayment);
+            formData.append('materialworks', materialworks);
+            formData.append('transportation', transportation);
+            formData.append('durationdays', duration);
+            formData.append('file', $('#FileName')[0].files[0]);
+
+            $.each(BiddingSelectedRowsDTO, function (index, rowData) {
+                formData.append('biddingSelectedRowsDTOs[' + index + '].price', rowData.price);
+                formData.append('biddingSelectedRowsDTOs[' + index + '].pkg_details_id', rowData.pkg_details_id);
+            });
+
+
+            // Make an AJAX request to your endpoint
+            $.ajax({
+                type: 'POST',
+                url: '/Bidding/VendorBidding',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response === 1) {
+                        alert("Thank you for your biddings");
+                        window.location.href = window.location.href;
+                    }
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        });
+    });
+
+
+    $(document).ready(function () {
+        $('#btnrelease').on('click', function () { // When the search button is clicked
+            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
+            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+
+            var project_name = $('select[name="state"]:eq(0) option:selected').text();
+            var industry_name = $('select[name="state"]:eq(1) option:selected').text();
+
+            var projectId = project.split('|')[1];
+            var industryId = industry.split('|')[1];
+
+            var pack_name = project_name + "/" + industry_name;
+
+            var selectedRowsData = []; // Array to hold the data of selected rows
+
+            // Iterate through each selected row
+            $('.rowCheckbox:checked').each(function () {
+                var row = $(this).closest('tr'); // Get the closest row to the checkbox
+                var rowData = {
+                    pr: row.find('td:eq(1)').text(), // Get PR#
+                    pr_item: row.find('td:eq(2)').text(), // Get line Item #
+                    pr_req_date: row.find('td:eq(3)').text(), // Get PR requisition Date
+                    mat_code: row.find('td:eq(4)').text(), // Get Material Code
+                    m_grp: row.find('td:eq(5)').text(), // Get Material Code
+                    mat_desc: row.find('td:eq(6)').text(), // Get Material Desc.
+                    m_long_desc: row.find('td:eq(7)').text(), // Get Material Long Desc.
+                    m_batch: row.find('td:eq(8)').text(), // Get Material Batch
+                    m_req_qty: row.find('td:eq(9)').text(), // Get Material requiested QTY
+                    m_uom: row.find('td:eq(10)').text() // Get Material UOM
+                };
+                selectedRowsData.push(rowData); // Push the row data to the array
+            });
+
+
+            var userIds = [];
+
+            // Iterate through each row in the selectedValues table
+            $('#selectedValues tr').each(function () {
+                // Find the hidden input field with class selected-user-id in the current row
+                var userId = $(this).find('.selected').val();
+                // Add the userId to the array
+                userIds.push(userId);
+            });
+
+
+            // Make an AJAX request to your endpoint
+            $.ajax({
+                type: 'POST',
+                url: '/CreatePackage/SavePackageManual',
+                data: {
+                    package_name: pack_name,
+                    assign_type: 'M',
+                    project_id: projectId,
+                    industry_id: industryId,
+                    selected_rows: selectedRowsData,
+                    user_id: userIds
+                },
+                success: function (response) {
+                    if (response === 1) {
+                        alert(pack_name + "Created");
+                        $('#tblbody').empty();
+                    }
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        });
+    });
+
+
+    $(document).on('click', '#tblheader a', function () {
+        var rowId = $(this).data('id');
+        $('html, body').animate({
+            scrollTop: $('.pd-20.card-box').offset().top // Scroll to the top position of the target element
+        }, 100); // Adjust the animation speed as needed (milliseconds)
+
+
+        // Make an AJAX request to your endpoint
+        $.ajax({
+            type: 'GET',
+            url: '/ExternalUser/GetPackages',
+            data: {
+                pkg_id: rowId
+            },
+            success: function (response) {
+                console.log(response);
+                // Assuming response is an array of objects containing data for each row
+                $('#tblbody').empty(); // Clear the table body
+
+                $.each(response, function (index, row) {
+                $('#tblbody').append(
+                    '<tr>' +
+                    '<td>' + row.mtr_long_desc + '</td>' +
+                  //  '<td>' + row.mtr_long_desc + '</td>' +
+                    '<td class="qty">' + row.mtr_qty + '</td>' +
+                    '<td>' + row.mtr_uom + '</td>' +
+                    '<td><input type="text" class="txtprice"></td>' +
+                    '<td><input type="text" class="txttotal" readonly></td>' +
+                    '<td><input type="hidden" class="id" value="' + row.id + '"></td>' +
+                    '</tr>'
+                );
+                });
+
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+    });
+
+    // Listen for input events on .txtprice elements
+    $(document).on('input', 'input.txtprice', function () {
+        // Get the current value of the input field
+        var value = $(this).val();
+        // Remove any non-numeric characters using regular expression
+        value = value.replace(/[^0-9.]/g, '');
+        // Update the input field value with the cleaned value
+        $(this).val(value);
+    });
+
+
+
+    // Function to update the total based on price and quantity
+    function updateTotal() {
+        $('#tblbody tr').each(function () {
+            var price = parseFloat($(this).find('.txtprice').val());
+            var qty = parseFloat($(this).find('.qty').text());
+            if (!isNaN(price) && !isNaN(qty)) {
+                var total = price * qty;
+                $(this).find('.txttotal').val(total.toFixed(2)); // Set the total value in the corresponding input field
+            } else {
+                // If either price or quantity is not a valid number, set total as empty or any default value
+                $(this).find('.txttotal').val('');
+            }
+
+        });
+    }
+
+    // Call updateTotal initially to calculate total on page load
+    updateTotal();
+
+    // Listen for changes in txtprice elements and update total accordingly
+    $(document).on('input', 'input.txtprice', function () {
+        updateTotal();
+    });
+
+
+    function updateTotalSum() {
+        var sum = 0;
+        // Loop through each row and sum up the values in the corresponding .txttotal input
+        $('#tblbody tr').each(function () {
+            var total = parseFloat($(this).find('.txttotal').val());
+            if (!isNaN(total)) {
+                sum += total;
+            }
+        });
+        // Update the value of txtprice_sum element with the sum
+     //   $('#txtprice_sum').val(sum.toFixed(2));
+
+        var formattedGrandTotal = sum.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        // Set the formatted grandTotal to the txtprice_sum input field
+        $('#txtprice_sum').val(formattedGrandTotal);
+    }
+
+    // Call updateTotalSum initially to calculate sum on page load
+    updateTotalSum();
+
+    // Listen for changes in txttotal elements
+    $(document).on('input', 'input.txtprice', function () {
+        updateTotalSum();
+    });
+
+    $(document).ready(function () {
+        $('#FileName').on('change', function () {
+            var fileName = $(this).val(); // Get the file name
+            var ext = fileName.split('.').pop().toLowerCase(); // Get the file extension
+
+            // Check if the file extension is not allowed
+            if ($.inArray(ext, ['pdf', 'xlsx', 'xls']) === -1) {
+                alert('Please select a PDF or Excel file.');
+                $(this).val(''); // Clear the file input
+            }
+        });
+    });
+
+
+</script>

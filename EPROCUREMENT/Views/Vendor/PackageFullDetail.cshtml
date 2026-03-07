@@ -1,0 +1,180 @@
+﻿
+
+
+
+@model EPROCUREMENT.DTO.PackageOfferDTO;
+
+@{
+
+	Layout = "_VLayout";
+}
+<!-- Default Basic Forms Start -->
+				<div class="pd-20 card-box mb-30">
+					<div class="clearfix">
+						<div class="pull-left">
+							<h4 class="text-blue h4">Package Details</h4>
+							
+						</div>
+						
+					</div>
+					<form method="post" asp-action="UploadUserOffer" asp-controller="Vendor" enctype="multipart/form-data">
+						<div class="form-group row">
+							<label class="col-sm-12 col-md-2 col-form-label">Project Name : </label>
+							<div class="col-sm-12 col-md-10">
+								<input class="form-control" type="text"  value="@Model.project_name" readonly>
+							</div>
+						</div>
+					
+						
+						
+						<div class="form-group row">
+							<label class="col-sm-12 col-md-2 col-form-label">Start Date :</label>
+							<div class="col-sm-12 col-md-10">
+								<input class="form-control date-picker" placeholder="Select Date" type="text" value="@Model.start_date" disabled>
+							</div>
+						</div>
+
+						<div class="form-group row">
+							<label class="col-sm-12 col-md-2 col-form-label">End Date :</label>
+							<div class="col-sm-12 col-md-10">
+								<input class="form-control date-picker" placeholder="Select Date" type="text" value="@Model.end_date" disabled>
+							</div>
+						</div> 
+
+
+							<div class="form-group row">
+							<label class="col-sm-12 col-md-2 col-form-label">Package Document : </label>
+							<div class="col-sm-12 col-md-10">
+								
+								<a  asp-controller="Vendor" asp-action="Download" asp-route-filename="@Model.file_name">@Model.file_name</a>
+							</div>
+							</div>
+
+							<div class="form-group">
+							<label>Comments</label>
+							<textarea class="form-control"  readonly>@Model.comments_s</textarea>
+						</div>
+
+					
+							<button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal">Send a Inquiry </button>
+
+
+								<div class="form-group">
+							<label>Upload your file </label>
+							<input asp-for="File" type="file" class="form-control-file form-control height-auto" accept="application/pdf,application/vnd.ms-excel" required>
+						   </div>
+
+							<div class="form-group" id="BidDiv"> 
+							<label class="col-sm-12 col-md-2 col-form-label"></label>
+							<div class="col-sm-12 col-md-10">
+								<button type="submit" class="btn btn-primary" >Bid</button>
+							</div>
+						</div>
+						
+					</form>
+					
+				</div>
+
+				
+		<div id="myModal" class="modal" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Send a Inquiry </h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+						@*<div class="html-editor pd-20 card-box mb-30">
+					<h4 class="h4 text-blue">SIAC E-Procurement</h4>
+					<p>Write your comments here :</p>
+					<textarea class="textarea_editor form-control border-radius-0" placeholder="Enter text ..."></textarea>
+				</div>*@
+				  <form method="post" asp-action="UploadUserOffer" asp-controller="Vendor" enctype="multipart/form-data">
+						<div class="form-group">
+							<label>Comments</label>
+							<textarea asp-for="comments" placeholder="Write your comment here" class="form-control" id="comttxt"></textarea>
+						</div>
+
+						<button type="submit" id="btncomment" class="btn btn-primary">Send a Comment </button>
+				  </form>
+				
+				</div>
+				<div class="modal-footer">
+
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+		<div id="BidModal" class="modal" tabindex="-1" role="dialog">
+		<div class="modal-dialog modal-lg" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Send a Inquiry </h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<form method="post" asp-action="AddProjectPackage" asp-controller="Vendor" enctype="multipart/form-data" >
+
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+		<script type="text/javascript">
+		$(function () {
+			 $("#btncomment").click(function () {
+			   
+				 console.log($('#comttxt').val());
+				//$.ajax({
+				//	type: "GET",
+				//	url: "/AddPackage/_AddPackagePartialView",
+				//	success: function (response) {
+				//		$("#myModal").find(".modal-body").html(response);
+				//		$("#myModal").modal('show');
+				//	},
+				//	failure: function (response) {
+				//		alert(response.responseText);
+				//	},
+				//	error: function (response) {
+				//		alert(response.responseText);
+				//	}
+				//});
+			});
+
+			$("#PackageGrid .details").click(function () {
+				var id = $(this).closest("tr").find("td").eq(0).html().trim();
+			   
+			   // console.log(customerId);
+				$.ajax({
+					type: "POST",
+					url: "/PackageDetails/_GetPackageDetails",
+					data: { "id": id },
+					success: function (response) {
+						$("#partialModal").find(".modal-body").html(response);
+						$("#partialModal").modal('show');
+					},
+					failure: function (response) {
+						alert(response.responseText);
+					},
+					error: function (response) {
+						alert(response.responseText);
+					}
+				});
+			});
+		});
+	</script>
+
+				<!-- Default Basic Forms End -->

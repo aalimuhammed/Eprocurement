@@ -1,0 +1,76 @@
+﻿
+@model IEnumerable<EPROCUREMENT.ViewModel.ProjectViewModel>;
+@{  
+	ViewBag.Title = "Index";  
+}  
+
+<h1>All SIAC Projects</h1>
+
+
+<table class="table table-striped">
+	<thead>
+	  <tr>
+		<th scope="col">Project Number</th>
+		<th scope="col">Project Name</th>
+		<th scope="col">Area</th>
+		<th scope="col">Start Date</th>
+		<th scope="col">End Date</th>
+		<th scope="col">Status</th>
+		<th scope="col">No of Packages</th>
+		<th scope="col">Actions</th>
+		
+	
+	  </tr>
+	</thead>
+	<tbody>
+	  @foreach (var item in Model)
+				{
+					<tr>
+									 <td>
+										 <a class="text-primary" asp-controller="RetrievePackages" asp-action="GetPackages" asp-route-id="@item.id" >  @Html.DisplayFor(modelItem => item.project_numb)</a>
+									</td>
+
+									
+									  <td>
+										@Html.DisplayFor(modelItem => item.project_name)
+									</td>
+
+									
+									 <td>
+										@Html.DisplayFor(modelItem => item.area_name)
+									</td>
+
+									<td>
+										@Html.DisplayFor(modelItem => item.start_date)
+									</td>
+
+									 <td>
+										@Html.DisplayFor(modelItem => item.end_date)
+									</td>
+
+									
+
+									
+
+									<td>
+										@Html.DisplayFor(modelItem => item.status)
+									</td>
+
+
+									 <td>
+										@Html.DisplayFor(modelItem => item.CountPackage)
+									</td>
+
+									<td>
+										 <a class="text-primary" asp-controller="RetrievePackages" asp-action="GetPackages" asp-route-id="@item.id" > Delete</a> ||  <a class="text-primary" asp-controller="RetrievePackages" asp-action="GetPackages" asp-route-id="@item.id" > Update </a>
+									</td>
+ 
+
+								
+
+									 
+					</tr>
+				}
+	</tbody>
+  </table>
+   

@@ -1,0 +1,438 @@
+﻿@model IEnumerable<EPROCUREMENT.SapResponse.PackagesResponse>;
+
+<style>
+    .highlighted {
+        background-color: #ffff99; /* or any other color */
+    }
+</style>
+
+<div class="page-header">
+    <div class="row">
+        <div class="col-md-12 col-sm-12">
+            <div class="title">
+                <h4>SIAC Revoked Lines</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pd-20 card-box mb-30">
+    <div class="clearfix">
+        <div class="pull-left">
+            <h4 class="text-blue h4">Selection Criteria</h4>
+        </div>
+    </div>
+    <form>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Select Project</label>
+                    <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Select Industry</label>
+                    <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
+                    </select>
+                </div>
+            </div>
+
+        </div>
+        <br />
+        <div class="text-center">
+            <!-- This div centers its content -->
+            <button type="button" id="btnsearch" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+</div>
+
+<div class="clearfix mb-20">
+    <div class="pull-left">
+        <h4 class="text-blue h4">Actions</h4>
+    </div>
+    <div class="pull-right">
+        <button type="button" id="btncancelrevoke" class="btn btn-danger">Cancel Revoke</button>
+    </div>
+</div>
+
+<div class="pd-20 card-box mb-30">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">
+                    <input type="checkbox" id="selectAll"> <!-- Checkbox for selecting all rows -->
+                </th>
+                <th scope="col">PR#</th>
+                <th scope="col">line Item #</th>
+                <th scope="col">PR requisition Date</th>
+                <th scope="col">Material Code</th>
+                <th scope="col">Material Group</th>
+                <th scope="col">Material Serial</th>
+                <th scope="col">Material Desc.</th>
+                <th scope="col">Material Long Desc.</th>
+                <th scope="col">Material Batch</th>
+                <th scope="col">Material requiested QTY</th>
+                <th scope="col">Material UOM</th>
+            </tr>
+        </thead>
+        <tbody id="tblbody">
+        </tbody>
+    </table>
+</div>
+
+<script>
+    var currentPage = 1;
+    var totalPages = 1;
+    // Checkbox for selecting all rows
+    $('#selectAll').change(function () {
+        $('.rowCheckbox').prop('checked', $(this).prop('checked'));
+        highlightRows();
+    });
+
+    // Checkbox for individual row selection
+    $('.rowCheckbox').change(function () {
+        highlightRows();
+    });
+
+    // Function to highlight selected rows
+    function highlightRows() {
+        $('.rowCheckbox:checked').closest('tr').addClass('highlighted');
+        $('.rowCheckbox:not(:checked)').closest('tr').removeClass('highlighted');
+    }
+
+    $('#tblbody').on('click', 'tr', function () {
+        highlightRows();
+    });
+
+    $(document).ready(function () {
+        $('#btnmanualassign').on('click', function () { // When the Manual Assign button is clicked
+            $('#searchTextBox').val(''); // Clear the search text box
+            $('#searchResultsBody').empty();
+            // fetchSearchResults(''); // Fetch search results with an empty search term
+        });
+
+        $('#searchTextBox').on('keyup', function (e) { // When a key is pressed in the search text box
+            if (e.keyCode === 13) { // Check if the pressed key is Enter (key code 13)
+                var searchTerm = $(this).val(); // Get the search term from the text box
+                fetchSearchResults(searchTerm); // Fetch search results
+            }
+        });
+
+        function fetchSearchResults(searchTerm) {
+            // Make an AJAX request to fetch search results
+            $.ajax({
+                type: 'GET',
+                url: '/Admin/Search',
+                data: { searchTerm: searchTerm },
+                success: function (response) {
+                    $('#searchResultsBody').empty();
+
+                    if (Array.isArray(response)) {
+                        // If response is an array, iterate through each record and append them to the table
+                        $.each(response, function (index, user) {
+                            $('#searchResultsBody').append('<tr><td>' + user.fname + '</td><td>' + user.tax_id + '</td><td><button class="btn btn-success" value="' + user.id + '">Select</button></td></tr>');
+                        });
+                    } else if (response === "No Data Found") {
+                        // If response is "No Data Found", display a message in the table
+                        $('#searchResultsBody').html('<tr><td colspan="3">No Data Found</td></tr>');
+                    } else {
+                        // If response is a single object, append it to the table
+                        $('#searchResultsBody').append('<tr><td>' + response.fname + '</td><td>' + response.tax_id + '</td><td><button class="btn btn-success" value="' + response.id + '">Select</button></td></tr>');
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        }
+
+        $(document).on('click', '#searchResultsBody button', function () {
+            var selectedRow = $(this).closest('tr');
+            selectedRow.hide();
+
+            var vendorName = $(this).closest('tr').find('td:first').text(); // Get the Vendor Name from the selected row
+            var taxId = $(this).closest('tr').find('td:eq(1)').text(); // Get the Tax ID from the selected row
+
+            var userId = selectedRow.find('.btn-success').val();
+
+            alert(userId);
+
+            // Append the selected values to the designated area in the modal
+            $('#selectedValues').append('<tr><td>' + vendorName + '</td><td>' + taxId + '</td><td hidden><input type="hidden" class="selected" value="' + userId + '"></td><td><button class="btn btn-danger cancelBtn">Cancel</button></td></tr>');
+        });
+
+        $(document).on('click', '.cancelBtn', function () {
+            var canceledRow = $(this).closest('tr'); // Get the canceled row
+            canceledRow.remove(); // Remove the canceled row from the selected values table
+
+            var vendorName = canceledRow.find('td:first').text(); // Get the Vendor Name from the canceled row
+            var taxId = canceledRow.find('td:eq(1)').text(); // Get the Tax ID from the canceled row
+
+            // Find the corresponding row in the search results table and show it
+            $('#searchResultsBody tr').each(function () {
+                var row = $(this);
+                if (row.find('td:first').text() === vendorName && row.find('td:eq(1)').text() === taxId) {
+                    row.show(); // Show the canceled row
+                    return false; // Exit the loop after finding the row
+                }
+            });
+        });
+
+    });
+
+    $(document).ready(function () {
+        // Make an AJAX request to fetch projects
+        $.ajax({
+            type: 'GET', // Use GET method to fetch data
+            url: '/Project/SapProjects',
+            success: function (response) {
+                $.each(response, function (index, project) {
+                    // Append each project as an option to the select element
+                    $('select[name="state"]:eq(0)').append('<option value="' + project.proj_num + '|' + project.id + '">' + project.proj_name + '</option>');
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+        // Your existing code for handling search button click and displaying table rows goes here
+    });
+
+    $(document).ready(function () {
+        // Make an AJAX request to fetch projects
+        $.ajax({
+            type: 'GET', // Use GET method to fetch data
+            url: '/Industry/SapIndustry',
+            success: function (response) {
+                $.each(response, function (index, industry) {
+                    // Append each project as an option to the select element
+                    $('select[name="state"]:eq(1)').append('<option value="' + industry.industry_code + '|' + industry.id + '">' + industry.descr + '</option>');
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+        // Your existing code for handling search button click and displaying table rows goes here
+    });
+
+    $(document).ready(function () {
+        $('#btnsearch').on('click', function () {
+            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
+            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+
+            var projectId = project.split('|')[1];
+            var industryId = industry.split('|')[1];
+
+            // Make an AJAX request to your endpoint
+            $.ajax({
+                type: 'GET',
+                url: '/RevokedPackages/GetRevokes',
+                data: {
+                    project_id: projectId,
+                    industry_id: industryId
+                },
+                success: function (response) {
+                    // Assuming response is an array of objects containing data for each row
+                    $('#tblbody').empty(); // Clear the table body
+
+                    $.each(response, function (index, row) {
+                        for (var key in row) {
+                            if (row[key] === null) {
+                                row[key] = ''; // Replace null with empty string
+                            }
+                        }
+                        // Append each row to the table
+                        $('#tblbody').append(
+                            '<tr>' +
+                            '<td><input type="checkbox" class="rowCheckbox" value="' + row.id + '"></td>' +
+                            '<td>' + (row.pr_num || '') + '</td>' +
+                            '<td>' + (row.line_item || '') + '</td>' +
+                            '<td>' + (row.pr_date || '') + '</td>' +
+                            '<td>' + (row.mtr_code || '') + '</td>' +
+                            '<td>' + (row.m_grp || '') + '</td>' +
+                            '<td>' + (row.serial || '') + '</td>' +
+                            '<td>' + (row.mtr_desc || '') + '</td>' +
+                            '<td>' + (row.mtr_long_desc || '') + '</td>' +
+                            '<td>' + (row.mtr_batch || '') + '</td>' +
+                            '<td>' + (row.mtr_qty || '') + '</td>' +
+                            '<td>' + (row.mtr_uom || '') + '</td>' +
+                            '</tr>'
+                        );
+                    });
+                    // $('#tblbody').show(); // Show the table body
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        });
+    });
+
+
+
+    $(document).ready(function () {
+        $('#btncancelrevoke').on('click', function () { 
+            var selectedIds = []; 
+
+            // Iterate through each selected row
+            $('.rowCheckbox:checked').each(function () {
+                var id = $(this).val(); // Get the ID associated with the checkbox
+                selectedIds.push(id); // Push the ID to the array
+            });
+
+            // Make an AJAX request to your endpoint
+            $.ajax({
+                type: 'POST',
+                url: '/RevokedPackages/CancelRevoke',
+                data: {
+                    line_id: selectedIds
+                },
+                traditional: true,
+                success: function (response) {
+                    if (response === 1) {
+                        alert('Packages has been cancelled');
+                        location.reload();
+                    }
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        });
+    });
+
+
+    $(document).ready(function () {
+        $('#btnrelease').on('click', function () { // When the search button is clicked
+            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
+            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+
+            var project_name = $('select[name="state"]:eq(0) option:selected').text();
+            var industry_name = $('select[name="state"]:eq(1) option:selected').text();
+
+            var projectId = project.split('|')[1];
+            var industryId = industry.split('|')[1];
+
+            var pack_name = project_name + "/" + industry_name;
+
+            var selectedRowsData = []; // Array to hold the data of selected rows
+
+            // Iterate through each selected row
+            $('.rowCheckbox:checked').each(function () {
+                var row = $(this).closest('tr'); // Get the closest row to the checkbox
+                var rowData = {
+                    pr: row.find('td:eq(1)').text(), // Get PR#
+                    pr_item: row.find('td:eq(2)').text(), // Get line Item #
+                    pr_req_date: row.find('td:eq(3)').text(), // Get PR requisition Date
+                    mat_code: row.find('td:eq(4)').text(), // Get Material Code
+                    m_grp: row.find('td:eq(5)').text(), // Get Material Code
+                    mat_desc: row.find('td:eq(6)').text(), // Get Material Desc.
+                    m_long_desc: row.find('td:eq(7)').text(), // Get Material Long Desc.
+                    m_batch: row.find('td:eq(8)').text(), // Get Material Batch
+                    m_req_qty: row.find('td:eq(9)').text(), // Get Material requiested QTY
+                    m_uom: row.find('td:eq(10)').text() // Get Material UOM
+                };
+                selectedRowsData.push(rowData); // Push the row data to the array
+            });
+
+
+            var userIds = [];
+
+            // Iterate through each row in the selectedValues table
+            $('#selectedValues tr').each(function () {
+                // Find the hidden input field with class selected-user-id in the current row
+                var userId = $(this).find('.selected').val();
+                // Add the userId to the array
+                userIds.push(userId);
+            });
+
+
+            // Make an AJAX request to your endpoint
+            $.ajax({
+                type: 'POST',
+                url: '/CreatePackage/SavePackageManual',
+                data: {
+                    package_name: pack_name,
+                    assign_type: 'M',
+                    project_id: projectId,
+                    industry_id: industryId,
+                    selected_rows: selectedRowsData,
+                    user_id: userIds
+                },
+                success: function (response) {
+                    if (response === 1) {
+                        alert(pack_name + "Created");
+                        $('#tblbody').empty();
+                    }
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        });
+    });
+
+
+
+    $(document).ready(function () {
+        $('#btnrevoke').on('click', function () { // When the search button is clicked
+            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
+            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+
+            var projectId = project.split('|')[1];
+            var industryId = industry.split('|')[1];
+
+            var selectedRowsData = []; // Array to hold the data of selected rows
+
+            // Iterate through each selected row
+            $('.rowCheckbox:checked').each(function () {
+                var row = $(this).closest('tr'); // Get the closest row to the checkbox
+                var rowData = {
+                    pr: row.find('td:eq(1)').text(), // Get PR#
+                    pr_item: row.find('td:eq(2)').text(), // Get line Item #
+                    pr_req_date: row.find('td:eq(3)').text(), // Get PR requisition Date
+                    mat_code: row.find('td:eq(4)').text(), // Get Material Code
+                    mat_desc: row.find('td:eq(5)').text(), // Get Material Desc.
+                    m_long_desc: row.find('td:eq(6)').text(), // Get Material Long Desc.
+                    m_batch: row.find('td:eq(7)').text(), // Get Material Batch
+                    m_req_qty: row.find('td:eq(8)').text(), // Get Material requiested QTY
+                    m_uom: row.find('td:eq(9)').text() // Get Material UOM
+                };
+                selectedRowsData.push(rowData); // Push the row data to the array
+            });
+
+
+            // Make an AJAX request to your endpoint
+            $.ajax({
+                type: 'POST',
+                url: '/RevokedPackages/Revoke',
+                data: {
+                    project_id: projectId,
+                    industry_id: industryId,
+                    selected_rows: selectedRowsData
+                },
+                success: function (response) {
+                    if (response === 1) {
+                        alert(pack_name + "Created");
+                        $('#tblbody').empty();
+                    }
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        });
+    });
+
+
+
+</script>

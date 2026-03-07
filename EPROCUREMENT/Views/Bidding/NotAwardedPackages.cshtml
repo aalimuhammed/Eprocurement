@@ -1,0 +1,244 @@
+﻿@{
+    Layout = "_ExtraLayout";
+}
+
+<style>
+    .highlighted {
+        background-color: #ffff99; /* or any other color */
+    }
+</style>
+<div class="container-fluid page-header">
+    <h1 class="display-3 text-uppercase text-white mb-3">Not Awarded Packages</h1>
+    <div class="d-inline-flex text-white">
+        <h6 class="text-uppercase m-0"><a href="">View Not Awarded Packages</a></h6>
+    </div>
+</div>
+
+<br />
+
+<div class="pd-20 card-box">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">PackageName</th>
+                <th scope="col">PackageFile</th>
+            </tr>
+        </thead>
+        <tbody id="tblheader">
+        </tbody>
+    </table>
+</div>
+
+
+<br />
+
+<h5 style="color:green">Prices Include all taxes and deductions,(excluding VAT for the Supply Only )</h5>
+
+
+<br />
+
+<div class="pd-20 card-box">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Material Desc.</th>
+                <th scope="col">Material requiested QTY</th>
+                <th scope="col">Material UOM</th>
+                <th scope="col">Price per Unit</th>
+                <th scope="col">Total</th>
+            </tr>
+        </thead>
+        <tbody id="tblbody">
+        </tbody>
+    </table>
+    <div class="form-group">
+        <p class="class=" col-sm-12 col-md-2 col-form-label"">Grand Total</p>
+        <div class="col-sm-12 col-md-10">
+            <input type="text" class="form-control form-control-sm" readonly id="txtprice_sum" />
+        </div>
+    </div>
+</div>
+
+<br />
+
+<div class="pd-20 card-box">
+    <div class="clearfix">
+        <div class="pull-left">
+            <h4 class="text-blue h4">Details</h4>
+        </div>
+    </div>
+    <form id="biddingForm">
+
+        <div class="form-group row">
+
+            <p class="col-sm-12 col-md-2 col-form-label">Advanced Payment %</p>
+            <div class="col-sm-12 col-md-4">
+                <input class="form-control"
+                       type="text"
+                       placeholder="Enter here your Advanced Payment %" id="txtpayment" readonly />
+            </div>
+
+            <p class="col-sm-12 col-md-2 col-form-label">Material Delivery Payment %</p>
+            <div class="col-sm-12 col-md-4">
+                <input class="form-control payment-input"
+                       type="text"
+                       placeholder="Material Delivery Payment %" id="materialworks" readonly />
+            </div>
+
+            <p class="col-sm-12 col-md-2 col-form-label">Works/Service Payment %</p>
+            <div class="col-sm-12 col-md-4">
+                <input class="form-control payment-input"
+                       type="text"
+                       placeholder="Works/Service Payment %" id="workspayment" readonly />
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <p class="col-sm-12 col-md-2 col-form-label">Trasportation</p>
+            <div class="col-sm-12 col-md-4">
+                <input class="form-control"
+                       type="text"
+                       placeholder="Support Transportation" id="trasn" readonly />
+            </div>
+
+        </div>
+
+        <div class="form-group row">
+            <p class="col-sm-12 col-md-2 col-form-label">Duration in Days</p>
+            <div class="col-sm-12 col-md-4">
+                <input class="form-control"
+                       type="text"
+                       placeholder="Your duration in Days" id="duration" readonly />
+            </div>
+
+            <p class="col-sm-12 col-md-2 col-form-label">Start From</p>
+            <div class="col-sm-12 col-md-4">
+                <input class="form-control"
+                       placeholder="Select Delivery Date"
+                       type="date"
+                       id="txtdelivery"
+                       readonly
+                       onkeydown="return false;" />
+            </div>
+        </div>
+    </form>
+    <script>
+        $(document).ready(function () {
+            // Highlight column when a row is clicked in #tblheader
+            $('#tblheader').on('click', 'tr', function () {
+                // Remove "highlighted" class from all rows
+                $('#tblheader tr').removeClass('highlighted');
+                // Add "highlighted" class to the clicked row
+                $(this).addClass('highlighted');
+            });
+        });
+
+        $(document).ready(function () {
+            // Make an AJAX request to fetch projects
+            $.ajax({
+                type: 'GET', // Use GET method to fetch data
+                url: '/Bidding/GetNotAwarded',
+                success: function (response) {
+
+                    console.log(response);
+                    $('#tblheader').empty();
+                    $.each(response, function (index, row) {
+
+                        // Append each row to the table
+                        $('#tblheader').append(
+                            '<tr>' +
+                            '<td> <a class="pkgn" href="#" data-id="' + row.id + '">' + row.pkg_name + ' </a> </td>' +
+                            '<td> <a class="fileuploaded" href="#" data-id="' + row.filename + '">' + row.filename + ' </a> </td>' +
+                            '</tr>'
+                        );
+                    });
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+
+            // Your existing code for handling search button click and displaying table rows goes here
+        });
+
+        $(document).on('click', '#tblheader .fileuploaded', function () {
+            var rowId = $(this).data('id');
+            // Create a hidden iframe
+            var iframe = $('<iframe>', {
+                id: 'hiddenDownloader',
+                style: 'display: none'
+            });
+            $('body').append(iframe);
+
+            // Set the iframe source to the download URL
+            $('#hiddenDownloader').attr('src', '/ReleasedPackages/DownloadPackageFile?fileName=' + rowId);
+
+            // Remove the iframe after download
+            $('#hiddenDownloader').on('load', function () {
+                $(this).remove();
+            });
+
+        });
+
+        $(document).on('click', '#tblheader .pkgn', function () {
+            var rowId = $(this).data('id');
+            $('html, body').animate({
+                scrollTop: $('.pd-20.card-box').offset().top // Scroll to the top position of the target element
+            }, 100); // Adjust the animation speed as needed (milliseconds)
+
+
+            // Make an AJAX request to your endpoint
+            $.ajax({
+                type: 'GET',
+                url: '/Bidding/GetPackagesRebiddedDetails',
+                data: {
+                    pkg_id: rowId
+                },
+                success: function (response) {
+
+                    console.log("details", response);
+                    // Assuming response is an array of objects containing data for each row
+                    $('#tblbody').empty(); // Clear the table body
+
+                    $.each(response, function (index, row) {
+                        $('#tblbody').append(
+                            '<tr>' +
+                            '<td>' + row.mtr_long_desc + '</td>' +
+                            //  '<td>' + row.mtr_long_desc + '</td>' +
+                            '<td class="qty">' + row.mtr_qty + '</td>' +
+                            '<td>' + row.mtr_uom + '</td>' +
+                            '<td><input type="text" class="txtprice" readonly value="' + row.price + '"></td>' +
+                            '<td><input type="text" class="txttotal" readonly value="' + (row.price * row.mtr_qty).toLocaleString() + '"></td>' +
+                            '<td><input type="hidden" class="id" value="' + row.id + '"></td>' +
+                            '</tr>'
+                        );
+                    });
+
+                    var totalSum = 0;
+                    $('.txttotal').each(function () {
+                        totalSum += parseFloat($(this).val().replace(/,/g, ''));
+                    });
+
+                    console.log(totalSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+
+                    $('#txtprice_sum').val(totalSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+
+                    // $('#txtprice_sum').val(totalSum);
+
+                    $('#txtdelivery').val(response[0].delivery_date.split('T')[0]);
+                    $('#txtpayment').val(response[0].advanced_payment);
+                    $('#materialworks').val(response[0].material_payment);
+                    $('#workspayment').val(response[0].works_payment);
+                    $('#duration').val(response[0].duration_days);
+                    $('#trasn').val(response[0].transportation);
+                    $('#FileNameLabel').text(response[0].filename);
+
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+
+        });
+    </script>

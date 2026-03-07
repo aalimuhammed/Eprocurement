@@ -1,0 +1,340 @@
+﻿@model IEnumerable<EPROCUREMENT.SapResponse.PackagesResponse>;
+
+<style>
+    .highlighted {
+        background-color: #ffff99; /* or any other color */
+    }
+</style>
+<div class="pd-20 card-box mb-30">
+<div class="clearfix">
+    <div class="pull-left">
+        <h4 class="text-blue h4">Selection Criteria</h4>
+    </div>
+</div>
+<form>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Select Project</label>
+                <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
+                </select>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Select Industry</label>
+                <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
+                </select>
+            </div>
+        </div>
+
+    </div>
+    <br />
+    <div class="text-center">
+        <!-- This div centers its content -->
+        <button type="button" id="btnsearch" class="btn btn-primary">Search</button>
+    </div>
+</form>
+</div>
+
+<div class="pd-20 card-box mb-30">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">PackageName</th>
+                <th scope="col">Type</th>
+                <th scope="col">Assign To</th>
+
+            </tr>
+        </thead>
+        <tbody id="tblheader">
+        </tbody>
+    </table>
+</div>
+
+<div class="pd-20 card-box mb-30">
+    <table class="table">
+        <thead id="headdetails">
+            <tr>
+                <th scope="col">PR#</th>
+                <th scope="col">line Item #</th>
+                <th scope="col">PR requisition Date</th>
+                <th scope="col">Material Code</th>
+                <th scope="col">Material Desc.</th>
+                <th scope="col">Material Long Desc.</th>
+                <th scope="col">Material Batch</th>
+                <th scope="col">Material requiested QTY</th>
+                <th scope="col">Material UOM</th>
+            </tr>
+        </thead>
+        <tbody id="tbldetails">
+        </tbody>
+    </table>
+</div>
+
+<script>
+    var currentPage = 1;
+    var totalPages = 1;
+    // Checkbox for selecting all rows
+    $('#selectAll').change(function () {
+        $('.rowCheckbox').prop('checked', $(this).prop('checked'));
+        highlightRows();
+    });
+
+    // Checkbox for individual row selection
+    $('.rowCheckbox').change(function () {
+        highlightRows();
+    });
+
+    // Function to highlight selected rows
+    function highlightRows() {
+        $('.rowCheckbox:checked').closest('tr').addClass('highlighted');
+        $('.rowCheckbox:not(:checked)').closest('tr').removeClass('highlighted');
+    }
+
+    // Highlight column when a row is clicked
+    $('.rowCheckbox').closest('tr').click(function () {
+        $(this).toggleClass('highlighted');
+    });
+
+    $(document).ready(function () {
+        $('#btnmanualassign').on('click', function () { // When the Manual Assign button is clicked
+            $('#searchTextBox').val(''); // Clear the search text box
+            $('#searchResultsBody').empty();
+            // fetchSearchResults(''); // Fetch search results with an empty search term
+        });
+
+        $('#searchTextBox').on('keyup', function (e) { // When a key is pressed in the search text box
+            if (e.keyCode === 13) { // Check if the pressed key is Enter (key code 13)
+                var searchTerm = $(this).val(); // Get the search term from the text box
+                fetchSearchResults(searchTerm); // Fetch search results
+            }
+        });
+
+        function fetchSearchResults(searchTerm) {
+            // Make an AJAX request to fetch search results
+            $.ajax({
+                type: 'GET',
+                url: '/Admin/Search',
+                data: { searchTerm: searchTerm },
+                success: function (response) {
+                    $('#searchResultsBody').empty();
+
+                    if (Array.isArray(response)) {
+                        // If response is an array, iterate through each record and append them to the table
+                        $.each(response, function (index, user) {
+                            $('#searchResultsBody').append('<tr><td>' + user.fname + '</td><td>' + user.tax_id + '</td><td><button class="btn btn-success" data-id="' + user.id + '">Select</button></td></tr>');
+                        });
+                    } else if (response === "No Data Found") {
+                        // If response is "No Data Found", display a message in the table
+                        $('#searchResultsBody').html('<tr><td colspan="3">No Data Found</td></tr>');
+                    } else {
+                        // If response is a single object, append it to the table
+                        $('#searchResultsBody').append('<tr><td>' + response.fname + '</td><td>' + response.tax_id + '</td><td><button class="btn btn-success" data-id="' + response.id + '">Select</button></td></tr>');
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        }
+
+        $(document).on('click', '#searchResultsBody button', function () {
+            var selectedRow = $(this).closest('tr');
+            selectedRow.hide();
+
+            var vendorName = $(this).closest('tr').find('td:first').text(); // Get the Vendor Name from the selected row
+            var taxId = $(this).closest('tr').find('td:eq(1)').text(); // Get the Tax ID from the selected row
+
+            // Append the selected values to the designated area in the modal
+            $('#selectedValues').append('<tr><td>' + vendorName + '</td><td>' + taxId + '</td><td><button class="btn btn-danger cancelBtn">Cancel</button></td></tr>');
+        });
+
+        $(document).on('click', '.cancelBtn', function () {
+            var canceledRow = $(this).closest('tr'); // Get the canceled row
+            canceledRow.remove(); // Remove the canceled row from the selected values table
+
+            var vendorName = canceledRow.find('td:first').text(); // Get the Vendor Name from the canceled row
+            var taxId = canceledRow.find('td:eq(1)').text(); // Get the Tax ID from the canceled row
+
+            // Find the corresponding row in the search results table and show it
+            $('#searchResultsBody tr').each(function () {
+                var row = $(this);
+                if (row.find('td:first').text() === vendorName && row.find('td:eq(1)').text() === taxId) {
+                    row.show(); // Show the canceled row
+                    return false; // Exit the loop after finding the row
+                }
+            });
+        });
+
+    });
+
+    $(document).ready(function () {
+        // Make an AJAX request to fetch projects
+        $.ajax({
+            type: 'GET', // Use GET method to fetch data
+            url: '/Project/SapProjects',
+            success: function (response) {
+                $.each(response, function (index, project) {
+                    // Append each project as an option to the select element
+                    $('select[name="state"]:eq(0)').append('<option value="' + project.proj_num + '">' + project.proj_name + '</option>');
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+        // Your existing code for handling search button click and displaying table rows goes here
+    });
+
+    $(document).ready(function () {
+        // Make an AJAX request to fetch projects
+        $.ajax({
+            type: 'GET', // Use GET method to fetch data
+            url: '/Industry/SapIndustry',
+            success: function (response) {
+                $.each(response, function (index, industry) {
+                    // Append each project as an option to the select element
+                    $('select[name="state"]:eq(1)').append('<option value="' + industry.industry_code + '">' + industry.descr + '</option>');
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+        // Your existing code for handling search button click and displaying table rows goes here
+    });
+
+    $(document).ready(function () {
+        $('#btnsearch').on('click', function () { // When the search button is clicked
+            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
+            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+
+            alert(industry);
+            // Check if the selected project is "معمل تكرير بترول" and the selected industry is "حديد تسليح"
+            if (project == '10010' && industry == 'M001') {
+                // Populate the table with the specified values
+                $('#tblheader').empty(); // Clear the table body
+                $('#tblheader').append('<tr><td><a href="#" class="header-link">مسطرد/ حديد تسليح/001</a></td><td>Manual</td><td><button class="btn btn-success details-button">Details</button></td></tr>');
+                $('#tblheader').append('<tr><td><a href="#" class="header-link">معمل تكرير بترول مسطرد/ حديد تسليح/002</a></td><td>Normal</td></tr>');
+
+
+                $('.details-button').on('click', function () {
+                    alert('295-896-094 العصريه للمقاولات-محمد اسماعيل ابوالعلا\n543-384-853 يونيتيد للمقاولات والتوريد-صبحى محمد');
+                });
+
+                $('#tblheader').on('click', 'a.header-link', function (e) {
+                    e.preventDefault(); // Prevent the default action of the <a> tag
+                    var text = $(this).text(); // Get the text inside the clicked <a>
+                    var projectName = "Project Name here"; // Replace "Project Name here" with the actual project name
+                    var number = text.split('/')[2]; // Extract the number from the text
+                    var value = projectName + ' / حديد تسليح/' + number.trim(); // Concatenate the project name and number
+                    // Perform any action with the value, such as displaying it in an alert
+                    //alert(value);
+
+                    // Check if it's a "Manual" row
+                    if ($(this).parent().next().text() === "Manual") {
+                        // Populate tbldetails with the provided values
+                        // $('#headdetails tr').append('<th scope="col">UserName</th>');
+                        // $('#headdetails tr').append('<th scope="col">Tax-ID</th>');
+                        $('#tbldetails').empty(); // Clear the table body
+                        $('#tbldetails').append('<tr><td>1200000033</td><td>10</td><td>2024-02-10</td><td>M004-40202003-000050</td><td>جلبه بروبلين اخضر ق 40/32 مم</td><td></td><td></td><td>500.000</td><td>ST</td></tr>');
+                        $('#tbldetails').append('<tr><td>1200000033</td><td>20</td><td>2024-02-10</td><td>M004-40202003-000016</td><td>مسلوب بروبلين اخضر ق 25 مم</td><td></td><td></td><td>896.000</td><td>ST</td></tr>');
+                    }
+
+                    if ($(this).parent().next().text() === "Normal") {
+                        // Populate tbldetails with the provided values
+                        $('#headdetails th:contains("UserName")').remove();
+                        $('#headdetails th:contains("Tax-ID")').remove();
+
+                        $('#tbldetails').empty(); // Clear the table body
+                        var data = [
+                            {
+                                "PR": "1200000035",
+                                "PR_ITEM": 10,
+                                "PR_REQ_DATE": "2024-02-10",
+                                "MAT_CODE": "M001-10202005-000029",
+                                "M_GRP": "10202005",
+                                "MAT_DESC": "جمل خشب H20 ط340 سم",
+                                "M_LON_DES": "",
+                                "M_BATCH": "",
+                                "M_REQ_QTY": 6654.000,
+                                "M_UNIT": "ST",
+                                "TRACK_PRO": "10010"
+                            },
+                            {
+                                "PR": "1200000035",
+                                "PR_ITEM": 20,
+                                "PR_REQ_DATE": "2024-02-10",
+                                "MAT_CODE": "M001-10202005-000030",
+                                "M_GRP": "10202005",
+                                "MAT_DESC": "جمل خشب H20 ط380 سم",
+                                "M_LON_DES": "",
+                                "M_BATCH": "",
+                                "M_REQ_QTY": 332.000,
+                                "M_UNIT": "ST",
+                                "TRACK_PRO": "10010"
+                            },
+                            {
+                                "PR": "1200000035",
+                                "PR_ITEM": 30,
+                                "PR_REQ_DATE": "2024-02-10",
+                                "MAT_CODE": "M001-10202005-000030",
+                                "M_GRP": "10202005",
+                                "MAT_DESC": "جمل خشب H20 ط380 سم",
+                                "M_LON_DES": "",
+                                "M_BATCH": "",
+                                "M_REQ_QTY": 3398.000,
+                                "M_UNIT": "ST",
+                                "TRACK_PRO": "10010"
+                            },
+                            {
+                                "PR": "1200000035",
+                                "PR_ITEM": 40,
+                                "PR_REQ_DATE": "2024-02-10",
+                                "MAT_CODE": "M001-10202005-000030",
+                                "M_GRP": "10202005",
+                                "MAT_DESC": "جمل خشب H20 ط380 سم",
+                                "M_LON_DES": "",
+                                "M_BATCH": "",
+                                "M_REQ_QTY": 36.000,
+                                "M_UNIT": "ST",
+                                "TRACK_PRO": "10010"
+                            },
+                            {
+                                "PR": "1200000035",
+                                "PR_ITEM": 50,
+                                "PR_REQ_DATE": "2024-02-10",
+                                "MAT_CODE": "M001-10202005-000030",
+                                "M_GRP": "10202005",
+                                "MAT_DESC": "جمل خشب H20 ط380 سم",
+                                "M_LON_DES": "",
+                                "M_BATCH": "",
+                                "M_REQ_QTY": 96.000,
+                                "M_UNIT": "ST",
+                                "TRACK_PRO": "10010"
+                            }
+                        ];
+
+                        $.each(data, function (index, row) {
+                            $('#tbldetails').append('<tr>' +
+                                '<td>' + row.PR + '</td>' +
+                                '<td>' + row.PR_ITEM + '</td>' +
+                                '<td>' + row.PR_REQ_DATE + '</td>' +
+                                '<td>' + row.MAT_CODE + '</td>' +
+                                '<td>' + row.MAT_DESC + '</td>' +
+                                '<td>' + row.M_LON_DES + '</td>' +
+                                '<td>' + row.M_BATCH + '</td>' +
+                                '<td>' + row.M_REQ_QTY + '</td>' +
+                                '<td>' + row.M_UNIT + '</td>' +
+                                '</tr>');
+                        });
+                    }
+                });
+            } 
+        });
+    });
+</script>

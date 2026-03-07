@@ -1,0 +1,72 @@
+﻿@model EPROCUREMENT.DTO.ProjectPackageDTO;
+
+@{
+	Layout = null;
+}
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.21.0/slimselect.css'>
+
+
+  
+					  
+
+<form method="post" asp-action="AddProjectPackage" asp-controller="AddPackage" enctype="multipart/form-data">
+
+							<select  class="form-control wizard-required" id="mainboq"  required>
+				 
+							  </select>
+
+
+							  
+
+							  <select  class="form-control wizard-required" id="boqchapters"  style="margin-top:10%" asp-for="boq_cpt_id" required>
+				 
+							  </select>
+
+
+
+
+							  <input style="margin-top:10%"  asp-for="File" required/>
+
+
+
+							  <div class="form-group row" style="margin-top:10%">
+							<label class="col-sm-12 col-md-2 col-form-label">Start Date</label>
+							<div class="col-sm-12 col-md-10">
+								 <input class="form-control" type="date" value="" asp-for="start_date">
+							</div>
+							</div>
+
+								<div class="form-group row" style="margin-top:10%">
+							<label class="col-sm-12 col-md-2 col-form-label">End Date</label>
+							<div class="col-sm-12 col-md-10">
+								 <input class="form-control" type="date" value="" asp-for="end_date">
+							</div>
+							</div>
+
+
+
+						<div class="form-group">
+							<label>Link of the drive </label>
+							<input class="form-control" type="text" asp-for="link_of_drive" />
+							
+						</div>
+								
+
+						<div class="form-group">
+							<label>Comments</label>
+							<textarea class="form-control" asp-for="comments"></textarea>
+						</div>
+
+								   <button type="submit" class="btn btn-primary">Save</button>
+</form>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.21.0/slimselect.js'></script>
+
+ <script src="~/js/selectdropdown/selectdropdown.js"></script>
+
+<script src="~/js/getdata.js"></script>

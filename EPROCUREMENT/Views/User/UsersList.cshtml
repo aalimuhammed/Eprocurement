@@ -1,0 +1,320 @@
+﻿@model IEnumerable<EPROCUREMENT.ViewModel.user_header_vm>
+
+@if (TempData["message"] != null)
+{
+    <script>alert('@TempData["message"]');</script>
+}
+
+@if (TempData["Rmessage"] != null)
+{
+    <script>alert('@TempData["Rmessage"]');</script>
+}
+
+<!-- ================= STYLES ================= -->
+<style>
+    /* Cursor pointer */
+    .pointer-cursor {
+        cursor: pointer;
+    }
+
+    /* Scrollable table */
+    .scrollable-table-container {
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+
+        .scrollable-table-container thead th {
+            position: sticky;
+            top: 0;
+            background-color: #fff;
+            z-index: 10;
+            border-bottom: 2px solid #dee2e6;
+            box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+        }
+
+    /* Filter card */
+    .filter-card {
+        border-left: 4px solid #0d6efd;
+        border-radius: 8px;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .filter-input:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 5px rgba(13, 110, 253, 0.3);
+        outline: none;
+    }
+
+    /* Clear button */
+    #clearFilters {
+        min-width: 120px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+        #clearFilters:hover {
+            background-color: #0d6efd;
+            color: #fff;
+            border-color: #0d6efd;
+        }
+
+    /* Responsive spacing */
+    @@media (max-width: 768px) {
+        .filter-card .row > div
+
+    {
+        margin-bottom: 1rem;
+    }
+
+    }
+</style>
+
+<!-- Modal --> <div class="modal fade" id="userTypesModal" tabindex="-1" role="dialog" aria-labelledby="userTypesModalLabel" aria-hidden="true"> <div class="modal-dialog" role="document"> <div class="modal-content"> <div class="modal-header"> <h5 class="modal-title" id="userTypesModalLabel">User Details</h5> <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span> </button> </div> <div class="modal-body" id="userTypesModalContent"> <!-- Content loaded via AJAX will be placed here --> <textarea id="rejectionMsg" class="form-control d-none" rows="5" required></textarea> <br /> <button id="confirmRejection" class="btn btn-primary d-none" form="rejectionForm">Confirm</button> </div> <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> </div> </div> </div> </div> <!-- Refuse Modal --> <div class="modal fade" id="refuseModal" tabindex="-1" role="dialog" aria-labelledby="refuseModalLabel" aria-hidden="true"> <div class="modal-dialog" role="document"> <div class="modal-content"> <div class="modal-header"> <h5 class="modal-title" id="refuseModalLabel">Enter Rejection Message</h5> <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span> </button> </div> <div class="modal-body"> <textarea id="rejectionMsgEmail" class="form-control" rows="5" required></textarea> </div> <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> <button id="confirmRejectionEmail" class="btn btn-primary">Confirm</button> </div> </div> </div> </div>
+
+<!-- ================= PAGE HEADER ================= -->
+<div class="page-header mb-3">
+    <div class="row">
+        <div class="col-md-12">
+            <h4>New Applied Users</h4>
+        </div>
+    </div>
+</div>
+
+<!-- ================= FILTER PANEL ================= -->
+<div class="card mb-3 shadow-sm filter-card">
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-3 col-sm-6">
+                <label class="form-label fw-bold">Area</label>
+                <input type="text" id="filterArea" class="form-control filter-input" placeholder="Search Area">
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <label class="form-label fw-bold">Company</label>
+                <input type="text" id="filterCompany" class="form-control filter-input" placeholder="Search Company">
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <label class="form-label fw-bold">Full Name</label>
+                <input type="text" id="filterName" class="form-control filter-input" placeholder="Search Name">
+            </div>
+
+            <div class="col-md-3 col-sm-6">
+                <label class="form-label fw-bold text-primary">Category</label>
+                <select id="filterCategory" class="form-select filter-input">
+                    <option value="">All Categories</option>
+                    @foreach (var cat in Model.Select(x => x.category).Distinct().OrderBy(c => c))
+                    {
+                        <option value="@cat">@cat</option>
+                    }
+                </select>
+            </div>
+
+            <br />
+                  <div class="col-12 d-flex justify-content-start mt-3">
+                <button type="button" id="clearFilters" class="btn btn-outline-secondary">
+                    Clear Filters
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <strong>
+                Showing <span id="rowCount">@Model.Count()</span> results
+            </strong>
+        </div>
+    </div>
+</div>
+
+<!-- ================= TABLE ================= -->
+<div class="scrollable-table-container">
+    <table id="usersTable" class="table table-striped table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Area</th>
+                <th>Company</th>
+                <th>FullName</th>
+                <th>Mobile</th>
+                <th>Email</th>
+                <th>TaxID File</th>
+                <th>Commerical Register</th>
+                <th>Income Tax</th>
+                <th>Electronic Invoice</th>
+                <th>Pre-Qualification</th>
+                <th>Equipment No.</th>
+                <th>Capital</th>
+                <th>Projects No.</th>
+                <th>Engineers No.</th>
+                <th>ISO</th>
+                <th>User Types</th>
+                <th>User Industries</th>
+                <th>Category</th>
+                <th>Accept</th>
+                <th>Refuse</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Area</td>
+                    <td>@item.company</td>
+                    <td>@item.FullName</td>
+                    <td>@item.keyperson_phone</td>
+                    <td>@item.email</td>
+
+                    <td>
+                        <a asp-controller="User" asp-action="Download" asp-route-filename="@item.taxid_document_file_path">
+                            @item.taxid_document_file_path
+                        </a>
+                    </td>
+
+                    <td>
+                        <a asp-controller="User" asp-action="Download" asp-route-filename="@item.commercial_register_document_file_path">
+                            @item.commercial_register_document_file_path
+                        </a>
+                    </td>
+
+                    <td>
+                        <a asp-controller="User" asp-action="Download" asp-route-filename="@item.income_tax_file_path">
+                            @item.income_tax_file_path
+                        </a>
+                    </td>
+
+                    <td>
+                        <a asp-controller="User" asp-action="Download" asp-route-filename="@item.electronice_invoice_file_path">
+                            @item.electronice_invoice_file_path
+                        </a>
+                    </td>
+
+                    <td>
+                        <a asp-controller="User" asp-action="Download" asp-route-filename="@item.prev_work_file_path">
+                            @item.prev_work_file_path
+                        </a>
+                    </td>
+
+                    <td>@item.equipment</td>
+                    <td>@item.moneybudget</td>
+                    <td>@item.projectno</td>
+                    <td>@item.engineersno</td>
+                    <td>@item.ISO</td>
+
+                    <td>
+                        <a id="userTypesLink_@item.id" class="fa fa-info-circle pointer-cursor" data-id="@item.id"></a>
+                    </td>
+
+                    <td>
+                        <a id="userIndustryLink_@item.id" class="fa fa-info-circle pointer-cursor" data-id="@item.id"></a>
+                    </td>
+
+                    <td>@item.category</td>
+
+                    <td>
+                        <a href="@Url.Action("AcceptEmail", "User", new { id = item.id })"
+                           class="text-success">
+                            <i class="fa fa-check"></i>
+                        </a>
+                    </td>
+
+                    <td>
+                        <a id="refuseLink_@item.id" class="fa fa-times pointer-cursor" style="color:red" data-id="@item.id"></a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- ================= SCRIPTS ================= -->
+<script>
+    $(document).ready(function () {
+
+        function applyFilters() {
+            var area = $('#filterArea').val().toLowerCase();
+            var company = $('#filterCompany').val().toLowerCase();
+            var name = $('#filterName').val().toLowerCase();
+            var category = $('#filterCategory').val().toLowerCase();
+
+            var visibleCount = 0;
+
+            $('#usersTable tbody tr').each(function () {
+                var row = $(this);
+                var rowArea = row.find('td').eq(0).text().toLowerCase();
+                var rowCompany = row.find('td').eq(1).text().toLowerCase();
+                var rowName = row.find('td').eq(2).text().toLowerCase();
+                var rowCategory = row.find('td').eq(17).text().toLowerCase();
+
+                var show =
+                    (!area || rowArea.includes(area)) &&
+                    (!company || rowCompany.includes(company)) &&
+                    (!name || rowName.includes(name)) &&
+                    (!category || rowCategory === category);
+
+                row.toggle(show);
+
+                if (show) visibleCount++;
+            });
+
+            $('#rowCount').text(visibleCount);
+        }
+
+        // Apply filter on input change
+        $('.filter-input').on('keyup change', function () {
+            applyFilters();
+        });
+
+        // Clear filters button
+        $('#clearFilters').click(function () {
+            $('.filter-input').val('');
+            applyFilters();
+        });
+
+        $('#usersTable').on('click', 'a[id^="userTypesLink_"]', function () {
+    var userId = $(this).data('id');
+    $.ajax({
+        url: '@Url.Action("UsersTypes", "User")',
+        type: 'GET',
+        data: { id: userId },
+        success: function (response) {
+            $('#userTypesModalContent').html(response);
+            $('#userTypesModal').modal('show');
+        },
+        error: function () {
+            alert('Error occurred while loading user types.');
+        }
+    });
+});
+
+// USER INDUSTRIES MODAL
+$('#usersTable').on('click', 'a[id^="userIndustryLink_"]', function () {
+    var userId = $(this).data('id');
+    $.ajax({
+        url: '@Url.Action("UsersIndustry", "User")',
+        type: 'GET',
+        data: { id: userId },
+        success: function (response) {
+            $('#userTypesModalContent').html(response);
+            $('#userTypesModal').modal('show');
+        },
+        error: function () {
+            alert('Error occurred while loading user industries.');
+        }
+    });
+});
+
+// REFUSE MODAL
+$('#usersTable').on('click', 'a[id^="refuseLink_"]', function () {
+    var userId = $(this).data('id');
+    $('#refuseModal').modal('show');
+    $('#confirmRejectionEmail').off('click').on('click', function () {
+        var rejectionMsg = $('#rejectionMsgEmail').val();
+        refuseUser(userId, rejectionMsg);
+    });
+});
+
+    });
+</script>

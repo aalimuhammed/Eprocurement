@@ -1,0 +1,352 @@
+﻿@model EPROCUREMENT.Services.Helper.PaginatedList<EPROCUREMENT.ViewModel.sap_users_vm>
+
+@{
+    ViewData["HideElement"] = true; // Set this to true if you want to hide the element
+}
+
+<style>
+    .table-container {
+        max-height: 600px; /* Adjust height as needed */
+        overflow-y: auto;
+        overflow-x: auto; /* Important since you have many columns */
+    }
+
+        .table-container thead th {
+            position: sticky;
+            top: 0;
+            background-color: #fff; /* Prevent transparency */
+            z-index: 10;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        /* Optional: Keep header shadow */
+        .table-container thead th {
+            box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+        }
+</style>
+
+<div class="page-header">
+    <div class="row">
+        <div class="col-md-12 col-sm-12">
+            <div class="title">
+                <h4>Existing Vendors</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-2">
+    <div class="col-md-6">
+        <input type="text" id="filterInput" class="form-control" placeholder="Search..." style="width: 100%;">
+    </div>
+    <div class="col-md-6 d-flex align-items-center">
+        <div class="me-4">
+            <label class="me-2">SAP Vendors</label>
+            <input type="checkbox" id="sapVendorCheckbox" onchange="filterChanged()">
+        </div>
+        <div style="margin-left: 30px;">
+            <label class="me-2">E-Procurement Vendors</label>
+            <input type="checkbox" id="eProcurementVendorCheckbox" onchange="filterChanged()">
+        </div>
+    </div>
+</div>
+
+
+<div class="mt-3">
+    <strong>
+        SAP Vendors Count: <span>@ViewBag.SapVendorsCount</span> <br />
+        E-Procurement Verified Vendors Count: <span>@ViewBag.EProcurementVendorsCount</span>
+    </strong>
+</div>
+
+<div class="table-container">
+<table class="table table-striped" style="margin-top:25px;">
+    <thead>
+        <tr>
+            <th scope="col" class="sortable" data-column="">Area <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="sap_code">SAP Code <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="TaxID">Tax-ID <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="CombinedUser">FullName <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="Company">Company <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="Email">Email <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="Phone">Phone <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="Fax">FAX <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="KeyPersonName">KeyPerson Name <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="KeyPersonMail">KeyPerson Email <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="KeyPersonPhone">KeyPerson Phone <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="CAPITAL">CAPITAL <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="EngineersNo">Engineers No. <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="EquipmentNo">Equipment No. <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="Category">Category <span class="sort-icon"></span></th>
+            <th scope="col">TaxID File</th>
+            <th scope="col">Commerical Register</th>
+            <th scope="col">Income Tax</th>
+            <th scope="col">Electronic Invoice</th>
+            <th scope="col">Pre-Qualification</th>
+        </tr>
+    </thead>
+    <tbody id="myTable">
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Area)</td>
+                <td>@Html.DisplayFor(modelItem => item.sap_code)</td>
+                <td>@Html.DisplayFor(modelItem => item.TaxID)</td>
+                <td>@Html.DisplayFor(modelItem => item.CombinedUser)</td>
+                <td>@Html.DisplayFor(modelItem => item.Company)</td>
+                <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                <td>@Html.DisplayFor(modelItem => item.Phone)</td>
+                <td>@Html.DisplayFor(modelItem => item.Fax)</td>
+                <td>@Html.DisplayFor(modelItem => item.keyperson_name)</td>
+                <td>@Html.DisplayFor(modelItem => item.KeyPersonMail)</td>
+                <td>@Html.DisplayFor(modelItem => item.KeyPersonPhone)</td>
+                <td>@Html.DisplayFor(modelItem => item.CAPITAL)</td>
+                <td>@Html.DisplayFor(modelItem => item.EngineersNo)</td>
+                <td>@Html.DisplayFor(modelItem => item.EquipmentNo)</td>
+                <td>@Html.DisplayFor(modelItem => item.category)</td>
+                <td><a asp-controller="User" asp-action="Download" asp-route-filename="@item.taxid_document_file_path">@Html.DisplayFor(modelItem => item.taxid_document_file_path)</a></td>
+                <td><a asp-controller="User" asp-action="Download" asp-route-filename="@item.commercial_register_document_file_path">@Html.DisplayFor(modelItem => item.commercial_register_document_file_path)</a></td>
+                <td><a asp-controller="User" asp-action="Download" asp-route-filename="@item.income_tax_file_path">@Html.DisplayFor(modelItem => item.income_tax_file_path)</a></td>
+                <td><a asp-controller="User" asp-action="Download" asp-route-filename="@item.electronic_invoice_file_path">@Html.DisplayFor(modelItem => item.electronic_invoice_file_path)</a></td>
+                <td><a asp-controller="User" asp-action="Download" asp-route-filename="@item.prev_work_file_path">@Html.DisplayFor(modelItem => item.prev_work_file_path)</a></td>
+            </tr>
+        }
+    </tbody>
+</table>
+</div>
+
+<!-- Pagination controls -->
+<div>
+    @if (Model.HasPreviousPage)
+    {
+        <a href="#" onclick="navigateToPage(@(Model.PageNumber - 1), true)">Previous</a>
+    }
+
+    Page @Model.PageNumber of @Model.TotalPages
+
+    @if (Model.HasNextPage)
+    {
+        <a href="#" onclick="navigateToPage(@(Model.PageNumber + 1), true)">Next</a>
+    }
+</div>
+
+
+<script>
+    var isSapVendorChecking = false;
+    var isEProcurementVendorChecking = false;
+
+    // Pagination function
+    function navigateToPage(pageNumber) {
+        $.ajax({
+            url: '/User/ExistedUserFilter',
+            type: 'GET',
+            data: {
+                page: pageNumber,
+                isSapVendorChecked: isSapVendorChecking,
+                isEProcurementVendorChecked: isEProcurementVendorChecking
+            },
+            success: function (users) {
+
+                $('#myTable').empty();
+
+                users.forEach(function (user) {
+                    $('#myTable').append(`
+                            <tr>
+                                <td>${user.area || ''}</td>
+                                <td>${user.sap_code || ''}</td>
+                                <td>${user.taxID || ''}</td>
+                                <td>${user.combinedUser || ''}</td>
+                                <td>${user.company || ''}</td>
+                                <td>${user.email || ''}</td>
+                                <td>${user.Phone || ''}</td>
+                                <td>${user.Fax || ''}</td>
+                                <td>${user.keyperson_name || ''}</td>
+                                <td>${user.keyPersonMail || ''}</td>
+                                <td>${user.keyPersonPhone || ''}</td>
+                                <td>${user.capital || ''}</td>
+                                <td>${user.engineersNo || ''}</td>
+                                <td>${user.equipmentNo || ''}</td>
+                                <td>${user.category || ''}</td>
+                                <td><a href="/User/Download?filename=${user.taxid_document_file_path || ''}">${user.taxid_document_file_path || ''}</a></td>
+                                <td><a href="/User/Download?filename=${user.commercial_register_document_file_path || ''}">${user.commercial_register_document_file_path || ''}</a></td>
+                                <td><a href="/User/Download?filename=${user.income_tax_file_path || ''}">${user.income_tax_file_path || ''}</a></td>
+                                <td><a href="/User/Download?filename=${user.electronic_invoice_file_path || ''}">${user.electronic_invoice_file_path || ''}</a></td>
+                                <td><a href="/User/Download?filename=${user.prev_work_file_path || ''}">${user.prev_work_file_path || ''}</a></td>
+                            </tr>
+                        `);
+                });
+                // Maintain checkbox states
+                document.getElementById('sapVendorCheckbox').checked = isSapVendorChecking;
+                document.getElementById('eProcurementVendorCheckbox').checked = isEProcurementVendorChecking;
+            },
+            error: function (xhr, status, error) {
+                console.error('Error during pagination:', error);
+            }
+        });
+    }
+
+    // Checkbox filter change
+    function filterChanged() {
+        isSapVendorChecking = document.getElementById('sapVendorCheckbox').checked;
+        isEProcurementVendorChecking = document.getElementById('eProcurementVendorCheckbox').checked;
+
+        $.ajax({
+            url: '/User/CheckBoxFilters',
+            type: 'GET',
+            data: {
+                isSapVendorChecked: isSapVendorChecking,
+                isEProcurementVendorChecked: isEProcurementVendorChecking
+            },
+            success: function (users) {
+                $('#myTable').empty();
+
+                users.forEach(function (user) {
+                    $('#myTable').append(`
+                        <tr>
+                            <td>${user.area || ''}</td>
+                            <td>${user.sap_code || ''}</td>
+                            <td>${user.taxID || ''}</td>
+                            <td>${user.combinedUser || ''}</td>
+                            <td>${user.company || ''}</td>
+                            <td>${user.email || ''}</td>
+                            <td>${user.Phone || ''}</td>
+                            <td>${user.Fax || ''}</td>
+                            <td>${user.keyperson_name || ''}</td>
+                            <td>${user.keyPersonMail || ''}</td>
+                            <td>${user.keyPersonPhone || ''}</td>
+                            <td>${user.capital || ''}</td>
+                            <td>${user.engineersNo || ''}</td>
+                            <td>${user.equipmentNo || ''}</td>
+                            <td>${user.category || ''}</td>
+                            <td><a href="/User/Download?filename=${user.taxid_document_file_path || ''}">${user.taxid_document_file_path || ''}</a></td>
+                            <td><a href="/User/Download?filename=${user.commercial_register_document_file_path || ''}">${user.commercial_register_document_file_path || ''}</a></td>
+                            <td><a href="/User/Download?filename=${user.income_tax_file_path || ''}">${user.income_tax_file_path || ''}</a></td>
+                            <td><a href="/User/Download?filename=${user.electronic_invoice_file_path || ''}">${user.electronic_invoice_file_path || ''}</a></td>
+                            <td><a href="/User/Download?filename=${user.prev_work_file_path || ''}">${user.prev_work_file_path || ''}</a></td>
+                        </tr>
+                    `);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('Error during filtering:', error);
+            }
+        });
+    }
+</script>
+
+<script>
+    function navigateToPage(page) {
+        // Use the Fetch API to get the new data (or directly set the URL if needed)
+        var url = '@Url.Action("ExistedUsers", "User")?page=' + page + '&pageSize=@Model.PageSize';
+
+        window.location.href = url; // Redirect to the new page, causing a server-side change
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('.bg-white').removeClass();
+    });
+
+    // $(document).ready(function () {
+
+    //     $("#filterInput").on("keyup", function () {
+    //         var value = $(this).val().toLowerCase();
+    //         $("#myTable tr").filter(function () {
+    //             $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    //         });
+    //     });
+
+    //     $(".sortable").click(function () {
+    //         var column = $(this).data("column");
+    //         var order = $(this).attr("data-order");
+    //         var text = $(this).text();
+    //         $("#myTable th .sort-icon").html(''); // Clear all sort icons
+    //         $(this).find('.sort-icon').html(order === 'asc' ? '&darr;' : '&uarr;'); // Add sort icon
+    //         $("#myTable th").removeClass("active");
+    //         $(this).addClass("active");
+    //         if (order == 'desc') {
+    //             $(this).attr("data-order", "asc");
+    //             order = 'asc';
+    //         } else {
+    //             $(this).attr("data-order", "desc");
+    //             order = 'desc';
+    //         }
+    //         var tbody = $("#myTable");
+    //         var rows = tbody.find('tr').toArray().sort(comparer($(this).index()));
+    //         if (order == 'desc') {
+    //             rows = rows.reverse();
+    //         }
+    //         for (var i = 0; i < rows.length; i++) {
+    //             tbody.append(rows[i]);
+    //         }
+    //     });
+
+    //     function comparer(index) {
+    //         return function (a, b) {
+    //             var valA = getCellValue(a, index), valB = getCellValue(b, index);
+    //             return $.isNumeric(valA) && $.isNumeric(valB) ? valA - valB : valA.toString().localeCompare(valB);
+    //         }
+    //     }
+
+    //     function getCellValue(row, index) {
+    //         return $(row).children('td').eq(index).text();
+    //     }
+    // });
+
+    $(document).ready(function () {
+        $('#filterInput').on('keypress', function (event) {
+            
+            if (event.which === 13) {  // 13 is the key code for Enter
+                isSapVendorChecking = document.getElementById('sapVendorCheckbox').checked;
+                isEProcurementVendorChecking = document.getElementById('eProcurementVendorCheckbox').checked;
+                var inputValue = $(this).val();
+                $.ajax({
+                    url: '/User/SearchFilter',
+                    type: 'GET',
+                    data: {
+                        search: inputValue,
+                        isSapVendorChecked: isSapVendorChecking,
+                        isEProcurementVendorChecked: isEProcurementVendorChecking
+                    },
+                    success: function (users) {
+                       
+                        $('#myTable').empty();
+
+                        // Loop through the users and append rows to the table
+                        users.forEach(function (user) {
+                                $('#myTable').append(`
+                                            <tr>
+                                                <td>${user.area || ''}</td>
+                                                <td>${user.sap_code || ''}</td>
+                                                <td>${user.taxID || ''}</td>
+                                                <td>${user.combinedUser || ''}</td>
+                                                <td>${user.company || ''}</td>
+                                                <td>${user.email || ''}</td>
+                                                <td>${user.Phone || ''}</td>
+                                                <td>${user.Fax || ''}</td>
+                                                <td>${user.keyperson_name || ''}</td>
+                                                <td>${user.keyPersonMail || ''}</td>
+                                                <td>${user.keyPersonPhone || ''}</td>
+                                                <td>${user.capital || ''}</td>
+                                                <td>${user.engineersNo || ''}</td>
+                                                <td>${user.equipmentNo || ''}</td>
+                                                <td>${user.category || ''}</td>
+                                                <td><a href="/User/Download?filename=${user.taxid_document_file_path || ''}">${user.taxid_document_file_path || ''}</a></td>
+                                                <td><a href="/User/Download?filename=${user.commercial_register_document_file_path || ''}">${user.commercial_register_document_file_path || ''}</a></td>
+                                                <td><a href="/User/Download?filename=${user.income_tax_file_path || ''}">${user.income_tax_file_path || ''}</a></td>
+                                                <td><a href="/User/Download?filename=${user.electronic_invoice_file_path || ''}">${user.electronic_invoice_file_path || ''}</a></td>
+                                                <td><a href="/User/Download?filename=${user.prev_work_file_path || ''}">${user.prev_work_file_path || ''}</a></td>
+                                            </tr>
+                                   `);
+
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error fetching users:', error);
+                    }
+                });
+            }
+        });
+    });
+</script>

@@ -1,0 +1,17 @@
+﻿@model IEnumerable<EPROCUREMENT.ViewModel.user_industry_vm>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>User Industries</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var userType in Model)
+        {
+            <tr>
+                <td>@userType.Industries</td>
+            </tr>
+        }
+    </tbody>
+</table>

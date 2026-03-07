@@ -1,0 +1,75 @@
+﻿<div class="pd-20 card-box mb-30">
+    <div class="clearfix">
+        <div class="pull-left">
+            <h4 class="text-blue h4">Material Group Selection</h4>
+        </div>
+    </div>
+    <form id="selectionForm">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Select Material Group <span style="color:red">*</span></label>
+                    <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <br />
+        <div class="text-center">
+            <!-- This div centers its content -->
+            <button type="button" id="btnsearch" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+</div>
+
+<h3 id="grandtotal"></h3>
+
+<script>
+    $(document).ready(function () {
+        // $('#btnaccept, #btnrevoke, #btnmanualassign').prop('disabled', true);
+        $("input").prop('required', true);
+        // Make an AJAX request to fetch projects
+
+        $('select[name="state"]:eq(0)').append('<option value="">Please Select your Material Group </option>');
+        $.ajax({
+            type: 'GET', // Use GET method to fetch data
+            url: '/ViewOnly/GetMaterialsGrp',
+            success: function (response) {
+                $.each(response, function (index, project) {
+                    // Append each project as an option to the select element
+                    $('select[name="state"]:eq(0)').append('<option value="' + project.id + '">' + project.name + '</option>');
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+        // Your existing code for handling search button click and displaying table rows goes here
+    });
+
+
+    $(document).ready(function () {
+        $('#btnsearch').on('click', function () { // When the search button is clicked
+            var material_id = $('select[name="state"]:eq(0)').val(); // Get the selected project
+        
+            // Make an AJAX request to your endpoint
+            $.ajax({
+                type: 'GET',
+                url: '/ViewOnly/GetIndustry',
+                data: {
+                    mtr_id: material_id,
+                },
+                success: function (response) {
+
+                    $('#grandtotal').text('Inudstry is  : ' + response.name);
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+
+        });
+    });
+</script>

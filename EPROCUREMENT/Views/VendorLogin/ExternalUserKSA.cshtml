@@ -1,0 +1,312 @@
+﻿@{
+	Layout = "_VLayout";
+}
+@model EPROCUREMENT.Models.VendorData;
+
+
+<body>
+
+	<div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="alertModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-xl" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="alertModalLabel">Update Industry</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<div class="row">
+							<div class="col-md-6">
+								<div class="form-group">
+									<label>Select Category <span style="color:red">*</span></label>
+									<select class="custom-select2 form-control" style="width: 100%; height: 38px;" id="industryheader">
+									</select>
+								</div>
+							</div>
+
+							<div class="col-md-6">
+								<div class="form-group">
+									<label>Select Industry <span style="color:red">*</span></label>
+									<select class="custom-select2 form-control" style="width: 100%; height: 38px;" id="industrydetails">
+									</select>
+								</div>
+							</div>
+
+							<div class="col-md-6">
+								<div class="form-group">
+									<label>Selected Values : <span style="color:red">*</span></label>
+									<select class="custom-select2 form-control" multiple style="width: 100%; height: 38px;" id="selectedindustry">
+									</select>
+								</div>
+							</div>
+
+						</div>
+
+					</div>
+
+
+					<button type="button" id="btnaddindustry" class="btn btn-success">Add</button>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Default Basic Forms Start -->
+	<div class="pd-20 card-box mb-30">
+		<div class="clearfix">
+			<div class="pull-left">
+				<h4 class="text-blue h4">Your Personal information</h4>
+				<p class="mb-30"></p>
+			</div>
+		</div>
+		<form method="POST" class="register-form" asp-action="UpdateVendor" asp-controller="VendorLogin" enctype="multipart/form-data">
+			<div class="form-group row">
+				<label class="col-sm-12 col-md-2 col-form-label">Name</label>
+				<div class="col-sm-12 col-md-10">
+					<input class="form-control" type="text" placeholder="Your Name " asp-for="Name" value="@Model?.Name">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-sm-12 col-md-2 col-form-label">Mobile</label>
+				<div class="col-sm-12 col-md-10">
+					<input class="form-control" placeholder="Your Telephone" type="text" asp-for="Telephone" value="@Model?.Telephone">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-sm-12 col-md-2 col-form-label">Fax</label>
+				<div class="col-sm-12 col-md-10">
+					<input class="form-control" placeholder="Your Fax" type="text" asp-for="Fax" value="@Model?.Fax">
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-sm-12 col-md-2 col-form-label">Email</label>
+				<div class="col-sm-12 col-md-10">
+					<input class="form-control" placeholder="Your Email" type="email" asp-for="Email" value="@Model?.Email">
+				</div>
+			</div>
+
+			<div class="form-group row">
+				<label class="col-sm-12 col-md-2 col-form-label">Tax ID</label>
+				<div class="col-sm-12 col-md-10">
+					<a asp-controller="User" asp-action="Download" asp-route-filename="@Model.tax_file">@Html.DisplayFor(modelItem => modelItem.tax_file)</a>
+					<input class="form-control" placeholder="Your Email" type="file" asp-for="tax_file" value="@Model?.tax_file">
+				</div>
+			</div>
+
+			<div class="form-group row">
+				<label class="col-sm-12 col-md-2 col-form-label">Prev Work</label>
+				<div class="col-sm-12 col-md-10">
+					<a asp-controller="User" asp-action="Download" asp-route-filename="@Model.prev_work_file">@Html.DisplayFor(modelItem => modelItem.prev_work_file)</a>
+					<input class="form-control" placeholder="Your Email" type="file" asp-for="prev_work_file" value="@Model?.prev_work_file">
+				</div>
+			</div>
+
+			<div class="form-group row">
+				<label class="col-sm-12 col-md-2 col-form-label">ID Card</label>
+				<div class="col-sm-12 col-md-10">
+					<a asp-controller="User" asp-action="Download" asp-route-filename="@Model.idcard">@Html.DisplayFor(modelItem => modelItem.idcard)</a>
+					<input class="form-control" placeholder="Your Email" type="file" asp-for="idcard" value="@Model?.idcard">
+				</div>
+			</div>
+
+			<input type="hidden" id="selectedIndustryInput" name="selectedIndustry" />
+
+			<div class="form-group row mb-30">
+				<label class="col-sm-12 col-md-2 col-form-label">Industry</label>
+				<div class="col-sm-12 col-md-10">
+					<select class="custom-select2 form-control" multiple name="state" style="width: 100%; height: 38px;" id="industrySelect">
+					</select>
+				</div>
+				<button type="button" class="btn btn-success" data-toggle="modal" data-target="#alertModal">Add Industry</button>
+			</div>
+
+			<div class="form-group row">
+				<label class="col-sm-12 col-md-2 col-form-label">Capital in your local Currency :</label>
+				<div class="col-sm-12 col-md-10">
+					<input class="form-control" placeholder="Capital" type="text" asp-for="money" value="@Model?.money">
+				</div>
+			</div>
+
+
+			<div class="form-group row">
+				<label class="col-sm-12 col-md-2 col-form-label">Address</label>
+				<div class="col-sm-12 col-md-10">
+					<input class="form-control" placeholder="Your Address" type="text" asp-for="Address" value="@Model?.Address">
+				</div>
+			</div>
+
+			<div class="form-group row">
+				<label class="col-sm-12 col-md-2 col-form-label">Equipment No :</label>
+				<div class="col-sm-12 col-md-10">
+					<input class="form-control" placeholder="Equipment No :" type="text" asp-for="equipment" value="@Model?.equipment">
+				</div>
+			</div>
+
+
+			<div class="form-group row">
+				<label class="col-sm-12 col-md-2 col-form-label">ISO </label>
+				<div class="col-sm-12 col-md-10">
+					<input class="form-control" placeholder="ISO" type="text" asp-for="iso" value="@Model?.iso">
+				</div>
+			</div>
+
+
+			<div class="form-group row">
+				<label class="col-sm-12 col-md-2 col-form-label">Engineers No :</label>
+				<div class="col-sm-12 col-md-10">
+					<input class="form-control" placeholder="Engineers No:" type="text" asp-for="engineer_num" value="@Model?.engineer_num">
+				</div>
+			</div>
+
+
+			<div class="form-group row">
+				<label class="col-sm-12 col-md-2 col-form-label">SalesPerson Email</label>
+				<div class="col-sm-12 col-md-10">
+					<input class="form-control" placeholder="SalesPerson Email" type="email" asp-for="SalesPersonEmail" value="@Model?.SalesPersonEmail">
+				</div>
+			</div>
+			<div class="mt-5 text-center"><button class="btn btn-success profile-button" type="submit">Update</button></div>
+		</form>
+	</div>
+
+</body>
+
+<script>
+
+
+	$(document).ready(function () {
+		// Make an AJAX request to fetch projects
+
+		$.ajax({
+			type: 'GET', // Use GET method to fetch data
+			url: '/ExternalUser/GetServiceHeaders',
+			success: function (response) {
+				//$('#industryheader').empty();
+
+				//                 $('#industryheader').append('<option value=" disabled">Please Select your Category</option>');
+
+				// $.each(response, function (index, industry) {
+
+				// 	$('#industryheader').append($('<option>', {
+				// 		value: industry.id,
+				// 		text: industry.name // Assuming 'name' is the property that holds the industry name
+				// 	}));
+				// });
+
+				var s = '<option value="-1">Please Select a Category</option>';
+				for (var i = 0; i < response.length; i++) {
+					s += '<option value="' + response[i].id + '">' + response[i].name + '</option>';
+				}
+				$("#industryheader").html(s);
+			},
+			error: function (xhr, textStatus, errorThrown) {
+				alert('Error: ' + errorThrown);
+			}
+		});
+
+		// Your existing code for handling search button click and displaying table rows goes here
+
+		$('#industryheader').on('change', function () {
+			var selectedIndustryId = $(this).val(); // Get the selected industry id
+
+			// Make AJAX request with selected industry id
+			$.ajax({
+				type: 'GET',
+				url: '/ExternalUser/GetIndustryDetails',
+				data: {
+					header_id: selectedIndustryId
+				},
+				success: function (response) {
+
+					$('#industrydetails').empty();
+
+					$('#industrydetails').append('<option value="-1">Please Select your Industry</option>');
+
+					$.each(response, function (index, industry) {
+						$('#industrydetails').append($('<option>', {
+							value: industry.id,
+							text: industry.descr
+						}));
+					});
+
+
+				},
+				error: function (xhr, textStatus, errorThrown) {
+					alert('Error: ' + errorThrown);
+				}
+			});
+		});
+
+		$('#industrydetails').on('change', function () {
+			var selectedIndustryId = $(this).val(); // Get the selected industry id
+			var text = $('#industrydetails :selected').text();
+
+			$('#selectedindustry').append("<option selected=true value=" + selectedIndustryId + ">" + text + "</option>");
+		});
+
+		$('.register-form').submit(function () {
+			var selectedValues = [];
+			$('#industrySelect option:selected').each(function () {
+				//	$('#selectedIndustryInput').val($(this).val());
+				selectedValues.push($(this).val());
+			});
+
+			$('#selectedIndustryInput').val(selectedValues.join(','));
+		});
+	});
+
+
+	$(document).ready(function () {
+		// Function to append selected values to industrySelect
+		function appendSelectedValues() {
+			var selectedValues = $('#selectedindustry').val(); // Get selected values
+			if (selectedValues) {
+				selectedValues.forEach(function (value) {
+					// Find the selected option in selectedindustry
+					var $selectedOption = $('#selectedindustry option[value="' + value + '"]');
+					// Clone and append the option to industrySelect
+					$('#industrySelect').append($selectedOption.clone().prop('selected', true));
+				});
+			}
+		}
+
+		// When the Add button is clicked
+		$('#btnaddindustry').click(function () {
+			appendSelectedValues(); // Append selected values to industrySelect
+		});
+	});
+
+	$(document).ready(function () {
+		// Make an AJAX request to fetch projects
+		$.ajax({
+			type: 'GET', // Use GET method to fetch data
+			url: '/ExternalUser/GetUserIndustry',
+			success: function (response) {
+
+				$('#industrySelect').empty();
+
+				$.each(response, function (index, industry) {
+
+					$('#industrySelect').append($('<option>', {
+						value: industry.industryId,
+						text: industry.industries // Assuming 'name' is the property that holds the industry name
+					}));
+				});
+
+				$('#industrySelect').find('option').prop('selected', true);
+			},
+			error: function (xhr, textStatus, errorThrown) {
+				alert('Error: ' + errorThrown);
+			}
+		});
+
+		// Your existing code for handling search button click and displaying table rows goes here
+	});
+
+</script>

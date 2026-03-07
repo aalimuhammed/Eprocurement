@@ -1,0 +1,846 @@
+﻿<style>
+    .highlighted {
+        background-color: #ffff99; /* or any other color */
+    }
+
+
+    /* Custom CSS */
+    #shortlisted {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        #shortlisted th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+
+        #shortlisted th {
+            background-color: lightgray;
+        }
+
+</style>
+
+<h2></h2>
+
+<div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="alertModalLabel">Manual Assign</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" id="searchTextBox" class="form-control" placeholder="Search by Namr Or Tax-ID">
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Vendor Name</th>
+                            <th>Tax ID</th>
+                            <th>Select</th>
+                        </tr>
+                    </thead>
+                    <tbody id="searchResultsBody"></tbody>
+
+                </table>
+
+                <!-- Area to display selected values -->
+                <h4>Selected Values</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Vendor Name</th>
+                            <th>Tax ID</th>
+                            <th>Cancel</th>
+                        </tr>
+                    </thead>
+                    <tbody id="selectedValues"></tbody>
+                </table>
+
+
+                <button type="button" id="btnrelease" class="btn btn-success">Release</button>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-header">
+    <div class="row">
+        <div class="col-md-12 col-sm-12">
+            <div class="title">
+                <h4>ShortListed Vendors</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pd-20 card-box mb-30">
+    <div class="clearfix">
+        <div class="pull-left">
+            <h4 class="text-blue h4">Selection Criteria</h4>
+        </div>
+    </div>
+    <form>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Select Project</label>
+                    <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Select Industry</label>
+                    <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
+                    </select>
+                </div>
+            </div>
+
+        </div>
+        <br />
+        <div class="text-center">
+            <!-- This div centers its content -->
+            <button type="button" id="btnsearch" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+</div>
+
+
+
+<div class="pd-20 card-box mb-30">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Package Name</th>
+            </tr>
+        </thead>
+        <tbody id="pkgtble">
+        </tbody>
+    </table>
+</div>
+
+<div class="clearfix mb-20">
+    <div class="pull-left">
+        <h4 class="text-blue h4">Actions</h4>
+    </div>
+    <div class="pull-right">
+        <button type="button" id="exporttoExcl" class="btn btn-success">Export To Excel</button>
+    </div>
+</div>
+<br />
+<table id="shortlisted">
+    <tr>
+        <th rowspan="3">Material Desc</th>
+        <th rowspan="3">UOM</th>
+        <th rowspan="3">QTY</th>
+        <th colspan="6">Vendor</th>
+    </tr>
+    <tr id="vendornameList">
+        <!--Here will Populate Vendor Names-->
+    </tr>
+    <tr id="headers">
+        <th>Unit Price</th>
+        <th>Total Price</th>
+        <th hidden>Duration</th>
+        <th hidden>delivery_date</th>
+        <th hidden>advanced_payment</th>
+        <th hidden>transportation</th>
+
+        <th>Unit Price</th>
+        <th>Total Price</th>
+        <th hidden>Duration</th>
+        <th hidden>delivery_date</th>
+        <th hidden>advanced_payment</th>
+        <th hidden>transportation</th>
+
+        <th>Unit Price</th>
+        <th>Total Price</th>
+        <th hidden>Duration</th>
+        <th hidden>delivery_date</th>
+        <th hidden>advanced_payment</th>
+        <th hidden>transportation</th>
+    </tr>
+@*     <tr id="actualdata">
+    </tr> *@
+
+    <tr id="totalbidding">
+        <th colspan="3">Total Bidding</th>
+        <th colspan="2" id="fgrandtotal"></th>
+        <th colspan="2" id="sgrandtotal"></th>
+        <th colspan="2" id="thgrandtotal"></th>
+    </tr>
+</table>
+
+
+<div class="container" style="margin-left:50%">
+    <div class="row inline">
+        <div class="col-md-4" style="margin-left:-20%">
+            <button class="btn btn-success" id="acceptofferone">Accept Offer 1 </button>
+        </div>
+        <div class="col-md-4 inline" style="margin-left:-10%">
+            <button class="btn btn-success" id="acceptoffertwo">Accept Offer 2</button>
+        </div>
+        <div class="col-md-4" style="margin-left:-5%">
+            <button class="btn btn-success" id="acceptofferthree">Accept Offer 3</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
+
+<script>
+    var currentPage = 1;
+    var totalPages = 1;
+
+    var pkg_header_id = 0;
+
+    $(document).ready(function () {
+        // Highlight column when a row is clicked in #tblheader
+        $('#pkgtble').on('click', 'tr', function () {
+            // Remove "highlighted" class from all rows
+            $('#pkgtble tr').removeClass('highlighted');
+            // Add "highlighted" class to the clicked row
+            $(this).addClass('highlighted');
+        });
+    });
+
+    $(document).ready(function () {
+        $('#btnmanualassign').on('click', function () { // When the Manual Assign button is clicked
+            $('#searchTextBox').val(''); // Clear the search text box
+            $('#searchResultsBody').empty();
+            // fetchSearchResults(''); // Fetch search results with an empty search term
+        });
+
+        $('#searchTextBox').on('keyup', function (e) { // When a key is pressed in the search text box
+            if (e.keyCode === 13) { // Check if the pressed key is Enter (key code 13)
+                var searchTerm = $(this).val(); // Get the search term from the text box
+                fetchSearchResults(searchTerm); // Fetch search results
+            }
+        });
+
+        function fetchSearchResults(searchTerm) {
+            // Make an AJAX request to fetch search results
+            $.ajax({
+                type: 'GET',
+                url: '/Admin/Search',
+                data: { searchTerm: searchTerm },
+                success: function (response) {
+                    $('#searchResultsBody').empty();
+
+                    if (Array.isArray(response)) {
+                        // If response is an array, iterate through each record and append them to the table
+                        $.each(response, function (index, user) {
+                            $('#searchResultsBody').append('<tr><td>' + user.fname + '</td><td>' + user.tax_id + '</td><td><button class="btn btn-success" value="' + user.id + '">Select</button></td></tr>');
+                        });
+                    } else if (response === "No Data Found") {
+                        // If response is "No Data Found", display a message in the table
+                        $('#searchResultsBody').html('<tr><td colspan="3">No Data Found</td></tr>');
+                    } else {
+                        // If response is a single object, append it to the table
+                        $('#searchResultsBody').append('<tr><td>' + response.fname + '</td><td>' + response.tax_id + '</td><td><button class="btn btn-success" value="' + response.id + '">Select</button></td></tr>');
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        }
+
+        $(document).on('click', '#searchResultsBody button', function () {
+            var selectedRow = $(this).closest('tr');
+            selectedRow.hide();
+
+            var vendorName = $(this).closest('tr').find('td:first').text(); // Get the Vendor Name from the selected row
+            var taxId = $(this).closest('tr').find('td:eq(1)').text(); // Get the Tax ID from the selected row
+
+            var userId = selectedRow.find('.btn-success').val();
+
+            alert(userId);
+
+            // Append the selected values to the designated area in the modal
+            $('#selectedValues').append('<tr><td>' + vendorName + '</td><td>' + taxId + '</td><td hidden><input type="hidden" class="selected" value="' + userId + '"></td><td><button class="btn btn-danger cancelBtn">Cancel</button></td></tr>');
+        });
+
+        $(document).on('click', '.cancelBtn', function () {
+            var canceledRow = $(this).closest('tr'); // Get the canceled row
+            canceledRow.remove(); // Remove the canceled row from the selected values table
+
+            var vendorName = canceledRow.find('td:first').text(); // Get the Vendor Name from the canceled row
+            var taxId = canceledRow.find('td:eq(1)').text(); // Get the Tax ID from the canceled row
+
+            // Find the corresponding row in the search results table and show it
+            $('#searchResultsBody tr').each(function () {
+                var row = $(this);
+                if (row.find('td:first').text() === vendorName && row.find('td:eq(1)').text() === taxId) {
+                    row.show(); // Show the canceled row
+                    return false; // Exit the loop after finding the row
+                }
+            });
+        });
+
+    });
+
+    $(document).ready(function () {
+        // Make an AJAX request to fetch projects
+        $.ajax({
+            type: 'GET', // Use GET method to fetch data
+            url: '/Project/SapProjects',
+            success: function (response) {
+                $.each(response, function (index, project) {
+                    // Append each project as an option to the select element
+                    $('select[name="state"]:eq(0)').append('<option value="' + project.proj_num + '|' + project.id + '">' + project.proj_name + '</option>');
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+        // Your existing code for handling search button click and displaying table rows goes here
+    });
+
+    $(document).ready(function () {
+        // Make an AJAX request to fetch projects
+        $.ajax({
+            type: 'GET', // Use GET method to fetch data
+            url: '/Industry/SapIndustry',
+            success: function (response) {
+                $.each(response, function (index, industry) {
+                    // Append each project as an option to the select element
+                    $('select[name="state"]:eq(1)').append('<option value="' + industry.industry_code + '|' + industry.id + '">' + industry.descr + '</option>');
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+        // Your existing code for handling search button click and displaying table rows goes here
+    });
+    $(document).ready(function () {
+        $('#btnsearch').on('click', function () { // When the search button is clicked
+            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
+            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+
+            var projectId = project.split('|')[1];
+            var industryId = industry.split('|')[1];
+
+
+            // Make an AJAX request to your endpoint
+            $.ajax({
+                type: 'GET',
+                url: '/ReleasedPackages/GetReleasedApplied',
+                data: {
+                    project_id: projectId,
+                    industry_id: industryId,
+                },
+                success: function (response) {
+                    // Assuming response is an array of objects containing data for each row
+                    $('#pkgtble').empty(); // Clear the table body
+
+                    if (response.length === 0) {
+                        alert('No data found.');
+                        return;
+                    }
+                    $.each(response, function (index, row) {
+                        // Check if bid is true, if true, add cancel button, otherwise, add empty cell
+
+                        // Append each row to the table
+                        $('#pkgtble').append(
+                            '<tr>' +
+                            '<td> <a href="#" data-id="' + row.id + '">' + row.pkg_name + ' </a> </td>' +
+                            '</tr>'
+                        );
+                    });
+                    // $('#tblbody').show(); // Show the table body
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+
+        });
+    });
+
+    $(document).on('click', '#pkgtble a', function () {
+        var rowId = $(this).data('id');
+        pkg_header_id = rowId;
+
+        $('html, body').animate({ scrollTop: $(document).height() }, 'slow');
+
+        // Make an AJAX request to your endpoint
+        $.ajax({
+            type: 'GET',
+            url: '/Bidding/PriceComparison',
+            data: {
+                pkg_id: rowId
+            },
+            success: function (response) {
+
+                console.log(response);
+                $('#vendornameList').empty();
+
+                //  console.log(response);
+
+                var dataNames = response; // Assuming the response is directly the object
+                var datadetailsName = response;
+                var dataprice = response;
+
+                // Select distinct values based on the 'mtr_desc' key
+                var distinctValues = [];
+                var uniqueDescriptions = [];
+
+                var detailsName = [];
+                var uniquedetailsNames = [];
+
+                var priceList = [];
+                var UniquericeList = [];
+
+                var priceWithNme = [];
+
+                dataNames.forEach(function (item) {
+                    var description = item.fname;
+                    if (!uniqueDescriptions.includes(description)) {
+                        uniqueDescriptions.push(description);
+                        distinctValues.push(item);
+                    }
+                });
+
+                distinctValues.forEach(function (vendor) {
+                    // Create new <th> elements for each vendor
+                    // var nameTh = $('<th colspan="2">').text(vendor.fname); // Assuming 'fname' is a property in the vendor object
+
+                    var nameTh = $('<th colspan="2">').html('<span class="vendorHname">' + vendor.fname + '</span><br/><a href="#" class="vendor-offer">' + vendor.offer + '</a>');
+
+                    // Append the new <th> elements to the table row
+                    $('#vendornameList').append(nameTh);
+
+                    // Add click event to the .vendor-offer link
+                    nameTh.find('.vendor-offer').click(function (event) {
+                        // Prevent default link behavior
+                        event.preventDefault();
+
+                        // Get the text of the clicked vendor offer
+                        var offerText = $(this).text();
+
+                        // Create a hidden iframe
+                        var iframe = $('<iframe>', {
+                            id: 'hiddenDownloader',
+                            style: 'display: none'
+                        });
+                        $('body').append(iframe);
+
+                        // Set the iframe source to the download URL
+                        $('#hiddenDownloader').attr('src', '/ReleasedPackages/DownloadBiddingFile?fileName=' + offerText);
+
+                        // Remove the iframe after download
+                        $('#hiddenDownloader').on('load', function () {
+                            $(this).remove();
+                        });
+
+                        // You can do whatever you want with the offer text here
+                    });
+
+                });
+
+                // datadetailsName.forEach(function (item) {
+                //     var description = item.mtr_desc;
+                //     var quantity = item.mtr_qty;
+
+                //     // Check if description is already in uniquedetailsNames
+                //     if (!uniquedetailsNames.includes(description)) {
+                //         uniquedetailsNames.push(description);
+                //         detailsName.push(item);
+                //     } else {
+                //         // Description is duplicated, check if quantities are different
+                //         var existingItem = detailsName.find(function (existing) {
+                //             return existing.mtr_desc === description && existing.mtr_qty !== quantity;
+                //         });
+                //         if (!existingItem) {
+                //             // Quantity is the same, skip adding
+                //             return;
+                //         } else {
+                //             // Quantity is different, add item with additional details
+                //             detailsName.push(item);
+                //         }
+                //     }
+                // });
+
+                datadetailsName.forEach(function (item) {
+                    var description = item.mtr_desc;
+                    var quantity = item.mtr_qty;
+                    var line_item = item.line_item;
+
+                    // Check if the combination of description and line_item is already in detailsName
+                    var existingItem = detailsName.find(function (existing) {
+                        return existing.mtr_desc === description && existing.line_item === line_item;
+                    });
+
+                    if (!existingItem) {
+                        // Item with the same description and line_item not found, add new item
+                        detailsName.push(item);
+                        uniquedetailsNames.push(description); // Optionally track unique descriptions
+                    } else {
+                        // Item with the same description and line_item found
+                        if (existingItem.mtr_qty !== quantity) {
+                            // Quantity is different, add item with additional details
+                            detailsName.push(item);
+                        }
+                        // If you want to update the existing item instead of adding a new one:
+                        // existingItem.mtr_qty = quantity;
+                    }
+                });
+
+
+                // Sort detailsName by mtr_qty
+                // detailsName.sort(function (a, b) {
+                //     return a.mtr_qty - b.mtr_qty;
+                // });
+
+                $('#headers').nextUntil('#totalbidding').remove();
+
+                var uniqueDetails = {};
+                detailsName.forEach(function (vendor) {
+                    var key = vendor.mtr_desc + vendor.mtr_uom + vendor.mtr_qty + vendor.line_item
+                    if (!uniqueDetails[key]) {
+                        uniqueDetails[key] = {
+                            mtr_desc: vendor.mtr_desc,
+                            mtr_uom: vendor.mtr_uom,
+                            mtr_qty: vendor.mtr_qty,
+                            line_item: vendor.line_item
+                        };
+                    }
+                });
+
+              
+                // Iterate through uniqueDetails to create table rows
+                var lastInsertedRow = $('#headers');
+
+                for (var key in uniqueDetails) {
+                    var newRow = $('<tr class="actualdata">');
+                    // Create new <td> elements for each unique combination
+                    var mtrdesc = $('<td class="mtrcls">').text(uniqueDetails[key].mtr_desc);
+                    newRow.append(mtrdesc);
+
+                    var uom = $('<td>').text(uniqueDetails[key].mtr_uom);
+
+                    var mtrqty = $('<td class="mtqty">').text(uniqueDetails[key].mtr_qty);
+                    var lineitem = $('<td hidden class="lineitem">').text(uniqueDetails[key].line_item);
+                    var fprice = $('<td class="fprice">').text("");
+                    var ftotal = $('<td class="ftotal">').text("");
+                    var fduration = $('<td hidden class="fduration">').text("");
+                    var ftransporation = $('<td hidden class="ftrans">').text("");
+                    var fdate = $('<td hidden class="fdate">').text("");
+                    var fadvancedpayment = $('<td hidden class="fadvancedpayment">').text("");
+                    // var fline_itm = $('<td hidden class="flineitem">').text("");
+
+                    var sprice = $('<td class="sprice">').text("");
+                    var stotal = $('<td class="stotal">').text("");
+                    var sduration = $('<td hidden class="sduration">').text("");
+                    var stransporation = $('<td hidden class="strans">').text("");
+                    var sdate = $('<td hidden class="sdate">').text("");
+                    var sadvancedpayment = $('<td hidden class="sadvancedpayment">').text("");
+                    // var sline_itm = $('<td hidden class="slineitem">').text("");
+
+                    var thprice = $('<td class="thprice">').text("");
+                    var thtotal = $('<td class="thtotal">').text("");
+                    var thduration = $('<td hidden class="thduration">').text("");
+                    var thtransporation = $('<td hidden class="thtrans">').text("");
+                    var thdate = $('<td hidden class="thdate">').text("");
+                    var thadvancedpayment = $('<td hidden class="thadvancedpayment">').text("");
+                    // var thline_itm = $('<td hidden class="thlineitem">').text("");
+
+
+                    // Append the new <td> elements to the new row
+                    newRow.append(lineitem, mtrdesc, uom, mtrqty, fprice, ftotal, fduration, fdate, fadvancedpayment, ftransporation, sprice, stotal, sduration, sdate, sadvancedpayment, stransporation, thprice, thtotal, thduration, thdate, thadvancedpayment, thtransporation);
+                    // Append the new row to the table
+                    // Append the new row after the last inserted row
+                    lastInsertedRow.after(newRow);
+
+                    // Update the last inserted row reference
+                    lastInsertedRow = newRow;
+                }
+
+
+                var headersRow = document.getElementById("headers");
+
+                // console.log(unitPriceIndexes);
+
+                var actualdataCount = $('.actualdata').length;
+
+
+                $('#vendornameList th .vendorHname').each(function (index) {
+                    var vendorName = $(this).text(); // Get the vendor name
+
+                    for (var i = 0; i < actualdataCount; i++) {
+                        var currentRow = $('.actualdata').eq(i); // Get the current row
+
+                        var mtrDesc = currentRow.find('.mtrcls').text().trim();
+                        var qty = currentRow.find('.mtqty').text().trim();
+                        var line = currentRow.find('.lineitem').text().trim();
+                        var vendorPrice = ''; // Initialize the price as empty string
+
+                        dataprice.forEach(function (vendor) {
+                            if (vendor.fname === vendorName && vendor.mtr_desc.trim() === mtrDesc && vendor.mtr_qty === qty && index == 0 && vendor.line_item === line) {
+                                vendorPrice = vendor.price; // Assign the price
+                                // console.log(vendorPrice);
+                                $('#acceptofferone').val(vendor.userid);
+                                // Get the cell under the "Unit Price" column
+                                var unitPriceCell = currentRow.find('.fprice');
+                                var fqty = currentRow.find('.mtqty').text().trim();
+                                var firsttotal = currentRow.find('.ftotal');
+                                var firstduration = currentRow.find('.fduration');
+                                var firsttrans = currentRow.find('.ftrans');
+                                var fdate = currentRow.find('.fdate');
+                                var fadvancedpayment = currentRow.find('.fadvancedpayment');
+
+                                // Update the content of the cell
+                                unitPriceCell.text(vendorPrice);
+                                firsttotal.text(vendorPrice * fqty);
+                                firstduration.text(vendor.duration_days);
+                                fdate.text(vendor.delivery_date);
+                                fadvancedpayment.text(vendor.advanced_payment);
+                                firsttrans.text(vendor.transportation);
+                            }
+
+                            if (vendor.fname === vendorName && vendor.mtr_desc.trim() === mtrDesc && vendor.mtr_qty === qty && index == 1 && vendor.line_item === line) {
+                                vendorPrice = vendor.price; // Assign the price
+
+                                // Get the cell under the "Unit Price" column
+                                var unitPriceCell = currentRow.find('.sprice');
+                                var fqty = currentRow.find('.mtqty').text().trim();
+                                var secondtotal = currentRow.find('.stotal');
+                                $('#acceptoffertwo').val(vendor.userid);
+                                var sduration = currentRow.find('.sduration');
+                                var strans = currentRow.find('.strans');
+                                var sdate = currentRow.find('.sdate');
+                                var sadvancedpayment = currentRow.find('.sadvancedpayment');
+                                // Update the content of the cell
+                                unitPriceCell.text(vendorPrice);
+                                secondtotal.text(vendorPrice * fqty);
+                                sduration.text(vendor.duration_days);
+                                sdate.text(vendor.delivery_date);
+                                sadvancedpayment.text(vendor.advanced_payment);
+                                strans.text(vendor.transportation);
+                                // Break the loop since we found the price
+                            }
+
+                            if (vendor.fname === vendorName && vendor.mtr_desc.trim() === mtrDesc && vendor.mtr_qty === qty && index == 2 && vendor.line_item === line) {
+                                vendorPrice = vendor.price; // Assign the price
+
+                                // Get the cell under the "Unit Price" column
+                                var unitPriceCell = currentRow.find('.thprice');
+                                var fqty = currentRow.find('.mtqty').text().trim();
+                                var thirtdtotal = currentRow.find('.thtotal');
+                                $('#acceptofferthree').val(vendor.userid);
+                                var thduration = currentRow.find('.thduration');
+                                var thtrans = currentRow.find('.thtrans');
+                                var thdate = currentRow.find('.thdate');
+                                var thadvancedpayment = currentRow.find('.thadvancedpayment');
+                                // Update the content of the cell
+                                unitPriceCell.text(vendorPrice);
+                                thirtdtotal.text(vendorPrice * fqty);
+                                thduration.text(vendor.duration_days);
+                                thdate.text(vendor.delivery_date);
+                                thadvancedpayment.text(vendor.advanced_payment);
+                                thtrans.text(vendor.transportation);
+                                // Break the loop since we found the price
+                            }
+                        });
+                    }
+                });
+
+                var val1 = 0;
+                $(".ftotal").each(function () {
+                    val1 += parseInt($(this).text());
+                });
+                if (isNaN(val1)) {
+                    $('#fgrandtotal').text('');
+                }
+                else {
+                    $('#fgrandtotal').text(val1);
+                }
+
+                var val2 = 0;
+                $(".stotal").each(function () {
+                    val2 += parseInt($(this).text());
+                });
+
+                if (isNaN(val2)) {
+                    $('#sgrandtotal').text('');
+                }
+                else{
+                    $('#sgrandtotal').text(val2);
+                }
+
+              
+                var val3 = 0;
+                $(".thtotal").each(function () {
+                    val3 += parseInt($(this).text());
+                });
+                if (isNaN(val3)) {
+
+                    $('#thgrandtotal').text('');
+                }
+                else {
+                    $('#thgrandtotal').text(val3);
+                }
+
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+        // let cont = $('.ftotal');
+
+        // cont.each(function () {
+        //     let textCont = $(this).text();
+            
+        // });
+
+      
+    });
+
+
+    $(document).ready(function () {
+        $('#acceptofferone').on('click', function () {
+            var usevalue = $(this).val();
+
+            var confirmBidding = confirm("Are you sure to accept this offer?");
+
+            if (confirmBidding) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/Bidding/AcceptBidding',
+                    data: {
+                        pkg_id: pkg_header_id,
+                        user_id: usevalue
+                    },
+                    success: function (response) {
+                        if (response === 1) {
+                            alert("You Accepted this Offer");
+                            location.reload();
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert('Error: ' + errorThrown);
+                    }
+                });
+            }
+        });
+    });
+
+
+    $(document).ready(function () {
+        $('#acceptoffertwo').on('click', function () {
+            var usevalue = $(this).val();
+
+            var confirmBidding = confirm("Are you sure to accept this offer?");
+
+            if (confirmBidding) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/Bidding/AcceptBidding',
+                    data: {
+                        pkg_id: pkg_header_id,
+                        user_id: usevalue
+                    },
+                    success: function (response) {
+                        if (response === 1) {
+                            alert("You Accepted this Offer");
+                            location.reload();
+
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert('Error: ' + errorThrown);
+                    }
+                });
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        $('#acceptofferthree').on('click', function () {
+            var usevalue = $(this).val();
+
+            var confirmBidding = confirm("Are you sure to accept this offer?");
+
+            if (confirmBidding) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/Bidding/AcceptBidding',
+                    data: {
+                        pkg_id: pkg_header_id,
+                        user_id: usevalue
+                    },
+                    success: function (response) {
+                        if (response === 1) {
+                            alert("You Accepted this Offer");
+                            location.reload();
+
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert('Error: ' + errorThrown);
+                    }
+                });
+            }
+        });
+    });
+
+    document.getElementById('exporttoExcl').addEventListener('click', function () {
+        exportToExcel();
+    });
+
+    function exportToExcel() {
+        // Get reference to the table
+        var originalTable = document.getElementById('shortlisted');
+
+        // Create a copy of the table
+        var tableCopy = originalTable.cloneNode(true);
+
+        // Remove elements with the class 'vendor-offer'
+        var elementsToRemove = tableCopy.querySelectorAll('.vendor-offer');
+        elementsToRemove.forEach(function (element) {
+            element.parentNode.removeChild(element);
+        });
+
+        // Include hidden elements by temporarily removing the hidden attribute
+        var hiddenElements = tableCopy.querySelectorAll('[hidden]');
+        hiddenElements.forEach(function (element) {
+            element.removeAttribute('hidden');
+        });
+
+        // Adjust the header cells to span the correct number of columns for export
+        var headerCells = tableCopy.querySelectorAll('th .vendorHname');
+        headerCells.forEach(function (headerCell) {
+            var th = headerCell.parentElement;  // Get the parent <th> element
+            th.setAttribute('colspan', 6);
+        });
+
+        var grandTotalCells = tableCopy.querySelectorAll('th#fgrandtotal, th#sgrandtotal, th#thgrandtotal');
+        grandTotalCells.forEach(function (cell) {
+            cell.setAttribute('colspan', 6);
+        });
+
+        // Convert the modified table to workbook
+        var wb = XLSX.utils.table_to_book(tableCopy, { sheet: "Sheet1" });
+
+        // Save workbook to file
+        XLSX.writeFile(wb, 'shortListed_vendors_exported_data.xlsx');
+    }
+
+</script>

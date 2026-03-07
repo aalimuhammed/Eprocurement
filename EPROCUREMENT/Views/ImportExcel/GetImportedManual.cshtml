@@ -1,0 +1,688 @@
+﻿@model IEnumerable<EPROCUREMENT.SapResponse.PackagesResponse>;
+
+<style>
+    .highlighted {
+        background-color: #ffff99; /* or any other color */
+    }
+</style>
+
+<h2></h2>
+
+<!-- Custom Modal -->
+<div class="modal fade" id="customAlert" tabindex="-1" role="dialog" aria-labelledby="customAlertTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="customAlertTitle">Success</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="customAlertMessage" class="text-center" style="font-size: 20px;"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="alertModalLabel">Manual Assign</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" id="searchTextBox" class="form-control" placeholder="Search by Namr Or Tax-ID">
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Vendor Name</th>
+                            <th>Tax ID</th>
+                            <th>Select</th>
+                        </tr>
+                    </thead>
+                    <tbody id="searchResultsBody"></tbody>
+
+                </table>
+
+                <!-- Area to display selected values -->
+                <h4>Selected Values</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Vendor Name</th>
+                            <th>Tax ID</th>
+                            <th>Cancel</th>
+                        </tr>
+                    </thead>
+                    <tbody id="selectedValues"></tbody>
+                </table>
+
+
+                <button type="button" id="btnrelease" class="btn btn-success">Release</button>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-header">
+    <div class="row">
+        <div class="col-md-12 col-sm-12">
+            <div class="title">
+                <h4>Packages Manual Released</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pd-20 card-box mb-30">
+    <div class="clearfix">
+        <div class="pull-left">
+            <h4 class="text-blue h4">Selection Criteria</h4>
+        </div>
+    </div>
+    <form id="selectionForm">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Select Project <span style="color:red">*</span></label>
+                    <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Select Industry <span style="color:red">*</span></label>
+                    <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
+                    </select>
+                </div>
+            </div>
+
+        </div>
+
+        <br />
+        <div class="text-center">
+            <!-- This div centers its content -->
+            <button type="button" id="btnsearch" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+</div>
+
+<div class="pd-20 card-box mb-30">
+    <h6 id="pkg_name"></h6>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Package Name</th>
+            </tr>
+        </thead>
+        <tbody id="tblepkgnames">
+        </tbody>
+    </table>
+</div>
+
+<div class="clearfix mb-20">
+    <div class="pull-left">
+        <h4 class="text-blue h4">Actions</h4>
+    </div>
+    <div class="pull-right">
+        <label>
+            Upload Package File
+            <input type="file" id="FileName"/>
+        </label>
+        <button type="button" id="btnaccept" class="btn btn-success">Accept</button>
+        <button type="button" id="btnrevoke" class="btn btn-danger">Revoke</button>
+        <button type="button" id="btnmanualassign" class="btn btn-primary" data-toggle="modal" data-target="#alertModal">Manual Assign</button>
+    </div>
+</div>
+
+<div class="pd-20 card-box mb-30">
+    <h6 id="pkg_name"></h6>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">
+                    <input type="checkbox" id="selectAll"> <!-- Checkbox for selecting all rows -->
+                </th>
+                <th scope="col">Serial#</th>
+                <th scope="col">Material Description</th>
+                <th scope="col">Unit of Measure</th>
+                <th scope="col">Qty</th>
+            </tr>
+        </thead>
+        <tbody id="tblbody">
+        </tbody>
+    </table>
+</div>
+
+<script>
+    var currentPage = 1;
+    var totalPages = 1;
+
+    var pkg_id = 0;
+
+    $('#selectAll').change(function () {
+        $('.rowCheckbox').prop('checked', $(this).prop('checked'));
+        highlightRows();
+    });
+
+    // Checkbox for individual row selection
+    $('.rowCheckbox').change(function () {
+        highlightRows();
+    });
+
+    // Function to highlight selected rows
+    function highlightRows() {
+        $('.rowCheckbox:checked').closest('tr').addClass('highlighted');
+        $('.rowCheckbox:not(:checked)').closest('tr').removeClass('highlighted');
+    }
+
+    $('#tblbody').on('click', 'tr', function () {
+        highlightRows();
+    });
+
+
+
+    $(document).ready(function () {
+        $('#btnmanualassign').on('click', function () { // When the Manual Assign button is clicked
+            $('#searchTextBox').val(''); // Clear the search text box
+            $('#searchResultsBody').empty();
+            // fetchSearchResults(''); // Fetch search results with an empty search term
+        });
+
+        $('#searchTextBox').on('keyup', function (e) { // When a key is pressed in the search text box
+            if (e.keyCode === 13) { // Check if the pressed key is Enter (key code 13)
+                var searchTerm = $(this).val(); // Get the search term from the text box
+                fetchSearchResults(searchTerm); // Fetch search results
+            }
+        });
+
+        function fetchSearchResults(searchTerm) {
+            // Make an AJAX request to fetch search results
+            $.ajax({
+                type: 'GET',
+                url: '/Admin/Search',
+                data: { searchTerm: searchTerm },
+                success: function (response) {
+                    $('#searchResultsBody').empty();
+
+                    if (Array.isArray(response)) {
+                        // If response is an array, iterate through each record and append them to the table
+                        $.each(response, function (index, user) {
+                            $('#searchResultsBody').append('<tr><td>' + user.fname + '</td><td>' + user.tax_id + '</td><td><button class="btn btn-success" value="' + user.id + '">Select</button></td></tr>');
+                        });
+                    } else if (response === "No Data Found") {
+                        // If response is "No Data Found", display a message in the table
+                        $('#searchResultsBody').html('<tr><td colspan="3">No Data Found</td></tr>');
+                    } else {
+                        // If response is a single object, append it to the table
+                        $('#searchResultsBody').append('<tr><td>' + response.fname + '</td><td>' + response.tax_id + '</td><td><button class="btn btn-success" value="' + response.id + '">Select</button></td></tr>');
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        }
+
+        $(document).on('click', '#searchResultsBody button', function () {
+            var selectedRow = $(this).closest('tr');
+            selectedRow.hide();
+
+            var vendorName = $(this).closest('tr').find('td:first').text(); // Get the Vendor Name from the selected row
+            var taxId = $(this).closest('tr').find('td:eq(1)').text(); // Get the Tax ID from the selected row
+
+            var userId = selectedRow.find('.btn-success').val();
+
+            //alert(userId);
+
+            // Append the selected values to the designated area in the modal
+            $('#selectedValues').append('<tr><td>' + vendorName + '</td><td>' + taxId + '</td><td hidden><input type="hidden" class="selected" value="' + userId + '"></td><td><button class="btn btn-danger cancelBtn">Cancel</button></td></tr>');
+        });
+
+        $(document).on('click', '.cancelBtn', function () {
+            var canceledRow = $(this).closest('tr'); // Get the canceled row
+            canceledRow.remove(); // Remove the canceled row from the selected values table
+
+            var vendorName = canceledRow.find('td:first').text(); // Get the Vendor Name from the canceled row
+            var taxId = canceledRow.find('td:eq(1)').text(); // Get the Tax ID from the canceled row
+
+            // Find the corresponding row in the search results table and show it
+            $('#searchResultsBody tr').each(function () {
+                var row = $(this);
+                if (row.find('td:first').text() === vendorName && row.find('td:eq(1)').text() === taxId) {
+                    row.show(); // Show the canceled row
+                    return false; // Exit the loop after finding the row
+                }
+            });
+        });
+
+    });
+
+
+    $(document).ready(function () {
+        // $('#btnaccept, #btnrevoke, #btnmanualassign').prop('disabled', true);
+        $("input").prop('required', true);
+        // Make an AJAX request to fetch projects
+
+        $('select[name="state"]:eq(0)').append('<option value="">Please Select your Project</option>');
+        $.ajax({
+            type: 'GET', // Use GET method to fetch data
+            url: '/Project/SapProjects',
+            success: function (response) {
+                $.each(response, function (index, project) {
+                    // Append each project as an option to the select element
+                    $('select[name="state"]:eq(0)').append('<option value="' + project.proj_num + '|' + project.id + '">' + project.proj_name + '</option>');
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+        // Your existing code for handling search button click and displaying table rows goes here
+    });
+
+    $(document).ready(function () {
+        // Make an AJAX request to fetch projects
+
+        $('select[name="state"]:eq(1)').append('<option value="">Please Select your Industry</option>');
+        $.ajax({
+            type: 'GET', // Use GET method to fetch data
+            url: '/Industry/SapIndustry',
+            success: function (response) {
+                $.each(response, function (index, industry) {
+                    // Append each project as an option to the select element
+                    $('select[name="state"]:eq(1)').append('<option value="' + industry.industry_code + '|' + industry.id + '">' + industry.descr + '</option>');
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+        // Your existing code for handling search button click and displaying table rows goes here
+    });
+
+    $(document).ready(function () {
+        // Disable the three buttons initially
+        $('#btnaccept, #btnrevoke, #btnmanualassign , #FileName').prop('disabled', true);
+
+        // Function to enable or disable the buttons based on the file input and checkbox states
+        function toggleButtons() {
+            var fileNotEmpty = $('#FileName')[0].files.length > 0; // Check if file input is not empty
+            var checkboxesChecked = $('.rowCheckbox:checked').length > 0; // Check if any checkboxes are checked
+
+            // Enable or disable buttons based on conditions
+            $('#btnrevoke').prop('disabled', !checkboxesChecked);
+            $('#btnmanualassign').prop('disabled', !fileNotEmpty || checkboxesChecked);
+            $('#btnaccept').prop('disabled', !fileNotEmpty || checkboxesChecked);
+        }
+
+        $('#FileName').on('change', function () {
+            toggleButtons(); // Check button states when file input changes
+        });
+
+        // Event listener for checkbox change
+        $('#tblbody').on('change', '.rowCheckbox', function () {
+            toggleButtons(); // Check button states when checkboxes change
+        });
+    });
+
+
+
+    $(document).ready(function () {
+        $('#btnaccept').on('click', function () { // When the search button is clicked
+            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
+            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+
+            var project_name = $('select[name="state"]:eq(0) option:selected').text();
+            var industry_name = $('select[name="state"]:eq(1) option:selected').text();
+
+            var projectId = project.split('|')[1];
+            var industryId = industry.split('|')[1];
+
+
+            var formData = new FormData();
+            formData.append('file', $('#FileName')[0].files[0]); // Add the file data to formData
+            
+            formData.append('Id', pkg_id);
+
+            // Make an AJAX request to your endpoint
+            $.ajax({
+                type: 'POST',
+                url: '/ImportExcel/AcceptPackageManaual',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    if (response === 1) {
+                        // Construct the success message
+                        var successMessage = "Released ";
+                        // Set the message inside the custom modal alert
+                        $('#customAlertMessage').text(successMessage);
+                        // Trigger the custom modal alert on success
+                        $('#customAlert').modal('show');
+                        $('#tblbody').empty();
+
+                        location.reload();
+                    }
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        });
+    });
+
+
+    $(document).ready(function () {
+        $('#btnrelease').on('click', function () { // When the search button is clicked
+            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
+            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+
+            var project_name = $('select[name="state"]:eq(0) option:selected').text();
+            var industry_name = $('select[name="state"]:eq(1) option:selected').text();
+
+            var projectId = project.split('|')[1];
+            var industryId = industry.split('|')[1];
+
+            var pack_name = project_name + "/" + industry_name;
+
+            var selectedIds = [];
+
+
+            var userIds = [];
+
+            // Iterate through each row in the selectedValues table
+            $('#selectedValues tr').each(function () {
+                // Find the hidden input field with class selected-user-id in the current row
+                var userId = $(this).find('.selected').val();
+                // Add the userId to the array
+                userIds.push(userId);
+            });
+
+            var formData = new FormData();
+            formData.append('file', $('#FileName')[0].files[0]); // Add the file data to formData
+
+            //console.log(userIds);
+            $.each(userIds, function (index, rowData) {
+                formData.append('user_Id[' + index + ']', rowData);
+            });
+
+            // $.each(selectedIds, function (index, rowData) {
+            //     formData.append('Id[' + index + ']', rowData);
+            // });
+
+            formData.append('Id', pkg_id);
+
+            // Make an AJAX request to your endpoint
+            $.ajax({
+                type: 'POST',
+                url: '/ImportExcel/AssignManualUsers',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    // console.log(response);
+                    // Construct the success message
+                    var successMessage = "Created " + pack_name;
+                    // Set the message inside the custom modal alert
+                    $('#customAlertMessage').text(successMessage);
+                    // Trigger the custom modal alert on success
+                    $('#customAlert').modal('show');
+                    location.reload();
+                    
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        });
+    });
+
+
+
+    $(document).ready(function () {
+        $('#btnrevoke').on('click', function () { // When the search button is clicked
+            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
+            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+
+            var projectId = project.split('|')[1];
+            var industryId = industry.split('|')[1];
+
+            var selectedRowsData = []; // Array to hold the data of selected rows
+
+            // Iterate through each selected row
+            $('.rowCheckbox:checked').each(function () {
+                var row = $(this).closest('tr'); // Get the closest row to the checkbox
+                var rowData = {
+                    serial: row.find('td:eq(1)').text(),
+                    mat_desc: row.find('td:eq(2)').text(), 
+                    m_uom: row.find('td:eq(3)').text(), 
+                    m_qty: row.find('td:eq(4)').text(), 
+                };
+                selectedRowsData.push(rowData); // Push the row data to the array
+            });
+
+           // console.log(selectedRowsData);
+
+            // Make an AJAX request to your endpoint
+            $.ajax({
+                type: 'POST',
+                url: '/RevokedPackages/RevokeManual',
+                data: {
+                    project_id: projectId ,
+                    industry_id: industryId,
+                    selected_rows: selectedRowsData
+                },
+                success: function (response) {
+                    if (response === 1) {
+                        // alert(pack_name + "Created");
+                        // Construct the success message
+                        var successMessage = "Selected Items has been Revoked";
+                        // Set the message inside the custom modal alert
+                        $('#customAlertMessage').text(successMessage);
+                        // Trigger the custom modal alert on success
+                        $('#customAlert').modal('show');
+
+                        $('#tblbody').empty();
+                        $('#alertModal').modal('hide');
+
+                        // Empty the search results table
+                        $('#searchResultsBody').empty();
+
+                        // Empty the selected values table
+                        $('#selectedValues').empty();
+                    }
+
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        });
+    });
+
+
+
+    $(document).ready(function () {
+        // Attach change event listener to the "Select Industry" dropdown
+        var searchData = [];
+        $('select[name="state"]:eq(1)').change(function () {
+            // Retrieve the selected industry value
+            var selectedIndustry = $(this).val();
+
+
+            var industryId = selectedIndustry.split('|')[1];
+
+            // Make an AJAX request to fetch data based on the selected industry
+            $.ajax({
+                type: 'GET',
+                url: '/ServicesMaterial/GetMaterialsServices',
+                data: { industry_id: industryId },
+                success: function (response) {
+                    searchData = response;
+                    //console.log(searchData);
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+        });
+
+        function validateDropdowns() {
+            var projectSelected = $('select[name="state"]:eq(0)').val() !== '';
+            var industrySelected = $('select[name="state"]:eq(1)').val() !== '';
+
+            if (!projectSelected || !industrySelected) {
+                alert('Please select options in both dropdown lists.');
+                return false;
+            }
+
+            return true;
+        }
+
+        function validateForm() {
+            var isValid = true;
+
+            // Check if all required fields are filled in
+            $('#selectionForm :input[required]').each(function () {
+                if ($.trim($(this).val()) === '') {
+                    isValid = false;
+                    return false; // Exit the loop if any required field is empty
+                }
+            });
+
+            return isValid;
+        }
+
+
+
+        $('#btnsearch').on('click', function () { // When the search button is clicked
+
+            if (!validateDropdowns()) {
+                return;
+            }
+
+            $("input").prop('required', true);
+            if (validateForm()) {
+                var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
+                var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+
+                var projectId = project.split('|')[1];
+                var industryId = industry.split('|')[1];
+
+                $.ajax({
+                    type: 'GET',
+                    url: '/ImportExcel/GetImportedPkgs',
+                    data: {
+                        project_id: projectId,
+                        industry_id: industryId
+                    },
+                    success: function (response) {
+                        console.log(response);
+                        if (response.length === 0) {
+                            alert('No data found.');
+                            return;
+                        }
+                        $('#tblepkgnames').empty(); // Clear the table body
+
+
+                        $.each(response, function (index, row) {
+                            // Append each row to the table
+                            $('#tblepkgnames').append(
+                                '<tr>' +
+                                '<td> <a href="#" data-id="' + row.id + '">' + row.pkg_name + ' </a> </td>' +
+                                 '</tr>'
+                            );
+                        });
+                        // $('#tblbody').show(); // Show the table body
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert('Error: ' + errorThrown);
+                    }
+                });
+            }
+            else {
+                alert('Please fill in all required fields.');
+            }
+        });
+    });
+
+    $(document).on('click', '#tblepkgnames a', function () {
+        var rowId = $(this).data('id');
+        pkg_id = rowId;
+
+
+        $.ajax({
+            type: 'GET',
+            url: '/ImportExcel/GetImportedExcel',
+            data: {
+                rowId: rowId
+            },
+            success: function (response) {
+                console.log(response);
+
+                // Assuming response is an array of objects containing data for each row
+                $('#tblbody').empty(); // Clear the table body
+
+
+                $.each(response, function (index, row) {
+                    // Append each row to the table
+                    $('#tblbody').append(
+                        '<tr>' +
+                        '<td><input type="checkbox" class="rowCheckbox" value="' + row.id + '"></td>' +
+                        '<td>' + row.serial + '</td>' +
+                        '<td>' + row.mtr_desc + '</td>' +
+                        '<td>' + row.mtr_uom + '</td>' +
+                        '<td>' + row.mtr_qty + '</td>' +
+                        '</tr>'
+                    );
+                });
+
+
+                toggleFileInput();
+                // $('#tblbody').show(); // Show the table body
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+    });
+      
+
+    function formatDate(dateString) {
+        // Create a Date object from the provided date string
+        var date = new Date(dateString);
+        // Extract year, month, and day components
+        var year = date.getFullYear();
+        var month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is zero-indexed
+        var day = date.getDate().toString().padStart(2, '0');
+
+        // Concatenate components to form the formatted date string
+        var formattedDate = year + month + day;
+        return formattedDate;
+    }
+
+    function toggleFileInput() {
+        var tblbodyRows = $('#tblbody tr').length;
+        $('#FileName').prop('disabled', tblbodyRows === 0);
+    }
+
+
+</script>

@@ -1,0 +1,82 @@
+﻿
+@{
+	Layout = "_VLayout";
+}
+@model EPROCUREMENT.Models.VendorData;
+
+<body>
+
+
+					<!-- Default Basic Forms Start -->
+					<div class="pd-20 card-box mb-30">
+						<div class="clearfix">
+							<div class="pull-left">
+								<h4 class="text-blue h4">Your Personal information</h4>
+								<p class="mb-30"></p>
+							</div>
+						</div>
+						<form method="POST" class="register-form" asp-action="UpdateVendor" asp-controller="VendorLogin" enctype="multipart/form-data">
+							<div class="form-group row">
+								<label class="col-sm-12 col-md-2 col-form-label">Name</label>
+								<div class="col-sm-12 col-md-10">
+									<input class="form-control" type="text" placeholder="Your Name " asp-for="Name" value="@Model?.Name">
+								</div>
+							</div>
+							<div class="form-group row">
+								<label class="col-sm-12 col-md-2 col-form-label">Telephone</label>
+								<div class="col-sm-12 col-md-10">
+									<input class="form-control" placeholder="Your Telephone" type="text" asp-for="Telephone" value="@Model?.Telephone">
+								</div>
+							</div>
+							<div class="form-group row">
+								<label class="col-sm-12 col-md-2 col-form-label">Mobile</label>
+								<div class="col-sm-12 col-md-10">
+									<input class="form-control" placeholder="Your Mobile" type="text" asp-for="Mobile" value="@Model?.Mobile">
+								</div>
+							</div>
+
+											<div class="form-group row">
+								<label class="col-sm-12 col-md-2 col-form-label">Fax</label>
+								<div class="col-sm-12 col-md-10">
+									<input class="form-control" placeholder="Your Fax" type="text" asp-for="Fax" value="@Model?.Fax">
+								</div>
+							</div>
+							<div class="form-group row">
+								<label class="col-sm-12 col-md-2 col-form-label">Email</label>
+								<div class="col-sm-12 col-md-10">
+									<input class="form-control" placeholder="Your Email" type="email" asp-for="Email" value="@Model?.Email">
+								</div>
+							</div>
+							<div class="form-group row">
+								<label class="col-sm-12 col-md-2 col-form-label">Address</label>
+								<div class="col-sm-12 col-md-10">
+									<input class="form-control" placeholder="Your Address" type="text" asp-for="Address" value="@Model?.Address">
+								</div>
+							</div>
+							<div class="form-group row">
+								<label class="col-sm-12 col-md-2 col-form-label">SalesPerson</label>
+								<div class="col-sm-12 col-md-10">
+									<input class="form-control" placeholder="SalesPerson" type="text" asp-for="CommentsSalesPerson" value="@Model?.CommentsSalesPerson">
+								</div>
+							</div>
+
+							<div class="form-group row">
+								<label class="col-sm-12 col-md-2 col-form-label">SalesPerson Address</label>
+								<div class="col-sm-12 col-md-10">
+									<input class="form-control" placeholder="SalesPerson Address" type="text" asp-for="ExternalAddressNumberSale" value="@Model?.ExternalAddressNumberSale">
+								</div>
+							</div>
+
+
+							<div class="form-group row">
+								<label class="col-sm-12 col-md-2 col-form-label">SalesPerson Email</label>
+								<div class="col-sm-12 col-md-10">
+									<input class="form-control" placeholder="SalesPerson Email" type="email" asp-for="SalesPersonEmail" value="@Model?.SalesPersonEmail">
+								</div>
+							</div>
+							<div class="mt-5 text-center"><button class="btn btn-success profile-button" type="submit">Update</button></div>
+						</form>
+					</div>
+			
+</body>
+

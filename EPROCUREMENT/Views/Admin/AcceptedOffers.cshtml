@@ -1,0 +1,453 @@
+﻿
+<style>
+    .highlighted {
+        background-color: #ffff99; /* or any other color */
+    }
+
+</style>
+
+<h2></h2>
+
+<div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="alertModalLabel">Manual Assign</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <input type="text" id="searchTextBox" class="form-control" placeholder="Search by Namr Or Tax-ID">
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Vendor Name</th>
+                            <th>Tax ID</th>
+                            <th>Select</th>
+                        </tr>
+                    </thead>
+                    <tbody id="searchResultsBody"></tbody>
+
+                </table>
+
+                <!-- Area to display selected values -->
+                <h4>Selected Values</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Vendor Name</th>
+                            <th>Tax ID</th>
+                            <th>Cancel</th>
+                        </tr>
+                    </thead>
+                    <tbody id="selectedValues"></tbody>
+                </table>
+
+
+                <button type="button" id="btnrelease" class="btn btn-success">Release</button>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-header">
+    <div class="row">
+        <div class="col-md-12 col-sm-12">
+            <div class="title">
+                <h4>Accepted Vendors</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="pd-20 card-box mb-30">
+    <div class="clearfix">
+        <div class="pull-left">
+            <h4 class="text-blue h4">Selection Criteria</h4>
+        </div>
+    </div>
+    <form>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Select Project</label>
+                    <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Select Industry</label>
+                    <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
+                    </select>
+                </div>
+            </div>
+
+        </div>
+        <br />
+        <div class="text-center">
+            <!-- This div centers its content -->
+            <button type="button" id="btnsearch" class="btn btn-primary">Search</button>
+        </div>
+    </form>
+</div>
+
+
+
+<div class="pd-20 card-box mb-30">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Package Name</th>
+            </tr>
+        </thead>
+        <tbody id="pkgtble">
+        </tbody>
+    </table>
+</div>
+
+
+<br />
+<h3 id="vendorname"></h3>
+
+<div class="pd-20 card-box mb-30">
+<table id="shortlisted" class="table">
+    <thead>
+        <tr>
+                <th scope="col">Material Desc</th>
+                <th scope="col">UOM</th>
+                <th scope="col">QTY</th>
+                <th scope="col">Price</th>
+                <th scope="col">Total</th>
+                <th scope="col">Duration Days</th>
+                <th scope="col">Advanced Payment</th>
+                <th scope="col">Material Payment</th>
+                <th scope="col">Works Payment</th>
+                <th scope="col">Transportation</th>
+        </tr>
+      
+    </thead>
+
+    <tbody id="detailstble">
+    </tbody>
+</table>
+
+<h3 id="grandtotal"></h3>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
+
+<script>
+    var currentPage = 1;
+    var totalPages = 1;
+
+    var pkg_header_id = 0;
+
+    // Checkbox for selecting all rows
+    $('#selectAll').change(function () {
+        $('.rowCheckbox').prop('checked', $(this).prop('checked'));
+        highlightRows();
+    });
+
+    // Checkbox for individual row selection
+    $('.rowCheckbox').change(function () {
+        highlightRows();
+    });
+
+    // Function to highlight selected rows
+    function highlightRows() {
+        $('.rowCheckbox:checked').closest('tr').addClass('highlighted');
+        $('.rowCheckbox:not(:checked)').closest('tr').removeClass('highlighted');
+    }
+
+    // Highlight column when a row is clicked
+    $('.rowCheckbox').closest('tr').click(function () {
+        $(this).toggleClass('highlighted');
+    });
+
+
+    $(document).ready(function () {
+        // Make an AJAX request to fetch projects
+        $.ajax({
+            type: 'GET', // Use GET method to fetch data
+            url: '/Project/SapProjects',
+            success: function (response) {
+                $.each(response, function (index, project) {
+                    // Append each project as an option to the select element
+                    $('select[name="state"]:eq(0)').append('<option value="' + project.proj_num + '|' + project.id + '">' + project.proj_name + '</option>');
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+        // Your existing code for handling search button click and displaying table rows goes here
+    });
+
+    $(document).ready(function () {
+        // Make an AJAX request to fetch projects
+        $.ajax({
+            type: 'GET', // Use GET method to fetch data
+            url: '/Industry/SapIndustry',
+            success: function (response) {
+                $.each(response, function (index, industry) {
+                    // Append each project as an option to the select element
+                    $('select[name="state"]:eq(1)').append('<option value="' + industry.industry_code + '|' + industry.id + '">' + industry.descr + '</option>');
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+        // Your existing code for handling search button click and displaying table rows goes here
+    });
+    $(document).ready(function () {
+        $('#btnsearch').on('click', function () { // When the search button is clicked
+            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
+            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+
+            var projectId = project.split('|')[1];
+            var industryId = industry.split('|')[1];
+
+
+            // Make an AJAX request to your endpoint
+            $.ajax({
+                type: 'GET',
+                url: '/Bidding/GetAcceptedOffers',
+                data: {
+                    project_id: projectId,
+                    industry_id: industryId,
+                },
+                success: function (response) {
+                    // Assuming response is an array of objects containing data for each row
+                    $('#pkgtble').empty(); // Clear the table body
+
+                    if (response.length === 0) {
+                        alert('No data found.');
+                        return;
+                    }
+                    $.each(response, function (index, row) {
+                        // Check if bid is true, if true, add cancel button, otherwise, add empty cell
+
+                        // Append each row to the table
+                        $('#pkgtble').append(
+                            '<tr>' +
+                            '<td> <a href="#" data-id="' + row.id + '">' + row.pkg_name + ' </a> </td>' +
+                            '</tr>'
+                        );
+                    });
+                    // $('#tblbody').show(); // Show the table body
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
+                }
+            });
+
+        });
+    });
+
+    $(document).on('click', '#pkgtble a', function () {
+        var rowId = $(this).data('id');
+   
+        $('html, body').animate({ scrollTop: $(document).height() }, 'slow');
+
+        // Make an AJAX request to your endpoint
+        $.ajax({
+            type: 'GET',
+            url: '/Bidding/GetAcceptedOffersDetails',
+            data: {
+                pkg_id: rowId
+            },
+            success: function (response) {
+
+                console.log(response);
+
+                var fname = response[0].fname;
+                var filename = response[0].filename;
+                
+                console.log(fname);
+
+                $('#detailstble').empty();
+                $('#vendorname').html('Vendor Name : ' + fname + " , " +" "+ "  " +"And the Offer is :"+' <a href="#" class="vendor-offer">' + filename + '</a>');
+
+                $.each(response, function (index, row) {
+                    // Check if bid is true, if true, add cancel button, otherwise, add empty cell
+
+                    // Append each row to the table
+                    $('#detailstble').append(
+                        '<tr>' +
+                        '<td> ' + row.mtr_desc + '</td>' +
+                        '<td> ' + row.mtr_uom + '</td>' +
+                        '<td> ' + row.mtr_qty + '</td>' +
+                        '<td> ' + row.price + '</td>' +
+                        '<td class="total"> ' + (row.mtr_qty * row.price).toLocaleString() + '</td>' +
+                        '<td> ' + row.duration_days + '</td>' +
+                        '<td> ' + row.advanced_payment + '</td>' +
+                        '<td> ' + row.material_payment + '</td>' +
+                        '<td> ' + row.works_payment + '</td>' +
+                        '<td> ' + row.transportation + '</td>' +
+                        '</tr>'
+                    );
+                });
+
+                var totalSum = 0;
+                $('.total').each(function () {
+                    totalSum += parseFloat($(this).text().replace(/,/g, ''));
+                });
+
+                $('#grandtotal').text('Total : ' + totalSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+
+                $('.vendor-offer').click(function (event) {
+                    // Prevent default link behavior
+                    event.preventDefault();
+
+                    // Get the text of the clicked vendor offer
+                    var offerText = $(this).text();
+
+                    // Create a hidden iframe
+                    var iframe = $('<iframe>', {
+                        id: 'hiddenDownloader',
+                        style: 'display: none'
+                    });
+                    $('body').append(iframe);
+
+                    // Set the iframe source to the download URL
+                    $('#hiddenDownloader').attr('src', '/ReleasedPackages/DownloadBiddingFile?fileName=' + offerText);
+
+                    // Remove the iframe after download
+                    $('#hiddenDownloader').on('load', function () {
+                        $(this).remove();
+                    });
+                });
+
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error: ' + errorThrown);
+            }
+        });
+
+        // let cont = $('.ftotal');
+
+        // cont.each(function () {
+        //     let textCont = $(this).text();
+
+        // });
+
+
+    });
+
+
+    $(document).ready(function () {
+        $('#acceptofferone').on('click', function () {
+            var usevalue = $(this).val();
+
+            var confirmBidding = confirm("Are you sure to accept this offer?");
+
+            if (confirmBidding) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/Bidding/AcceptBidding',
+                    data: {
+                        pkg_id: pkg_header_id,
+                        user_id: usevalue
+                    },
+                    success: function (response) {
+                        if (response === 1) {
+                            alert("You Accepted this Offer");
+                            location.reload();
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert('Error: ' + errorThrown);
+                    }
+                });
+            }
+        });
+    });
+
+
+
+    $(document).ready(function () {
+        $('#acceptoffettwo').on('click', function () {
+            var usevalue = $(this).val();
+
+            var confirmBidding = confirm("Are you sure to accept this offer?");
+
+            if (confirmBidding) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/Bidding/AcceptBidding',
+                    data: {
+                        pkg_id: pkg_header_id,
+                        user_id: usevalue
+                    },
+                    success: function (response) {
+                        if (response === 1) {
+                            alert("You Accepted this Offer");
+                            location.reload();
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert('Error: ' + errorThrown);
+                    }
+                });
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        $('#acceptofferthree').on('click', function () {
+            var usevalue = $(this).val();
+
+            var confirmBidding = confirm("Are you sure to accept this offer?");
+
+            if (confirmBidding) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/Bidding/AcceptBidding',
+                    data: {
+                        pkg_id: pkg_header_id,
+                        user_id: usevalue
+                    },
+                    success: function (response) {
+                        if (response === 1) {
+                            alert("You Accepted this Offer");
+                            location.reload();
+
+                        }
+                    },
+                    error: function (xhr, textStatus, errorThrown) {
+                        alert('Error: ' + errorThrown);
+                    }
+                });
+            }
+        });
+    });
+
+    document.getElementById('exporttoExcl').addEventListener('click', function () {
+        exportToExcel();
+    });
+
+    function exportToExcel() {
+        // Get reference to the table
+        var table = document.getElementById('shortlisted');
+
+        // Convert table to workbook
+        var wb = XLSX.utils.table_to_book(table, { sheet: "Sheet1" });
+
+        // Save workbook to file
+        XLSX.writeFile(wb, 'shortListed_vendors_exported_data.xlsx');
+    }
+
+
+</script>

@@ -1,0 +1,74 @@
+﻿
+@model EPROCUREMENT.Models.projects;
+
+<title>Insert Project</title>
+
+<h1>Create New Project </h1>
+
+
+<div  class="pd-20 card-box mb-30" style="margin-top:20px">
+<form method="post" asp-action="createproject" asp-controller="ProjectOprations" enctype="multipart/form-data">
+	<div class="form-group row">
+		<label class="col-sm-12 col-md-2 col-form-label">Project Number</label>
+		<div class="col-sm-12 col-md-10">
+			<input class="form-control" type="text" placeholder="Project Number" asp-for="project_numb">
+		</div>
+	</div>
+	<div class="form-group row">
+		<label class="col-sm-12 col-md-2 col-form-label">Project Name </label>
+		<div class="col-sm-12 col-md-10">
+			<input class="form-control" placeholder="Project Name" type="text" asp-for="project_name">
+		</div>
+	</div>
+
+
+	<div class="form-group row">
+		<label class="col-sm-12 col-md-2 col-form-label">Area</label>
+		<div class="col-sm-12 col-md-10">
+			<select class="custom-select col-12" asp-for="area_id">
+				<option selected="">Choose...</option>
+				<option value="1">العاصمة الإدارية</option>
+				<option value="2">العالمين</option>
+				<option value="3">السعودية</option>
+				<option value="4">ليبيا</option>
+			</select>
+		</div>
+	</div>
+
+
+	  <div class="form-group row" style="margin-top:10%">
+							<label class="col-sm-12 col-md-2 col-form-label">Start Date</label>
+							<div class="col-sm-12 col-md-10">
+								 <input class="form-control" type="date"   asp-for="start_date" >
+							</div>
+							</div>
+
+							  <div class="form-group row" style="margin-top:10%">
+							<label class="col-sm-12 col-md-2 col-form-label">End Date</label>
+							<div class="col-sm-12 col-md-10">
+								 <input class="form-control" type="date" value="" asp-for="end_date">
+                            
+							</div>
+							</div>
+
+		<div class="form-group row">
+		<label class="col-sm-12 col-md-2 col-form-label">Status</label>
+		<div class="col-sm-12 col-md-10">
+			<select class="custom-select col-12" asp-for="status" required>
+				<option selected="">Choose...</option>
+				<option value="0">Tendering</option>
+				<option value="1">Awarded</option>
+				
+			</select>
+		</div>
+	</div>
+
+
+		<button type="submit" class="btn btn-outline-primary">Save</button>
+
+</form>
+
+</div>
+
+
+

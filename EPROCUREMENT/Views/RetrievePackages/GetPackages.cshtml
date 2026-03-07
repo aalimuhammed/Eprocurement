@@ -1,0 +1,145 @@
+﻿@model IEnumerable<EPROCUREMENT.ViewModel.ProjectPackageViewModel>
+
+
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.21.0/slimselect.css'>
+
+    <button class="btn btn-success" id="btnadd">Add New Package</button>
+
+
+
+ <table id="PackageGrid" class="table table-striped">
+                                                <thead>
+                                                      <tr>
+                                                            <th scope="col">BOQ Standards</th>
+                                                           
+                                                            <th scope="col">NO. of packages</th>
+
+                                                             <th scope="col">Details</th>
+
+                                                          
+                                                      </tr>
+                                                </thead>
+
+                                          <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+ 
+                                      <td hidden>
+                                         @item.chaptr_id
+                                    </td>
+
+                                       <td>
+                                        @Html.DisplayFor(modelItem => item.BOQ_Standard)
+                                       </td>
+
+                                 
+
+                                    
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.package_no)
+                                    </td>
+
+
+                                    <td>
+                                         <a  class="details" href="javascript:;" >Details</a>
+                                    </td>
+
+
+                                   
+                    </tr>
+                }
+
+                                          </tbody>
+                                           
+                                          </table>
+
+                                         
+  <!-- Modal Insert -->
+  
+        <div id="myModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Package Details Form</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <!-- Modal Details-->
+      <div id="partialModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Package Details Form</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.21.0/slimselect.js'></script>
+   
+    <script type="text/javascript">
+        $(function () {
+             $("#btnadd").click(function () {
+               
+                $.ajax({
+                    type: "GET",
+                    url: "/AddPackage/_AddPackagePartialView",
+                    success: function (response) {
+                        $("#myModal").find(".modal-body").html(response);
+                        $("#myModal").modal('show');
+                    },
+                    failure: function (response) {
+                        alert(response.responseText);
+                    },
+                    error: function (response) {
+                        alert(response.responseText);
+                    }
+                });
+            });
+
+            $("#PackageGrid .details").click(function () {
+                var id = $(this).closest("tr").find("td").eq(0).html().trim();
+               
+               // console.log(customerId);
+                $.ajax({
+                    type: "POST",
+                    url: "/PackageDetails/_GetPackageDetails",
+                    data: { "id": id },
+                    success: function (response) {
+                        $("#partialModal").find(".modal-body").html(response);
+                        $("#partialModal").modal('show');
+                    },
+                    failure: function (response) {
+                        alert(response.responseText);
+                    },
+                    error: function (response) {
+                        alert(response.responseText);
+                    }
+                });
+            });
+        });
+    </script>

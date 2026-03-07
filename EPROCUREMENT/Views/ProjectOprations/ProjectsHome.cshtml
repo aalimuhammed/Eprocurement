@@ -1,0 +1,127 @@
+﻿
+@model IEnumerable<EPROCUREMENT.ViewModel.ProjectViewModel>;
+@{  
+	
+}
+
+<title>Data Archive</title>
+
+<h1>All SIAC Projects</h1>
+
+@if (TempData["message"] != null)
+{
+	<script>alert('@TempData["message"]');</script>
+}
+
+
+@if (TempData["Rmessage"] != null)
+{
+	<script>alert('@TempData["Rmessage"]');</script>
+}
+
+
+  <a href="@Url.Action("InsertProject" , "ProjectOprations")" class="btn btn-success" >Add New Project</a>
+
+<table class="table table-striped" style="margin-top:25px;" id="detailstble">
+	<thead>
+	  <tr>
+		<th scope="col">Project Number</th>
+		<th scope="col">Project Name</th>
+		<th scope="col">Area</th>
+		<th scope="col">Start Date</th>
+	   <th scope="col">End Date</th>
+	   <th scope="col">Status</th>
+		<th scope="col">No of Packages</th>
+		<th scope="col">Actions</th>
+		
+	
+	  </tr>
+	</thead>
+	<tbody>
+	  @foreach (var item in Model)
+				{
+					<tr>
+									 <td>
+										 <a class="text-primary" asp-controller="RetrievePackages" asp-action="GetPackages" asp-route-id="@item.id" >  @Html.DisplayFor(modelItem => item.project_numb)</a>
+									</td>
+
+									
+									  <td>
+										@Html.DisplayFor(modelItem => item.project_name)
+									</td>
+
+									
+									 <td>
+										@Html.DisplayFor(modelItem => item.area_name)
+									</td>
+
+									<td>
+										@Html.DisplayFor(modelItem => item.start_date)
+									</td>
+
+									 <td>
+										@Html.DisplayFor(modelItem => item.end_date)
+									</td>
+
+									
+
+									
+
+									<td>
+										@Html.DisplayFor(modelItem => item.status)
+									</td>
+
+
+									 <td>
+										@Html.DisplayFor(modelItem => item.CountPackage)
+									</td>
+
+									<td>
+										     <button class='fa fa-trash fa-1x delete' style='color:red' value="@item.id" ><span class='glyphicon glyphicon-trash text-danger' ></span></button> ||  <a class="	fa fa-edit" style="color:green" asp-controller="ProjectOprations" asp-action="GetProject" asp-route-id="@item.id" ></a> ||  <a class="" style="color:green" asp-controller="RetrievePackages" asp-action="GetPackages" asp-route-id="@item.id" >Manage Packages</a> 
+									</td>
+ 
+
+								
+
+									 
+					</tr>
+				}
+	</tbody>
+  </table>
+
+
+  
+       <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/slim-select/1.21.0/slimselect.js'></script>
+   
+    <script type="text/javascript">
+
+        $(document).on('click', '#detailstble .delete', function(e) 
+{ 
+     var id =$(this).val();
+   
+  
+  if(confirm("Do you really want to delete ?"))
+  {
+    $.ajax({
+        type:'Post',
+       url: "/ProjectOprations/DeleteProject",
+      data: { "id": id },
+      
+      success:function(response){
+          location.reload();
+       // alert(response);
+        //loadbuildings(project_id , tokenParam);                             
+        
+      },
+      error: function (response) {
+      alert(response.ex);
+          }
+       });
+  }
+  
+
+});
+    </script>
+   

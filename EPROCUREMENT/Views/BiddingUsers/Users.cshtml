@@ -1,0 +1,77 @@
+﻿@model IEnumerable<EPROCUREMENT.ViewModel.bidding_users_ViewModel>;
+
+<table class="table table-striped" style="margin-top:25px;">
+	<thead>
+		<tr>
+			<th scope="col">FullName</th>
+			<th scope="col">User Name</th>
+			<th scope="col">Email</th>
+			<th scope="col">Company</th>
+			<th scope="col">Category</th>
+			<th scope="col">Quotation File</th>
+			<th scope="col">Project</th>
+			<th scope="col">Package Name</th>
+			<th scope="col">Created Time</th>
+			<th scope="col">Accept Offer</th>
+			<th scope="col">Reject Offer</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in Model)
+		{
+			<tr>
+
+
+
+				<td>
+					@Html.DisplayFor(modelItem => item.FullName)
+				</td>
+
+
+				<td>
+					@Html.DisplayFor(modelItem => item.username)
+				</td>
+
+				<td>
+					@Html.DisplayFor(modelItem => item.Email)
+				</td>
+
+				<td>
+					@Html.DisplayFor(modelItem => item.Company)
+				</td>
+
+				<td>
+					@Html.DisplayFor(modelItem => item.user_category)
+				</td>
+
+				<td>
+					<a asp-controller="BiddingUsers" asp-action="DownloadOffer" asp-route-filename="@item.file_name">@Html.DisplayFor(modelItem => item.file_name)</a>
+				</td>
+
+				<td>
+					@Html.DisplayFor(modelItem => item.project_name)
+				</td>
+
+				<td>
+					@Html.DisplayFor(modelItem => item.PackageName)
+				</td>
+
+				<td>
+					@Html.DisplayFor(modelItem => item.createdTime)
+				</td>
+
+				<td>
+					<a class="fa fa-check fa-1x" style="color:green" asp-controller="BiddingUsers" asp-action="AcceptEmail" asp-route-project_name="@item.project_name" asp-route-PackageName="@item.PackageName" asp-route-id="@item.userid"></a>
+				</td>
+
+
+				<td>
+					<a class="fa fa-times fa-1x" style="color:red" asp-controller="BiddingUsers" asp-action="RefuseEmail" asp-route-project_name="@item.project_name" asp-route-PackageName="@item.PackageName" asp-route-id="@item.userid"></a>
+				</td>
+
+			</tr>
+		}
+	</tbody>
+</table>
+
+
