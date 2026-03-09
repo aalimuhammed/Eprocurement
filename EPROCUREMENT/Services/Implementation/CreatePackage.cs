@@ -174,25 +174,27 @@ namespace EPROCUREMENT.Services.Implementation
 							user_id = userId
 						}));
 
-				
 
-				await _procurementDBContext.packages_details.AddRangeAsync(packageDetails);
+                // send an email notification to the users in the user_id list
+                await _procurementDBContext.packages_details.AddRangeAsync(packageDetails);
 				returnedvalue = await _procurementDBContext.SaveChangesAsync();
 
                 var sapStatusDTOList = new List<SapStatusDTO>();
                 foreach (var row in packageDetails)
                 {
+                    var SapDTO = new SapStatusDTO
+                    {
+                        EPACKAGE = pkgName,
+                        PR = row.pr_num,
+                        industry = industryResult,
+                        ITEM = int.Parse(row.line_item),
+                        STATUS = "Manual-Released"
+                    };
 
-                    var SapDTO = new SapStatusDTO();
-                    SapDTO.EPACKAGE = pkgName;
-                    SapDTO.PR = row.pr_num;
-                    SapDTO.industry = industryResult;
-                    SapDTO.ITEM = int.Parse(row.line_item);
-                    SapDTO.STATUS = "Manual-Released";
                     sapStatusDTOList.Add(SapDTO);
-                    await SapApi.SaveToSAPAsync(SapDTO);
                 }
 
+                // save all in parallel
                 var saveTasks = sapStatusDTOList.Select(dto => SapApi.SaveToSAPAsync(dto));
                 await Task.WhenAll(saveTasks);
             }

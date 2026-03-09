@@ -71,7 +71,7 @@ namespace EPROCUREMENT.sap
             }
         }
 
-        public static async Task<bool> CreateVendorDeepInsertAsync(CreateVendorDeepInsertionDTO vendorData)
+        public static async Task<(bool Success, HttpStatusCode StatusCode)> CreateVendorDeepInsertAsync(CreateVendorDeepInsertionDTO vendorData)
         {
             string apiUrl = "http://dev-app.siac-construction.com:8000/sap/opu/odata/sap/ZEPROCURMENT_DEEP_INSERTING_V2_SRV/vendorSet";
 
@@ -125,9 +125,9 @@ namespace EPROCUREMENT.sap
         ""Fax"" : ""{vendorData.Fax?.Trim() ?? ""}"",
         ""Email"" : ""{vendorData.Email?.Trim() ?? ""}"",
         ""Address"" : """",
-        ""CommentsSalesPerson"" : ""{vendorData.CommentsSalesPerson?.Trim() ?? ""}"",
-        ""ExternalAddressNumberSale"" : ""{vendorData.ExternalAddressNumberSale?.Trim() ?? ""}"",
-        ""SalesPersonEmail"" : ""{vendorData.SalesPersonEmail?.Trim() ?? ""}"",
+        ""CommentsSalesPerson"" : ""{vendorData.KeyPersonName?.Trim() ?? ""}"",
+        ""ExternalAddressNumberSale"" : ""{vendorData.KeyPersonMobile?.Trim() ?? ""}"",
+        ""SalesPersonEmail"" : ""{vendorData.KeyPersonEmail?.Trim() ?? ""}"",
         ""BpType"" : ""{vendorData.BpType?.Trim() ?? ""}"",
         ""CrudType"" : """",
         ""NavVendorToIndustry"" : {{
@@ -142,12 +142,15 @@ namespace EPROCUREMENT.sap
 
             var response = await httpClient.PostAsync(apiUrl, content);
 
+            if( response.StatusCode == HttpStatusCode.NotFound)
+                return (false, response.StatusCode);
+
             if (response.IsSuccessStatusCode)
-                return true;
+                return (true, response.StatusCode);
 
             var error = await response.Content.ReadAsStringAsync();
             Console.WriteLine(error);
-            return false;
+            return (false, response.StatusCode);
         }
         public static async Task<bool> UpdateVendor(string tokenValue, string sessionValue , string sap_code , VendorData vendorData)
         {

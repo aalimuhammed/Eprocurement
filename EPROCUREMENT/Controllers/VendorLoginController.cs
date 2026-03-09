@@ -41,6 +41,10 @@ namespace EPROCUREMENT.Controllers
 
         public IActionResult ResetPassword()
         {
+            string errorMessage = TempData["ErrorMessage"] as string;
+
+            // Pass error message to the view
+            ViewBag.ErrorMessage = errorMessage;
             return View();
         }
 
@@ -590,9 +594,16 @@ namespace EPROCUREMENT.Controllers
         public async Task<IActionResult> SendEmailResetPasswod(ResetPasswordVendorDTO resetPasswordVendorDTO)
         {
             var user_id = await procurementDBContext.user_header
-                                                     .Where(x => x.email.Contains(resetPasswordVendorDTO.Email))
+                                                     .Where(x => x.email == resetPasswordVendorDTO.Email && 
+                                                          x.tax_id == resetPasswordVendorDTO.TaxId)
                                                      .Select(z => z.id)
                                                      .FirstOrDefaultAsync();
+
+            if (user_id ==  0)
+            {
+                TempData["ErrorMessage"] = "Your Data doesnt exist";
+                return RedirectToAction("ResetPassword");
+            }
 
             var guid = Guid.NewGuid().ToString("N").ToUpper();
 

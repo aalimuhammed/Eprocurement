@@ -7,5 +7,6 @@ namespace EPROCUREMENT.DTO
         [Required]
         [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
+        public string TaxId { get; set; }
     }
 }

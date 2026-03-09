@@ -1,0 +1,82 @@
+@{
+    Layout = "_Layout";
+}
+
+<div class="container" style="max-width:900px;margin:24px auto;padding:20px;">
+    <h2>Register New Admin</h2>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" role="alert">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" role="alert">@TempData["ErrorMessage"]</div>
+    }
+
+    <div class="card" style="padding:16px;margin-bottom:18px;">
+        <form method="post" asp-action="Register" asp-controller="Admin">
+            @Html.AntiForgeryToken()
+
+            <div style="display:flex;gap:12px;align-items:center;">
+                <input type="text" name="username" placeholder="username" required class="form-control" style="width:250px;" />
+                <button type="submit" class="btn btn-primary">Register</button>
+            </div>
+
+            <div style="margin-top:8px;font-size:0.9em;color:#666;">
+                Default password will be <strong>123456</strong>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Admins table -->
+    <div class="card" style="padding:16px;">
+        <h4>Admins</h4>
+        <table class="table table-striped" style="width:100%;border-collapse:collapse;">
+            <thead>
+                <tr>
+                    
+                    <th style="width:54%;">Username</th>
+                    <th style="width:38%;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    // get admins and start sequential row counter
+                    var admins = ViewBag.Admins as List<EPROCUREMENT.Models.siacadmin> ?? new List<EPROCUREMENT.Models.siacadmin>();
+                    var row = 1;
+                }
+                @foreach (var a in admins)
+                {
+                    <tr>
+                        <td>
+                            <!-- username input remains visible in the Username cell and is associated with the edit form via HTML5 'form' attribute -->
+                            <input type="text" id="username-@a.id" name="username" form="editForm-@a.id" value="@a.username" class="form-control" style="min-width:200px;" />
+                        </td>
+                        <td>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <form id="editForm-@a.id" method="post" asp-action="EditAdmin" asp-controller="Admin" style="display:inline-flex;gap:8px;align-items:center;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@a.id" />
+                                    <button type="submit" class="btn btn-sm btn-success">Save</button>
+                                </form>
+
+                                <form method="post" asp-action="DeleteAdmin" asp-controller="Admin" onsubmit="return confirm('Delete this admin? This cannot be undone.');" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@a.id" />
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (!admins.Any())
+        {
+            <div style="color:#666;">No admins found.</div>
+        }
+    </div>
+
+</div>

@@ -191,6 +191,7 @@
 				</div>
 			</div>
 			<div class="mt-5 text-center"><button class="btn btn-success profile-button" type="submit">Update</button></div>
+			<div class="mt-5 text-center"><a class="btn btn-danger profile-button" href="@Url.Action("VendorPackages", "ExternalUser")">Cancel</a></div>
 		</form>
 	</div>
 
@@ -269,12 +270,17 @@
             });
         });
 
-		  $('#industrydetails').on('change', function () {
-            var selectedIndustryId = $(this).val(); // Get the selected industry id
-			 var text = $('#industrydetails :selected').text();
+			$('#industrydetails').on('change', function () {
+		var selectedIndustryId = $(this).val();
+		var text = $('#industrydetails :selected').text();
 
-			  $('#selectedindustry').append("<option selected=true value="+selectedIndustryId+">"+text+"</option>");
-        });
+		// check if already exists
+		if ($('#selectedindustry option[value="' + selectedIndustryId + '"]').length === 0) {
+			$('#selectedindustry').append(
+				'<option selected value="' + selectedIndustryId + '">' + text + '</option>'
+			);
+		}
+	});
 
 		 $('.register-form').submit(function () {
 			var selectedValues = [];
@@ -290,17 +296,24 @@
 
 	$(document).ready(function () {
 		// Function to append selected values to industrySelect
-		function appendSelectedValues() {
-			var selectedValues = $('#selectedindustry').val(); // Get selected values
-			if (selectedValues) {
-				selectedValues.forEach(function (value) {
-					// Find the selected option in selectedindustry
-					var $selectedOption = $('#selectedindustry option[value="' + value + '"]');
-					// Clone and append the option to industrySelect
-					$('#industrySelect').append($selectedOption.clone().prop('selected', true));
-				});
-			}
+			function appendSelectedValues() {
+		var selectedValues = $('#selectedindustry').val();
+
+		if (selectedValues) {
+			selectedValues.forEach(function (value) {
+
+				var $selectedOption = $('#selectedindustry option[value="' + value + '"]');
+
+				// prevent duplicate
+				if ($('#industrySelect option[value="' + value + '"]').length === 0) {
+					$('#industrySelect').append(
+						$selectedOption.clone().prop('selected', true)
+					);
+				}
+
+			});
 		}
+	}
 
 		// When the Add button is clicked
 		$('#btnaddindustry').click(function () {

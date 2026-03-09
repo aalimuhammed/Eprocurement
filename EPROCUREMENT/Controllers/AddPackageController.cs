@@ -35,10 +35,5 @@ namespace EPROCUREMENT.Controllers
 
             return RedirectToAction("GetPackages", "RetrievePackages", new { id = (int)HttpContext.Session.GetInt32("projectid") });
         }
-
-
-
-
-   
     }
 }

@@ -2,13 +2,11 @@
 using EPROCUREMENT.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using System.Text.RegularExpressions;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace EPROCUREMENT.Controllers
 {
@@ -21,6 +19,7 @@ namespace EPROCUREMENT.Controllers
         {
             this.procurementDBContext = procurementDB;
         }
+
         public IActionResult Login()
         {
             return View();
@@ -30,7 +29,6 @@ namespace EPROCUREMENT.Controllers
         {
             return View();
         }
-
 
         public IActionResult ShortListed()
         {
@@ -53,21 +51,114 @@ namespace EPROCUREMENT.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(LoginModel loginModel)
+        public async Task<IActionResult> Login(LoginModel loginModel)
         {
-            var account = procurementDBContext.siac_admin.SingleOrDefault(x => x.username == loginModel.username && x.password == loginModel.password);
+            var account = await procurementDBContext.siac_admin.FirstOrDefaultAsync
+                                (x => x.username == loginModel.username
+                                && x.password == loginModel.password);
+
             if (account != null)
             {
                 HttpContext.Session.SetInt32("AdminId", account.id);
-                //return RedirectToAction("ProjectsHome", "ProjectOprations");
                 return RedirectToAction("UsersList", "User");
             }
             else
             {
-                // Login failed
                 ModelState.AddModelError("", "Invalid login attempt.");
                 return View();
             }
+        }
+
+        // GET: /Admin/Register
+        [HttpGet]
+        public async Task<IActionResult> Register()
+        {
+            var admins = await procurementDBContext.siac_admin
+                                .OrderBy(a => a.id)
+                                .ToListAsync();
+
+            ViewBag.Admins = admins;
+            return View();
+        }
+
+        // POST: /Admin/Register
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(siacadmin admin)
+        {
+            if (admin == null || string.IsNullOrWhiteSpace(admin.username))
+            {
+                TempData["ErrorMessage"] = "Username is required.";
+                return RedirectToAction("Register");
+            }
+
+            var exists = await procurementDBContext.siac_admin
+                                .AnyAsync(x => x.username == admin.username);
+            if (exists)
+            {
+                TempData["ErrorMessage"] = "Username already exists.";
+                return RedirectToAction("Register");
+            }
+
+            admin.password = "123456";
+            procurementDBContext.siac_admin.Add(admin);
+            await procurementDBContext.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Admin registered successfully. Default password is 123456.";
+            return RedirectToAction("Register");
+        }
+
+        // POST: /Admin/EditAdmin
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditAdmin(int id, string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                TempData["ErrorMessage"] = "Username is required.";
+                return RedirectToAction("Register");
+            }
+
+            var admin = await procurementDBContext.siac_admin.FindAsync(id);
+            if (admin == null)
+            {
+                TempData["ErrorMessage"] = "Admin not found.";
+                return RedirectToAction("Register");
+            }
+
+            var exists = await procurementDBContext.siac_admin
+                                .AnyAsync(x => x.username == username && x.id != id);
+            if (exists)
+            {
+                TempData["ErrorMessage"] = "Another admin already uses that username.";
+                return RedirectToAction("Register");
+            }
+
+            admin.username = username;
+            procurementDBContext.siac_admin.Update(admin);
+            await procurementDBContext.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Admin updated successfully.";
+            return RedirectToAction("Register");
+        }
+
+        // POST: /Admin/DeleteAdmin
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAdmin(int id)
+        {
+            var admin = await procurementDBContext.siac_admin.FindAsync(id);
+            if (admin == null)
+            {
+                TempData["ErrorMessage"] = "Admin not found.";
+                return RedirectToAction("Register");
+            }
+
+            procurementDBContext.siac_admin.Remove(admin);
+            await procurementDBContext.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Admin deleted.";
+            return RedirectToAction("Register");
         }
 
         [HttpGet]
@@ -78,33 +169,33 @@ namespace EPROCUREMENT.Controllers
 
             if (!string.IsNullOrEmpty(searchTerm))
             {
-                if (Regex.IsMatch(searchTerm, @"^\d{15}$")) // Check for 15-digit search term
-                {
-                    query = procurementDBContext.sap_users
-                        .Where(u => EF.Functions.Like(u.tax_id, $"%{searchTerm}%")); // Assuming id_number is the relevant field
-                }
-                else if (Regex.IsMatch(searchTerm, @"^\w{3}-\w{3}-\w{3}$"))
-                {
-                    query = procurementDBContext.sap_users
-                        .Where(u => EF.Functions.Like(u.tax_id, $"%{searchTerm}%"));
-                }
-                else
-                {
-                    query = procurementDBContext.sap_users
-                        .Where(u => EF.Functions.Like(u.fname, $"%{searchTerm}%"));
-                }
+                //if (Regex.IsMatch(searchTerm, @"^\d{15}$"))
+                //{
+                //    query = procurementDBContext.sap_users
+                //        .Where(u => EF.Functions.Like(u.tax_id, $"%{searchTerm}%"));
+                //}
+                //else if (Regex.IsMatch(searchTerm, @"^\w{3}-\w{3}-\w{3}$"))
+                //{
+                //    query = procurementDBContext.sap_users
+                //        .Where(u => EF.Functions.Like(u.tax_id, $"%{searchTerm}%"));
+                //}
+                //else
+                //{
+                //    query = procurementDBContext.sap_users
+                //        .Where(u => EF.Functions.Like(u.fname, $"%{searchTerm}%"));
+                //}
 
-                var sapUsersResult = await query.OrderBy(u => u.id).Take(10).ToListAsync();
+                //var sapUsersResult = await query.OrderBy(u => u.id).Take(10).ToListAsync();
 
-                if (sapUsersResult.Any())
-                {
-                    return Ok(sapUsersResult);
-                }
+                //if (sapUsersResult.Any())
+                //{
+                //    return Ok(sapUsersResult);
+                //}
 
-                if (Regex.IsMatch(searchTerm, @"^\d{15}$")) // Check for 15-digit search term
+                if (Regex.IsMatch(searchTerm, @"^\d{15}$"))
                 {
                     user_verifyed = procurementDBContext.user_header
-                                                .Where(u => EF.Functions.Like(u.tax_id, $"%{searchTerm}%")) // Assuming id_number is the relevant field
+                                                .Where(u => EF.Functions.Like(u.tax_id, $"%{searchTerm}%"))
                                                 .Where(h => h.verifyied == true);
                 }
                 else if (Regex.IsMatch(searchTerm, @"^\w{3}-\w{3}-\w{3}$"))
@@ -120,7 +211,10 @@ namespace EPROCUREMENT.Controllers
                                                 .Where(h => h.verifyied == true);
                 }
 
-                var userHeaderResult = await user_verifyed.OrderBy(u => u.id).Take(10).ToListAsync();
+                var userHeaderResult = await user_verifyed
+                                    .OrderBy(u => u.id)
+                                    .Take(10)
+                                    .ToListAsync();
 
                 if (userHeaderResult.Any())
                 {

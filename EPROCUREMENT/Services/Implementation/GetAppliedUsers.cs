@@ -298,6 +298,9 @@ namespace EPROCUREMENT.Services.Implementation
                             uh.fax,
                             uh.phone_two,
                             uh.SalesPersonEmail,
+                            uh.keyperson_name,
+                            uh.keyperson_mail,
+                            uh.keyperson_phone,
                             IndustryCode = si.industry_code
                         }
                     ).ToListAsync(cancellationToken);
@@ -319,6 +322,9 @@ namespace EPROCUREMENT.Services.Implementation
                                 //ExternalAddressNumberSale = first.mobile,
                                 SalesPersonEmail = first.email,
                                 //BpType = first.bp_type,
+                                KeyPersonName = first.keyperson_name,
+                                KeyPersonEmail = first.keyperson_mail,
+                                KeyPersonMobile = first.keyperson_phone,
                                 Industries = query
                                                 .Select(x => x.IndustryCode)
                                                 .Distinct()

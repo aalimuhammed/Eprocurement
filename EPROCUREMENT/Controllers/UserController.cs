@@ -1,10 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using EPROCUREMENT.Models;
-using EPROCUREMENT.sap;
+﻿using EPROCUREMENT.sap;
 using EPROCUREMENT.Services.Helper;
 using EPROCUREMENT.Services.Interfaces;
 using EPROCUREMENT.ViewModel;
@@ -12,6 +6,11 @@ using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MimeKit;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EPROCUREMENT.Controllers
 {
@@ -386,7 +385,6 @@ namespace EPROCUREMENT.Controllers
         // For SIAC ..
         public async Task<IActionResult> AcceptEmail(int id , CancellationToken cancellationToken)
         {
-           // string file_path = "D:/EProcurement/EPROCUREMENTMANAGEMENT/storage/app/public/userprofile/";
             string file_path = "/home/siacdev/Downloads/EPROCUREMENTMANAGEMENT/storage/app/public/userprofile/";
             string extractedTax = null;
             string extractedCommercial = null;
@@ -411,6 +409,15 @@ namespace EPROCUREMENT.Controllers
             if (indexCommercial != -1)
             {
                 extractedCommercial = Path.GetFileName(commercial_file);
+            }
+
+            var vendorDeepInsert = await usersActions.GetUsersForDeepInsertion(id, cancellationToken);
+            var result = await SapApi.CreateVendorDeepInsertAsync(vendorDeepInsert);
+            if(result.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                TempData["message"] = "The Vendor not exist in the SAP so cannot accept the vendor";
+
+                return RedirectToAction("UsersList", "User");
             }
 
             //var extractedTaxPath = Path.Combine(file_path, "tax", extractedTax);
@@ -446,17 +453,10 @@ namespace EPROCUREMENT.Controllers
             {
 				TempData["message"] = "Accept Mail has been sent!";
 
-                var vendorDeepInsert = await usersActions.GetUsersForDeepInsertion(id, cancellationToken);
-                await SapApi.CreateVendorDeepInsertAsync(vendorDeepInsert);
-
                 //SendToFinance(extractedTaxPath , extractedCommercialPath);
                 return RedirectToAction("UsersList", "User");
 			}
 			return RedirectToAction("UsersList", "User");
-
-			//ViewBag.Message = string.Format("Hello {0}.\\nCurrent Date and Time: {1}", "AA", DateTime.Now.ToString());
-
-			// return Ok();
 
 		}
         private void SendToFinance(string tax_file, string commercial_file)

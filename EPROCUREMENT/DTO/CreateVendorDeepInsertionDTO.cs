@@ -14,6 +14,9 @@ namespace EPROCUREMENT.DTO
         public string ExternalAddressNumberSale { get; set; }
         public string SalesPersonEmail { get; set; }
         public string BpType { get; set; }
+        public string KeyPersonName { get; set; }
+        public string KeyPersonEmail { get; set; }
+        public string KeyPersonMobile { get; set; }
 
         public List<string> Industries { get; set; }
     }
