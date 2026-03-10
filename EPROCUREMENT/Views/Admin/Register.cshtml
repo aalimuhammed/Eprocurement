@@ -19,7 +19,14 @@
             @Html.AntiForgeryToken()
 
             <div style="display:flex;gap:12px;align-items:center;">
-                <input type="text" name="username" placeholder="username" required class="form-control" style="width:250px;" />
+                <input type="email"
+                       name="username"
+                       placeholder="username@siac-construction.com"
+                       required
+                       pattern="^[a-zA-Z0-9._%+-]+@@siac-construction\.com$"
+                       title="Only emails from siac-construction.com are allowed"
+                       class="form-control"
+                       style="width:350px;" />
                 <button type="submit" class="btn btn-primary">Register</button>
             </div>
 
@@ -52,7 +59,7 @@
                     <tr>
                         <td>
                             <!-- username input remains visible in the Username cell and is associated with the edit form via HTML5 'form' attribute -->
-                            <input type="text" id="username-@a.id" name="username" form="editForm-@a.id" value="@a.username" class="form-control" style="min-width:200px;" />
+                            <input type="text" id="username-@a.id" name="username" form="editForm-@a.id" value="@a.username" class="form-control" style="min-width:350px;" />
                         </td>
                         <td>
                             <div style="display:flex;gap:8px;align-items:center;">

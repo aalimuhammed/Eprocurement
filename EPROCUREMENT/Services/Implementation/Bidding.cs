@@ -32,9 +32,6 @@ namespace EPROCUREMENT.Services.Implementation
 
 			return result;
         }
-
-		
-
 		public async Task<IQueryable<Accepted_Offers_ViewModel>> AcceptedoffersDetails(int pkg_id)
 		{
 			return await Task.Run(() => _procurementDBContext.Accepted_Offers_ViewModels.FromSqlRaw("CALL accepted_offers_report({0});", pkg_id));

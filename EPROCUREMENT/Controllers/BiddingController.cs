@@ -156,7 +156,7 @@ namespace EPROCUREMENT.Controllers
 
             var builder = new BodyBuilder();
             var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Acceptance of Offer Mail ", "e-procurement@siac-egypt.com"));
+            message.From.Add(new MailboxAddress("Acceptance of Offer Mail ", "it-solutions@siac-construction.com"));
             message.To.Add(new MailboxAddress("", userEntity.email));
             message.Subject = "Confirmation from SIAC E-Procurement";
 
@@ -167,7 +167,7 @@ namespace EPROCUREMENT.Controllers
             using (var client = new SmtpClient())
             {
                 client.Connect("smtp.office365.com", 587, false);
-                client.Authenticate("e-procurement@siac-egypt.com", "abdoali123Ali@#");
+                client.Authenticate("it-solutions@siac-construction.com", "It@siac$0L2025");
 
                 await client.SendAsync(message);
                 client.Disconnect(true);

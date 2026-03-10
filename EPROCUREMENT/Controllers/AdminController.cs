@@ -3,10 +3,11 @@ using EPROCUREMENT.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace EPROCUREMENT.Controllers
 {
@@ -91,6 +92,11 @@ namespace EPROCUREMENT.Controllers
                 TempData["ErrorMessage"] = "Username is required.";
                 return RedirectToAction("Register");
             }
+            if (!admin.username.EndsWith("@siac-construction.com", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["ErrorMessage"] = "Only siac-construction.com emails are allowed.";
+                return RedirectToAction("Register");
+            }
 
             var exists = await procurementDBContext.siac_admin
                                 .AnyAsync(x => x.username == admin.username);
@@ -113,6 +119,12 @@ namespace EPROCUREMENT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditAdmin(int id, string username)
         {
+            if (!username.EndsWith("@siac-construction.com", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["ErrorMessage"] = "Only siac-construction.com emails are allowed.";
+                return RedirectToAction("Register");
+            }
+
             if (string.IsNullOrWhiteSpace(username))
             {
                 TempData["ErrorMessage"] = "Username is required.";
