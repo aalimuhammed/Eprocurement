@@ -276,60 +276,121 @@ namespace EPROCUREMENT.Services.Implementation
                                 .CountAsync(cancellationToken);
             return vendorCount;
         }
-
         public async Task<CreateVendorDeepInsertionDTO> GetUsersForDeepInsertion(
-            int id, CancellationToken cancellationToken = default)
+    int id, CancellationToken cancellationToken = default)
         {
+            // Fetch data
             var query = await (
-                        from uh in procurementDB.user_header
-                        join ud in procurementDB.user_detail
-                            on uh.id equals ud.user_id
-                        join si in procurementDB.services_industries
-                            on ud.industries_details equals si.id
-                        where uh.id == id
-                        select new
-                        {
-                            uh.fname,
-                            uh.lname,
-                            uh.company,
-                            uh.tax_id,
-                            uh.email,
-                            uh.phone,
-                            uh.fax,
-                            uh.phone_two,
-                            uh.SalesPersonEmail,
-                            uh.keyperson_name,
-                            uh.keyperson_mail,
-                            uh.keyperson_phone,
-                            IndustryCode = si.industry_code
-                        }
-                    ).ToListAsync(cancellationToken);
+                from uh in procurementDB.user_header
+                join ud in procurementDB.user_detail on uh.id equals ud.user_id
+                join si in procurementDB.services_industries on ud.industries_details equals si.id
+                where uh.id == id
+                select new
+                {
+                    uh.fname,
+                    uh.lname,
+                    uh.company,
+                    uh.tax_id,
+                    uh.email,
+                    uh.phone,
+                    uh.fax,
+                    uh.phone_two,
+                    uh.SalesPersonEmail,
+                    uh.keyperson_name,
+                    uh.keyperson_mail,
+                    uh.keyperson_phone,
+                    uh.areas_id,
+                    uh.moneybudget,
+                    uh.iso_verifyed,
+                    uh.engineersno,
+                    uh.projectno,
+                    IndustryCode = si.industry_code
+                }
+            ).ToListAsync(cancellationToken);
 
-                            if (!query.Any())
-                                return null;
+            if (!query.Any())
+                return null;
 
-                            var first = query.First();
+            var first = query.First();
 
-                            return new CreateVendorDeepInsertionDTO
-                            {
-                                Name = first.fname + " " + first.lname,
-                                Tax_Id = first.tax_id,
-                                Email = first.email,
-                                Mobile = first.phone,
-                                Fax = first.fax,
-                                Telephone = first.phone_two,
-                                //CommentsSalesPerson = first.sale,
-                                //ExternalAddressNumberSale = first.mobile,
-                                SalesPersonEmail = first.email,
-                                //BpType = first.bp_type,
-                                KeyPersonName = first.keyperson_name,
-                                KeyPersonEmail = first.keyperson_mail,
-                                KeyPersonMobile = first.keyperson_phone,
-                                Industries = query
-                                                .Select(x => x.IndustryCode)
-                                                .Distinct()
-                                                .ToList()
-                            };
+            // Parse moneybudget safely
+            decimal moneyBudget = 0;
+            decimal.TryParse(first.moneybudget, out moneyBudget);
+
+            // Determine category using a helper method
+            string category = GetCategory(
+                first.areas_id,
+                moneyBudget,
+                first.iso_verifyed,
+               int.Parse( first.engineersno),
+               int.Parse( first.projectno)
+            );
+
+            // Map category to BbType
+            string bbType = category switch
+            {
+                "A" => "0001",
+                "B" => "0002",
+                "C" => "0003",
+                "D" => "0004",
+                _ => "0004"
+            };
+
+            return new CreateVendorDeepInsertionDTO
+            {
+                Name = $"{first.fname} {first.lname}",
+                Tax_Id = first.tax_id,
+                Email = first.email,
+                Mobile = first.phone,
+                Fax = first.fax,
+                Telephone = first.phone_two,
+                SalesPersonEmail = first.SalesPersonEmail,
+                KeyPersonName = first.keyperson_name,
+                KeyPersonEmail = first.keyperson_mail,
+                KeyPersonMobile = first.keyperson_phone,
+                BpType = bbType,
+                Industries = query.Select(x => x.IndustryCode).Distinct().ToList()
+            };
+        }
+        private string GetCategory(int? areaId, decimal moneyBudget, bool isoVerified, int engineersNo, decimal projectNo)
+        {
+            // Area 3 rules
+            if (areaId == 3)
+            {
+                if (moneyBudget >= 100_000_000 && isoVerified && engineersNo >= 6) return "A";
+                if (moneyBudget >= 30_000_000 && isoVerified  && engineersNo >= 4) return "B";
+                if (moneyBudget >= 10_000_000 && !isoVerified && engineersNo >= 3) return "C";
+                if (moneyBudget >= 300_000 && !isoVerified && engineersNo >= 1) return "D";
+
+                // fallback based on money only
+                if (moneyBudget >= 100_000_000) return "A";
+                if (moneyBudget >= 30_000_000) return "B";
+                if (moneyBudget >= 10_000_000) return "C";
+                if (moneyBudget >= 300_000) return "D";
+            }
+
+            // Area 1 rules
+            if (areaId == 1)
+            {
+                if (isoVerified)
+                {
+                    if (moneyBudget >= 6_000_000 && projectNo >= 20_000_000 && engineersNo >= 6) return "A";
+                    if (moneyBudget >= 3_000_000 && projectNo >= 10_000_000 && engineersNo >= 4) return "B";
+                }
+                else
+                {
+                    if (moneyBudget >= 1_000_000 && projectNo >= 5_000_000 && engineersNo >= 3) return "C";
+                    if (moneyBudget >= 400_000 && projectNo >= 1_000_000 && engineersNo >= 1) return "D";
+                }
+
+                // fallback based on money only
+                if (moneyBudget >= 6_000_000) return "A";
+                if (moneyBudget >= 3_000_000) return "B";
+                if (moneyBudget >= 1_000_000) return "C";
+                if (moneyBudget >= 400_000) return "D";
+            }
+
+            return "D"; // default
         }
     }
 }
