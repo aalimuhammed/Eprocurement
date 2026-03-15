@@ -491,7 +491,6 @@ namespace EPROCUREMENT.Controllers
             var ext = Path.GetExtension(path).ToLowerInvariant();
             return types[ext];
         }
-
         private Dictionary<string, string> GetMimeTypes()
         {
             return new Dictionary<string, string>

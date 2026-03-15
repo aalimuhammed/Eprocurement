@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EPROCUREMENT.Services.Implementation
@@ -219,26 +220,34 @@ namespace EPROCUREMENT.Services.Implementation
 			return await Task.Run(() => _procurementDBContext.Released_Packages_Vms.FromSqlRaw("CALL released_pkgs({0});" , pkg_id));
 		}
 
-		public async Task<List<packages_header>> GetPackages_Headers(int project_id, int industry_id)
+		public async Task<List<packages_header>> GetPackages_Headers(
+			int project_id, int industry_id , CancellationToken cancellationToken)
 		{
-			var result = await _procurementDBContext.packages_header
-				.Where(x => x.project_id == project_id &&
-				            x.cancelled != true &&
-							x.industry_id == industry_id)
-				.ToListAsync();
+            var query = _procurementDBContext.packages_header
+					   .Where(x => x.project_id == project_id &&
+								   x.cancelled != true);
 
-			return result;
-		}
+            if (industry_id > 0)
+            {
+                query = query.Where(x => x.industry_id == industry_id);
+            }
 
-        public async Task<List<packages_header>> GetPriceComparison(int project_id, int industry_id)
+            return await query.ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<packages_header>> GetPriceComparison(
+			int project_id, int industry_id , CancellationToken cancellationToken)
         {
-            var result = await _procurementDBContext.packages_header
-               .Where(x => x.project_id == project_id &&
-                           x.bid == true && 
-                           x.industry_id == industry_id)
-               .ToListAsync();
+            var query = _procurementDBContext.packages_header
+							.Where(x => x.project_id == project_id &&
+										x.bid == true);
 
-            return result;
+            if (industry_id > 0)
+            {
+                query = query.Where(x => x.industry_id == industry_id);
+            }
+
+            return await query.ToListAsync(cancellationToken);
         }
 
         public async Task<IQueryable<released_headers_vm>> GetReleased_Headers(int project_id, int industry_id)

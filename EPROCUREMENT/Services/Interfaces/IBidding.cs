@@ -3,6 +3,7 @@ using EPROCUREMENT.Models;
 using EPROCUREMENT.ViewModel;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EPROCUREMENT.Services.Interfaces
@@ -23,7 +24,8 @@ namespace EPROCUREMENT.Services.Interfaces
 
 		public Task<int> AcceptBidding(int pkg_id, int user_id);
 
-		public Task<List<packages_header>> GetAcceptedOffers(int project_id, int industry_id);
+		public Task<List<packages_header>> GetAcceptedOffers(
+			int project_id, int industry_id, CancellationToken cancellationToken = default);
 
 		public Task<IQueryable<Awarded_Packages_ViewModel>> GetAwarded_Packages(int user_id);
 

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EPROCUREMENT.Services.Implementation
@@ -46,17 +47,19 @@ namespace EPROCUREMENT.Services.Implementation
 			return result;
 		}
 
-		public async Task<List<revoked_packages>> GetRevokedPackages(int project_id, int industry_id)
+		public async Task<List<revoked_packages>> GetRevokedPackages(
+			int project_id, int? industry_id , CancellationToken cancellationToken)
 		{
-			var result  = await _procurementDBContext.revoked_packages
-				.Where(x => x.project_id == project_id && 
-				            x.industry_id == industry_id && 
-							x.cancelled != true)
-				.ToListAsync();
+            var query = _procurementDBContext.revoked_packages
+                  .Where(x => x.project_id == project_id && x.cancelled != true);
 
-			return result;
-		}
+            if (industry_id.HasValue && industry_id > 0)
+            {
+                query = query.Where(x => x.industry_id == industry_id.Value);
+            }
 
+            return await query.ToListAsync(cancellationToken);
+        }
 		public async Task<int> revokePackages(RevokingPackageDTO revokePackagesDTO)
 		{
 			int result = 0;

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EPROCUREMENT.Controllers
@@ -22,9 +23,10 @@ namespace EPROCUREMENT.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> GetReleased(int project_id , int industry_id)
+		public async Task<IActionResult> GetReleased(
+			int project_id , int industry_id , CancellationToken cancellationToken)
 		{
-			return Ok(await _releasedPackages.GetPackages_Headers(project_id, industry_id));
+			return Ok(await _releasedPackages.GetPackages_Headers(project_id, industry_id , cancellationToken));
 		}
 
 		[HttpGet]

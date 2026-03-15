@@ -310,23 +310,33 @@
         // Your existing code for handling search button click and displaying table rows goes here
     });
 
-    $(document).ready(function () {
-        // Make an AJAX request to fetch projects
+      $(document).ready(function () {
+
+        var $industrySelect = $('select[name="state"]:eq(1)');
+
+        // Add default option first
+        $industrySelect.append('<option value="0" selected>Select Industry</option>');
+
+        // Make AJAX request
         $.ajax({
-            type: 'GET', // Use GET method to fetch data
+            type: 'GET',
             url: '/Industry/SapIndustry',
             success: function (response) {
+
                 $.each(response, function (index, industry) {
-                    // Append each project as an option to the select element
-                    $('select[name="state"]:eq(1)').append('<option value="' + industry.industry_code + '|' + industry.id + '">' + industry.descr + '</option>');
+                    $industrySelect.append(
+                        '<option value="' + industry.industry_code + '|' + industry.id + '">'
+                        + industry.descr +
+                        '</option>'
+                    );
                 });
+
             },
             error: function (xhr, textStatus, errorThrown) {
                 alert('Error: ' + errorThrown);
             }
         });
 
-        // Your existing code for handling search button click and displaying table rows goes here
     });
     $(document).ready(function () {
         $('#btnsearch').on('click', function () { // When the search button is clicked

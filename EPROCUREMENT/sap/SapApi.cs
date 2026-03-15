@@ -73,7 +73,7 @@ namespace EPROCUREMENT.sap
 
         public static async Task<(bool Success, HttpStatusCode StatusCode)> CreateVendorDeepInsertAsync(CreateVendorDeepInsertionDTO vendorData)
         {
-            string apiUrl = "http://dev-app.siac-construction.com:8000/sap/opu/odata/sap/ZEPROCURMENT_DEEP_INSERTING_V2_SRV/vendorSet";
+            string apiUrl = "http://prd-app.siac-construction.com:8000/sap/opu/odata/sap/ZEPROCURMENT_DEEP_INSERTING_V2_SRV/vendorSet";
 
             var handler = new HttpClientHandler
             {
@@ -90,7 +90,7 @@ namespace EPROCUREMENT.sap
                 new MediaTypeWithQualityHeaderValue("application/json"));
 
             // Add SAP client cookie
-            handler.CookieContainer.Add(new Uri(apiUrl), new Cookie("sap-usercontext", "sap-client=110"));
+            handler.CookieContainer.Add(new Uri(apiUrl), new Cookie("sap-usercontext", "sap-client=310"));
 
             // Step 1: Fetch CSRF token (must use SAME handler / HttpClient)
             var tokenRequest = new HttpRequestMessage(HttpMethod.Get, apiUrl);

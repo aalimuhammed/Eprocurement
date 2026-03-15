@@ -1,6 +1,7 @@
 ﻿using EPROCUREMENT.DTO;
 using EPROCUREMENT.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EPROCUREMENT.Controllers
@@ -31,9 +32,11 @@ namespace EPROCUREMENT.Controllers
 		}
 
 		[HttpGet]
-		public async Task<IActionResult> GetRevokes(int project_id , int industry_id)
+		public async Task<IActionResult> GetRevokes(
+			int project_id , int industry_id , CancellationToken cancellationToken)
 		{
-			return Ok(await _revokePackages.GetRevokedPackages(project_id , industry_id));
+			return Ok(await _revokePackages.GetRevokedPackages(
+				project_id , industry_id , cancellationToken));
 		}
 
 		[HttpPost]

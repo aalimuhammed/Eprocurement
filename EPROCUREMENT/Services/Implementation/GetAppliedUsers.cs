@@ -277,7 +277,7 @@ namespace EPROCUREMENT.Services.Implementation
             return vendorCount;
         }
         public async Task<CreateVendorDeepInsertionDTO> GetUsersForDeepInsertion(
-    int id, CancellationToken cancellationToken = default)
+            int id, CancellationToken cancellationToken = default)
         {
             // Fetch data
             var query = await (

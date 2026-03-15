@@ -70,7 +70,39 @@
     }
 
     }
+
+    /* Busy overlay */
+    #busyOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255,255,255,0.7);
+        z-index: 2000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #busyOverlay .spinner-container {
+        text-align: center;
+    }
+
+    #busyOverlay .spinner-text {
+        margin-top: 0.75rem;
+        font-weight: 600;
+        color: #333;
+    }
 </style>
+
+<!-- Busy overlay (start hidden) -->
+<div id="busyOverlay" style="display:none;">
+    <div class="spinner-container">
+        <div class="spinner-border text-primary" role="status" aria-hidden="true"></div>
+        <div class="spinner-text">Please wait...</div>
+    </div>
+</div>
 
 <!-- Modal --> <div class="modal fade" id="userTypesModal" tabindex="-1" role="dialog" aria-labelledby="userTypesModalLabel" aria-hidden="true"> <div class="modal-dialog" role="document"> <div class="modal-content"> <div class="modal-header"> <h5 class="modal-title" id="userTypesModalLabel">User Details</h5> <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span> </button> </div> <div class="modal-body" id="userTypesModalContent"> <!-- Content loaded via AJAX will be placed here --> <textarea id="rejectionMsg" class="form-control d-none" rows="5" required></textarea> <br /> <button id="confirmRejection" class="btn btn-primary d-none" form="rejectionForm">Confirm</button> </div> <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> </div> </div> </div> </div> <!-- Refuse Modal --> <div class="modal fade" id="refuseModal" tabindex="-1" role="dialog" aria-labelledby="refuseModalLabel" aria-hidden="true"> <div class="modal-dialog" role="document"> <div class="modal-content"> <div class="modal-header"> <h5 class="modal-title" id="refuseModalLabel">Enter Rejection Message</h5> <button type="button" class="close" data-dismiss="modal" aria-label="Close"> <span aria-hidden="true">&times;</span> </button> </div> <div class="modal-body"> <textarea id="rejectionMsgEmail" class="form-control" rows="5" required></textarea> </div> <div class="modal-footer"> <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> <button id="confirmRejectionEmail" class="btn btn-primary">Confirm</button> </div> </div> </div> </div>
 
@@ -215,7 +247,7 @@
 
                     <td>
                         <a href="@Url.Action("AcceptEmail", "User", new { id = item.id })"
-                           class="text-success">
+                           class="text-success accept-link">
                             <i class="fa fa-check"></i>
                         </a>
                     </td>
@@ -232,6 +264,24 @@
 <!-- ================= SCRIPTS ================= -->
 <script>
     $(document).ready(function () {
+
+        function showBusy() {
+            // ensure flex layout when visible
+            $('#busyOverlay').css('display', 'flex');
+        }
+
+        function hideBusy() {
+            $('#busyOverlay').css('display', 'none');
+        }
+
+        // ensure overlay hidden on initial load (extra safety)
+        hideBusy();
+
+        // Re-enable Confirm button and clear message when refuse modal opens
+        $('#refuseModal').on('show.bs.modal', function () {
+            $('#confirmRejectionEmail').prop('disabled', false);
+            $('#rejectionMsgEmail').val('');
+        });
 
         function applyFilters() {
             var area = $('#filterArea').val().toLowerCase();
@@ -274,47 +324,86 @@
         });
 
         $('#usersTable').on('click', 'a[id^="userTypesLink_"]', function () {
-    var userId = $(this).data('id');
-    $.ajax({
-        url: '@Url.Action("UsersTypes", "User")',
-        type: 'GET',
-        data: { id: userId },
-        success: function (response) {
-            $('#userTypesModalContent').html(response);
-            $('#userTypesModal').modal('show');
-        },
-        error: function () {
-            alert('Error occurred while loading user types.');
-        }
-    });
-});
+            var userId = $(this).data('id');
+            $.ajax({
+                url: '@Url.Action("UsersTypes", "User")',
+                type: 'GET',
+                data: { id: userId },
+                success: function (response) {
+                    $('#userTypesModalContent').html(response);
+                    $('#userTypesModal').modal('show');
+                },
+                error: function () {
+                    alert('Error occurred while loading user types.');
+                }
+            });
+        });
 
-// USER INDUSTRIES MODAL
-$('#usersTable').on('click', 'a[id^="userIndustryLink_"]', function () {
-    var userId = $(this).data('id');
-    $.ajax({
-        url: '@Url.Action("UsersIndustry", "User")',
-        type: 'GET',
-        data: { id: userId },
-        success: function (response) {
-            $('#userTypesModalContent').html(response);
-            $('#userTypesModal').modal('show');
-        },
-        error: function () {
-            alert('Error occurred while loading user industries.');
-        }
-    });
-});
+        // USER INDUSTRIES MODAL
+        $('#usersTable').on('click', 'a[id^="userIndustryLink_"]', function () {
+            var userId = $(this).data('id');
+            $.ajax({
+                url: '@Url.Action("UsersIndustry", "User")',
+                type: 'GET',
+                data: { id: userId },
+                success: function (response) {
+                    $('#userTypesModalContent').html(response);
+                    $('#userTypesModal').modal('show');
+                },
+                error: function () {
+                    alert('Error occurred while loading user industries.');
+                }
+            });
+        });
 
-// REFUSE MODAL
-$('#usersTable').on('click', 'a[id^="refuseLink_"]', function () {
-    var userId = $(this).data('id');
-    $('#refuseModal').modal('show');
-    $('#confirmRejectionEmail').off('click').on('click', function () {
-        var rejectionMsg = $('#rejectionMsgEmail').val();
-        refuseUser(userId, rejectionMsg);
-    });
-});
+        // ACCEPT: show busy indicator then navigate
+        $('#usersTable').on('click', 'a.accept-link', function (e) {
+            e.preventDefault();
+            var href = $(this).attr('href');
+            showBusy();
+            // small delay to ensure overlay is visible before navigation
+            setTimeout(function () {
+                window.location.href = href;
+            }, 150);
+        });
+
+        // REFUSE MODAL
+        $('#usersTable').on('click', 'a[id^="refuseLink_"]', function () {
+            var userId = $(this).data('id');
+            $('#refuseModal').modal('show');
+            $('#confirmRejectionEmail').off('click').on('click', function () {
+                var rejectionMsg = $('#rejectionMsgEmail').val();
+                refuseUser(userId, rejectionMsg);
+            });
+        });
+
+        function refuseUser(userId, rejectionMsg) {
+            // disable confirm button and show busy indicator
+            var $btn = $('#confirmRejectionEmail');
+            $btn.prop('disabled', true);
+            showBusy();
+
+            $.ajax({
+                url: '@Url.Action("RefuseEmail", "User")', // Server endpoint to send refusal email
+                type: 'POST',
+                data: {
+                    id: userId,
+                    rejectionMsg: rejectionMsg
+                },
+                success: function(response) {
+                    hideBusy();
+                    // close modal before reload
+                    $('#refuseModal').modal('hide');
+                    alert('Rejection email sent successfully!');
+                    location.reload(); // Refresh the page after successful operation
+                },
+                error: function() {
+                    hideBusy();
+                    $btn.prop('disabled', false);
+                    alert('An error occurred while sending the rejection email.');
+                }
+            });
+        }
 
     });
 </script>

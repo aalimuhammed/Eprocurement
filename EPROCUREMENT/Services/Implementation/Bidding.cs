@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using EPROCUREMENT.DTO;
+﻿using EPROCUREMENT.DTO;
 using EPROCUREMENT.Infrastructure.Persistence;
 using EPROCUREMENT.Models;
 using EPROCUREMENT.sap;
 using EPROCUREMENT.Services.Interfaces;
 using EPROCUREMENT.ViewModel;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace EPROCUREMENT.Services.Implementation
 {
@@ -37,22 +38,33 @@ namespace EPROCUREMENT.Services.Implementation
 			return await Task.Run(() => _procurementDBContext.Accepted_Offers_ViewModels.FromSqlRaw("CALL accepted_offers_report({0});", pkg_id));
 		}
 
-		public async Task<List<packages_header>> GetAcceptedOffers(int project_id, int industry_id)
+		public async Task<List<packages_header>> GetAcceptedOffers(
+			int project_id, int industry_id , CancellationToken cancellationToken)
         {
-			//var accepted = await _procurementDBContext.accepted_offers.Select(z => z.pkg_header_id).ToListAsync();
+            //var accepted = await _procurementDBContext.accepted_offers.Select(z => z.pkg_header_id).ToListAsync();
 
-			//var pack_header = await _procurementDBContext.packages_header
-			//	                      .Where(y => y.project_id == project_id 
-			//						  && y.industry_id == industry_id
-			//						  && accepted.Contains(y.id))
-			//						  .ToListAsync();
+            //var pack_header = await _procurementDBContext.packages_header
+            //	                      .Where(y => y.project_id == project_id 
+            //						  && y.industry_id == industry_id
+            //						  && accepted.Contains(y.id))
+            //						  .ToListAsync();
 
+            var query =
+                    from ao in _procurementDBContext.accepted_offers
+                    join ph in _procurementDBContext.packages_header
+                        on ao.pkg_header_id equals ph.id
+                    where ph.project_id == project_id
+                    select ph;
 
-			var acceptedHeaders = await (from ao in _procurementDBContext.accepted_offers
-										 join ph in _procurementDBContext.packages_header on ao.pkg_header_id equals ph.id
-										 where ph.project_id == project_id && ph.industry_id == industry_id
-										 select ph).Distinct().ToListAsync();
-			return acceptedHeaders;
+            if (industry_id > 0)
+            {
+                query = query.Where(ph => ph.industry_id == industry_id);
+            }
+
+            return await query
+                .Distinct()
+				.AsNoTracking()
+                .ToListAsync(cancellationToken);
 
         }
 
@@ -65,13 +77,11 @@ namespace EPROCUREMENT.Services.Implementation
         {
             return await Task.Run(() => _procurementDBContext.Awarded_Packages_ViewModels.FromSqlRaw("CALL not_awarded_pkgs({0});", user_id));
         }
-
         public async Task<IQueryable<Rebidding_Packges_Details_ViewModel>> GetPackgesDetailsRebidded(int user_id, int pkg_id)
         {
             string sqlQuery = $"CALL rebidding_packg_details({user_id}, {pkg_id});";
             return await Task.Run(() => _procurementDBContext.Rebidding_Packges_Details_ViewModels.FromSqlRaw(sqlQuery));
         }
-
         public async Task<IQueryable<packages_rebidded>> GetPackgesForRebedding(int user_id)
         {
             return await Task.Run(() => _procurementDBContext.Packages_Rebiddeds.FromSqlRaw("CALL rebidding_packges({0});", user_id));
