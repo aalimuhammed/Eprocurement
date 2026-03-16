@@ -15,7 +15,8 @@ namespace EPROCUREMENT.Services.Interfaces
 		 Task<List<packages_header>> GetPackages_Headers
 			(int project_id, int industry_id , CancellationToken cancellationToken = default);
 
-         Task<List<packages_header>> GetAppliedPackages(int project_id, int industry_id);
+         Task<List<packages_header>> GetAppliedPackages(
+			 int project_id, int industry_id, CancellationToken cancellationToken = default);
         Task<List<packages_header>> GetPriceComparison(
 			int project_id, int industry_id , CancellationToken cancellationToken = default);
 

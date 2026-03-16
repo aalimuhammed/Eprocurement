@@ -199,20 +199,25 @@ namespace EPROCUREMENT.Services.Implementation
 
         }
 
-        public async Task<List<packages_header>> GetAppliedPackages(int project_id, int industry_id)
+        public async Task<List<packages_header>> GetAppliedPackages(
+			int project_id, 
+			int industry_id,
+			CancellationToken cancellationToken)
         {
-            var accepted_offers = await _procurementDBContext.accepted_offers
-										.Select(x => x.pkg_header_id)
-										.ToListAsync();
+            var acceptedOffersQuery = _procurementDBContext.accepted_offers
+						 .Select(x => x.pkg_header_id);
 
-            var result = await _procurementDBContext.packages_header
-                 .Where(x => x.project_id == project_id &&
-                             x.bid == true &&
-                             !accepted_offers.Contains(x.id) &&
-                             x.industry_id == industry_id)
-                 .ToListAsync();
+            var query = _procurementDBContext.packages_header
+                .Where(x => x.project_id == project_id &&
+                            x.bid == true &&
+                            !acceptedOffersQuery.Contains(x.id));
 
-            return result;
+            if (industry_id > 0)
+            {
+                query = query.Where(x => x.industry_id == industry_id);
+            }
+
+            return await query.ToListAsync(cancellationToken);
         }
 
         public async Task<IQueryable<released_packages_vm>> GetPackages_Details(int pkg_id)

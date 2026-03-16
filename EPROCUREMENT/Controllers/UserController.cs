@@ -411,14 +411,14 @@ namespace EPROCUREMENT.Controllers
                 extractedCommercial = Path.GetFileName(commercial_file);
             }
 
-            var vendorDeepInsert = await usersActions.GetUsersForDeepInsertion(id, cancellationToken);
-            var result = await SapApi.CreateVendorDeepInsertAsync(vendorDeepInsert);
-            if(result.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                TempData["message"] = "The Vendor not exist in the SAP so cannot accept the vendor";
+            //var vendorDeepInsert = await usersActions.GetUsersForDeepInsertion(id, cancellationToken);
+            //var result = await SapApi.CreateVendorDeepInsertAsync(vendorDeepInsert);
+            //if(result.StatusCode == System.Net.HttpStatusCode.NotFound)
+            //{
+            //    TempData["message"] = "The Vendor not exist in the SAP so cannot accept the vendor";
 
-                return RedirectToAction("UsersList", "User");
-            }
+            //    return RedirectToAction("UsersList", "User");
+            //}
 
             //var extractedTaxPath = Path.Combine(file_path, "tax", extractedTax);
             //var extractedCommercialPath = Path.Combine(file_path, "commercial", extractedCommercial);
