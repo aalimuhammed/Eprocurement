@@ -16,7 +16,8 @@ namespace EPROCUREMENT.Controllers
         private readonly IUsersActions _usersActions;
         private readonly IPackageHeader _packageHeader;
         private IWebHostEnvironment _environment;
-        public BiddingController(IBidding bidding , 
+        public BiddingController(
+            IBidding bidding , 
             IWebHostEnvironment environment, 
             IUsersActions usersActions , 
             IPackageHeader packageHeader)
@@ -136,7 +137,6 @@ namespace EPROCUREMENT.Controllers
             return Ok(result);
         }
 
-
         [HttpPost]
         public async Task<IActionResult> AcceptBidding(int pkg_id , int user_id)
         {
@@ -151,8 +151,8 @@ namespace EPROCUREMENT.Controllers
 
         private async Task<int> SendAnEmail(int user_id , int pkg_id)
         {
-            var userEntity = _usersActions.EmailAndFiles(user_id).Result;
-            var packgHeader = _packageHeader.GetPackagesHeaderAsync(pkg_id).Result;
+            var userEntity = await _usersActions.EmailAndFiles(user_id);
+            var packgHeader = await _packageHeader.GetPackagesHeaderAsync(pkg_id);
 
             var builder = new BodyBuilder();
             var message = new MimeMessage();

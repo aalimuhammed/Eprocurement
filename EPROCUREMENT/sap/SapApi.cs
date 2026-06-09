@@ -71,7 +71,8 @@ namespace EPROCUREMENT.sap
             }
         }
 
-        public static async Task<(bool Success, HttpStatusCode StatusCode)> CreateVendorDeepInsertAsync(CreateVendorDeepInsertionDTO vendorData)
+        public static async Task<(bool Success, HttpStatusCode StatusCode)> CreateVendorDeepInsertAsync(
+            CreateVendorDeepInsertionDTO vendorData)
         {
             string apiUrl = "http://prd-app.siac-construction.com:8000/sap/opu/odata/sap/ZEPROCURMENT_DEEP_INSERTING_V2_SRV/vendorSet";
 
@@ -116,27 +117,27 @@ namespace EPROCUREMENT.sap
                 }}"));
 
             string jsonData = $@"{{
-    ""d"" : {{
-        ""Vendor"" : """",
-        ""VendorDes"" : ""{vendorData.Name?.Trim() ?? ""}"",
-        ""SearchTerm1"" : ""{vendorData.Tax_Id?.Trim() ?? ""}"",
-        ""Telephone"" : ""{vendorData.Telephone?.Trim() ?? ""}"",
-        ""Mobile"" : ""{vendorData.Mobile?.Trim() ?? ""}"",
-        ""Fax"" : ""{vendorData.Fax?.Trim() ?? ""}"",
-        ""Email"" : ""{vendorData.Email?.Trim() ?? ""}"",
-        ""Address"" : """",
-        ""CommentsSalesPerson"" : ""{vendorData.KeyPersonName?.Trim() ?? ""}"",
-        ""ExternalAddressNumberSale"" : ""{vendorData.KeyPersonMobile?.Trim() ?? ""}"",
-        ""SalesPersonEmail"" : ""{vendorData.KeyPersonEmail?.Trim() ?? ""}"",
-        ""BpType"" : ""{vendorData.BpType?.Trim() ?? ""}"",
-        ""CrudType"" : """",
-        ""NavVendorToIndustry"" : {{
-            ""results"" : [
-               {resultsJson}
-            ]
-        }}
-    }}
-}}";
+                    ""d"" : {{
+                        ""Vendor"" : """",
+                        ""VendorDes"" : ""{vendorData.Name?.Trim() ?? ""}"",
+                        ""SearchTerm1"" : ""{vendorData.Tax_Id?.Trim() ?? ""}"",
+                        ""Telephone"" : ""{vendorData.Telephone?.Trim() ?? ""}"",
+                        ""Mobile"" : ""{vendorData.Mobile?.Trim() ?? ""}"",
+                        ""Fax"" : ""{vendorData.Fax?.Trim() ?? ""}"",
+                        ""Email"" : ""{vendorData.Email?.Trim() ?? ""}"",
+                        ""Address"" : """",
+                        ""CommentsSalesPerson"" : ""{vendorData.KeyPersonName?.Trim() ?? ""}"",
+                        ""ExternalAddressNumberSale"" : ""{vendorData.KeyPersonMobile?.Trim() ?? ""}"",
+                        ""SalesPersonEmail"" : ""{vendorData.KeyPersonEmail?.Trim() ?? ""}"",
+                        ""BpType"" : ""{vendorData.BpType?.Trim() ?? ""}"",
+                        ""CrudType"" : """",
+                        ""NavVendorToIndustry"" : {{
+                            ""results"" : [
+                               {resultsJson}
+                            ]
+                        }}
+                    }}
+                }}";
 
             var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 

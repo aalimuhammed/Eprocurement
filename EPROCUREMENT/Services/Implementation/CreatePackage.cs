@@ -14,10 +14,14 @@ namespace EPROCUREMENT.Services.Implementation
     public class CreatePackage : ICreatePackage
 	{
 		private readonly ProcurementDBContext _procurementDBContext;
+        private readonly IEmailService _emailService;
 
-		public CreatePackage(ProcurementDBContext procurementDBContext)
+        public CreatePackage(
+            ProcurementDBContext procurementDBContext , 
+            IEmailService emailService)
 		{
 			_procurementDBContext = procurementDBContext;
+            _emailService = emailService;
 		}
 
 		public async Task<int> CreateSapPackage(CreatePackageDTO createPackageDTO)
@@ -109,7 +113,6 @@ namespace EPROCUREMENT.Services.Implementation
 
 			return returnedvalue;
 		}
-
 		public async Task<int> CreateSapPackageManual(CreatePackageManualDTO createPackageManualDTO)
 		{
 			int returnedvalue = 0;
@@ -177,7 +180,7 @@ namespace EPROCUREMENT.Services.Implementation
 
                 // send an email notification to the users in the user_id list
                 await _procurementDBContext.packages_details.AddRangeAsync(packageDetails);
-				returnedvalue = await _procurementDBContext.SaveChangesAsync();
+                returnedvalue = await _procurementDBContext.SaveChangesAsync();
 
                 var sapStatusDTOList = new List<SapStatusDTO>();
                 foreach (var row in packageDetails)
@@ -197,6 +200,95 @@ namespace EPROCUREMENT.Services.Implementation
                 // save all in parallel
                 var saveTasks = sapStatusDTOList.Select(dto => SapApi.SaveToSAPAsync(dto));
                 await Task.WhenAll(saveTasks);
+
+                var userEmails = await _procurementDBContext.user_header
+                                 .Where(u => createPackageManualDTO.user_id.Contains(u.id))
+                                 .Select(u => new
+                                 {
+                                     u.id,
+                                     u.email,
+                                     u.fname,
+                                 })
+                                 .ToListAsync();
+
+                var emailTasks = userEmails.Select(user =>
+                {
+                    string subject = "SIAC New Package Assigned";
+
+                    string body = $@"
+                        <html>
+                        <body style='font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6;'>
+
+                        <!-- English Section -->
+                        <p>Dear {user.fname},</p>
+
+                        <br/>
+
+                        <p>
+                        Please be informed that a new Request for Quotation (RFQ) has been initiated by SIAC Construction Company and has been assigned to you.
+                        </p>
+
+                        <p><b>Package details are as follows:</b></p>
+
+                        <p>
+                        {pkgName}
+                        </p>
+
+                        <br/>
+
+                        <p>
+                        Kindly review the RFQ and submit your quotation accordingly.<br/>
+                        For further details, please refer to the following link:<br/>
+                        <a href='https://eproc.siac-construction.com:9443/'>
+                        https://eproc.siac-construction.com:9443/
+                        </a>
+                        </p>
+
+                        <br/><hr/><br/>
+
+                        <!-- Arabic Section -->
+                        <div style='direction: rtl; text-align: right; font-family: Arial, sans-serif;'>
+
+                        <p>السيد/ {user.fname}</p>
+
+                        <br/>
+
+                        <p>
+                        يرجى العلم بأنه تم إنشاء طلب عرض سعر (RFQ) جديد من قبل شركة سياك للإنشاءات، وقد تم إسناده إلى سيادتكم.
+                        </p>
+
+                        <p><b>تفاصيل حزمة الأعمال كما يلي:</b></p>
+
+                        <p>
+                        {pkgName}
+                        </p>
+
+                        <br/>
+
+                        <p>
+                        نرجو من سيادتكم مراجعة الطلب وتقديم عرض السعر الخاص بكم في أقرب وقت ممكن.<br/>
+                        لمزيد من التفاصيل، يرجى زيارة الرابط التالي:<br/>
+                        <a href='https://eproc.siac-construction.com:9443/'>
+                        https://eproc.siac-construction.com:9443/
+                        </a>
+                        </p>
+
+                        </div>
+
+                        <br/>
+
+                        <p>
+                        Best Regards,<br/>
+                        Procurement Team
+                        </p>
+
+                        </body>
+                        </html>";
+
+                    return _emailService.SendEmailAsync(user.email, subject, body);
+                });
+
+                await Task.WhenAll(emailTasks);
             }
 
 			return returnedvalue;

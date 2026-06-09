@@ -11,8 +11,8 @@ namespace EPROCUREMENT.Services.Implementation
 {
     public class MailService : IMailService
     {
-        private readonly MailSettings _mailSettings;
-        public MailService(IOptions<MailSettings> mailSettings)
+        private readonly EmailSettings _mailSettings;
+        public MailService(IOptions<EmailSettings> mailSettings)
         {
             _mailSettings = mailSettings.Value;
         }

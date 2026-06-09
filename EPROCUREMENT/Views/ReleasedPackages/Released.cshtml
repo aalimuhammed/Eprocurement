@@ -38,6 +38,59 @@
     </div>
 </div>
 
+<!-- Manage Users Modal -->
+<div class="modal fade" id="manageUsersModal" tabindex="-1" role="dialog" aria-labelledby="manageUsersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="manageUsersModalLabel">Manage Assigned Users</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Add User Section -->
+                <div class="mb-3">
+                    <button type="button" class="btn btn-primary btn-sm" id="btnToggleSearch">+ Add User</button>
+                </div>
+                <div id="addUserSection" style="display:none;" class="mb-3">
+                    <div class="input-group">
+                        <input type="text" id="userSearchBox" class="form-control" placeholder="Search by Tax ID or Company Name..." />
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" id="btnUserSearch">Search</button>
+                        </div>
+                    </div>
+                    <table class="table table-sm mt-2" id="userSearchResultsTable" style="display:none;">
+                        <thead>
+                            <tr>
+                                <th>Company Name</th>
+                                <th>Tax ID</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="userSearchResultsBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Assigned Users Table -->
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Company Name</th>
+                            <th>Tax ID</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assignedUsersBody"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="page-header">
     <div class="row">
         <div class="col-md-12 col-sm-12">
@@ -86,10 +139,12 @@
         <thead>
             <tr>
                 <th scope="col">PackageName</th>
+                <th scope="col">Created Time</th>
                 <th scope="col">Type</th>
                 <th scope="col">Uploaded File</th>
                 <th scope="col">Assigned By</th>
                 <th scope="col">Vendors</th>
+                <th scope="col">Actions</th>
                 <th scope="col">Status</th>
                 <th scope="col">Cancel</th>
 
@@ -251,7 +306,7 @@
                     $('#tblheader').empty(); // Clear the table body
                     $('#tbldetails').empty();
 
-                   // console.log(response);
+                   console.log(response);
 
                     $.each(response, function (index, row) {
                         var assignTypeText = '';
@@ -276,13 +331,27 @@
 
                         var vendorsListButtonHTML = row.hasUser === 'TRUE' ? '<td><button class="btn btn-success" data-id="' + row.id + '"> Vendors </button></td>' : '<td></td>';
 
+                            var actionButtonHTML = '';
+                        if (!row.bid) {
+                            actionButtonHTML = '<button class="btn btn-warning btn-sm manageUsersbtn" data-id="' + row.id + '">Action</button>';
+                        }
+                        let date = new Date(row.inserted_date);
+
+                        let formattedDate =
+                            String(date.getDate()).padStart(2, '0') + '/' +
+                            String(date.getMonth() + 1).padStart(2, '0') + '/' +
+                            date.getFullYear();
+
+
                         $('#tblheader').append(
                             '<tr>' +
                             '<td> <a class="pkgdetails" href="#" data-id="' + row.id + '">' + row.pkg_name + ' </a> </td>' +
+                            '<td>' + formattedDate + '</td>' +
                             '<td>' + assignTypeText + '</td>' +
                             '<td> <a class="fileuploaded" href="#" data-id="' + row.filename + '">' + row.filename + ' </a> </td>' +
                             '<td>' + row.admin + '</td>' +
                             vendorsListButtonHTML +
+                            '<td>' + actionButtonHTML + '</td>' +
                             '<td>' + statusText + '</td>' +
                             cancelButtonHTML +
                             '</tr>'
@@ -425,6 +494,133 @@
             $(this).remove();
         });
 
+    });
+
+        // ── Manage Users Modal ──────────────────────────────────────────────
+    var currentManagePkgId = null;
+
+    function loadAssignedUsers(pkgId) {
+        $.ajax({
+            type: 'GET',
+            url: '/ReleasedPackages/GetUserAssigned',
+            data: { pkg_id: pkgId },
+            success: function (response) {
+                $('#assignedUsersBody').empty();
+                if (Array.isArray(response) && response.length > 0) {
+                    $.each(response, function (i, user) {
+                        $('#assignedUsersBody').append(
+                            '<tr>' +
+                            '<td>' + user.companyName + '</td>' +
+                            '<td>' + user.taxId + '</td>' +
+                            '<td><button class="btn btn-danger btn-sm removeUserBtn" data-userid="' + user.userId + '">Delete</button></td>' +
+                            '</tr>'
+                        );
+                    });
+                } else {
+                    $('#assignedUsersBody').html('<tr><td colspan="3" class="text-center">No users assigned</td></tr>');
+                }
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error loading users: ' + errorThrown);
+            }
+        });
+    }
+
+    // Open modal on Action button click
+    $(document).on('click', '#tblheader .manageUsersbtn', function () {
+        currentManagePkgId = $(this).data('id');
+        $('#addUserSection').hide();
+        $('#userSearchResultsTable').hide();
+        $('#userSearchResultsBody').empty();
+        $('#userSearchBox').val('');
+        loadAssignedUsers(currentManagePkgId);
+        $('#manageUsersModal').modal('show');
+    });
+
+    // Toggle search section
+    $('#btnToggleSearch').on('click', function () {
+        $('#addUserSection').toggle();
+    });
+
+    // Search users by Tax ID or Company Name
+    $('#btnUserSearch').on('click', function () {
+        var term = $('#userSearchBox').val().trim();
+        if (!term) return;
+
+        $.ajax({
+            type: 'GET',
+            url: '/Admin/ReAssignSearch',
+            data: { searchTerm: term , pkg_id: currentManagePkgId },
+            success: function (response) {
+                $('#userSearchResultsBody').empty();
+                if (Array.isArray(response) && response.length > 0) {
+                    $.each(response, function (i, user) {
+                        $('#userSearchResultsBody').append(
+                            '<tr>' +
+                            '<td>' + (user.company || user.companyName || '') + '</td>' +
+                            '<td>' + (user.tax_id || user.taxId || '') + '</td>' +
+                            '<td><button class="btn btn-success btn-sm addUserFromSearchBtn" ' +
+                                'data-userid="' + (user.id || user.userId || '') + '" ' +
+                                'data-company="' + (user.company || user.companyName || '') + '" ' +
+                                'data-taxid="' + (user.tax_id || user.taxId || '') + '">' +
+                                'Add' +
+                            '</button></td>' +
+                            '</tr>'
+                        );
+                    });
+                    $('#userSearchResultsTable').show();
+                } else {
+                    $('#userSearchResultsBody').html('<tr><td colspan="3">No results found</td></tr>');
+                    $('#userSearchResultsTable').show();
+                }
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error searching: ' + errorThrown);
+            }
+        });
+    });
+
+    // Also trigger search on Enter key
+    $('#userSearchBox').on('keyup', function (e) {
+        if (e.keyCode === 13) $('#btnUserSearch').trigger('click');
+    });
+
+    // Add user from search results — wire this to your actual assign endpoint
+    $(document).on('click', '.addUserFromSearchBtn', function () {
+        var userId = $(this).data('userid');
+        var company = $(this).data('company');
+        var taxId = $(this).data('taxid');
+
+        // TODO: call your assign endpoint here, e.g.:
+         $.ajax({ type: 'POST', url: '/ReleasedPackages/AssignUser', data: { pkg_id: currentManagePkgId, user_id: userId }})
+
+        // Optimistically add to the assigned table
+        $('#assignedUsersBody').find('td[colspan]').remove(); // remove empty message if present
+        $('#assignedUsersBody').append(
+            '<tr>' +
+            '<td>' + company + '</td>' +
+            '<td>' + taxId + '</td>' +
+            '<td><button class="btn btn-danger btn-sm removeUserBtn" data-userid="' + userId + '">Delete</button></td>' +
+            '</tr>'
+        );
+
+        $(this).closest('tr').hide(); // hide from search results to avoid duplicate adds
+    });
+
+    // Delete assigned user — wire this to your actual remove endpoint
+    $(document).on('click', '#assignedUsersBody .removeUserBtn', function () {
+        var userId = $(this).data('userid');
+        var row = $(this).closest('tr');
+
+        if (!confirm('Remove this user from the package?')) return;
+
+        // TODO: call your remove endpoint here, e.g.:
+        $.ajax({ type: 'DELETE', url: '/ReleasedPackages/DeleteAssignedUser', data: { pkg_id: currentManagePkgId, user_id: userId }, })
+
+        row.remove();
+        if ($('#assignedUsersBody tr').length === 0) {
+            $('#assignedUsersBody').html('<tr><td colspan="3" class="text-center">No users assigned</td></tr>');
+        }
     });
 
 </script>

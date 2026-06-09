@@ -1,4 +1,5 @@
-﻿using EPROCUREMENT.Models;
+﻿using EPROCUREMENT.DTO;
+using EPROCUREMENT.Models;
 using EPROCUREMENT.ViewModel;
 using Org.BouncyCastle.Tsp;
 using System.Collections.Generic;
@@ -22,20 +23,28 @@ namespace EPROCUREMENT.Services.Interfaces
 
 	    Task<List<int>> GetVendorIndustries(int vendor_id);
 
-         Task<int> CancelReleasedPackage(int pkg_id);
+         Task<int> CancelReleasedPackage(int pkg_id , CancellationToken cancellationToken);
 
-		public Task<IQueryable<released_packages_vm>> GetPackages_Details(int pkg_id);
+		 Task<IQueryable<released_packages_vm>> GetPackages_Details(int pkg_id);
 
-		public Task<List<packages_header>> GetAllReleased(int vendor_id);
+		 Task<List<packages_header>> GetAllReleased(int vendor_id);
 
-		public Task<List<released_packages>> GetSelectedPackages(int project_id, int industry_id);
+		 Task<List<released_packages>> GetSelectedPackages(int project_id, int industry_id);
 
-		public Task<IQueryable<released_headers_vm>> GetReleased_Headers(int project_id, int industry_id);
+		 Task<IQueryable<released_headers_vm>> GetReleased_Headers(int project_id, int industry_id);
 
-		public Task<IQueryable<vendors_vms>> GetVendors(int pkg_id);
+		 Task<IQueryable<vendors_vms>> GetVendors(int pkg_id);
 
-
-
-
+		Task<List<UserAssignedDTO>> GetUserAssigned(
+			int pkg_id , 
+			CancellationToken cancellationToken = default);
+		Task<int> DeleteAssignedUser(
+			int pkg_id, 
+			int user_id, 
+			CancellationToken cancellationToken = default);
+		Task<int> AssignUserToPackage(
+			int pkg_id, 
+			int user_id, 
+			CancellationToken cancellationToken = default);
     }
 }

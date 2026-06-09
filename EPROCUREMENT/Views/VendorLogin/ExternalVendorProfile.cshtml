@@ -293,6 +293,12 @@
         });
 	});
 
+		$('#selectedindustry').on('change', function () {
+		if ($(this).val().length === 0) {
+			alert('You must have at least one Industry selected.');
+		}
+	});
+
 
 	$(document).ready(function () {
 		// Function to append selected values to industrySelect

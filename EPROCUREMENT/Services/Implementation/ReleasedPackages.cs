@@ -6,6 +6,7 @@ using EPROCUREMENT.Services.Interfaces;
 using EPROCUREMENT.ViewModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.Cmp;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -16,24 +17,36 @@ namespace EPROCUREMENT.Services.Implementation
 	public class ReleasedPackages : IReleasedPackages
 	{
 		private readonly ProcurementDBContext _procurementDBContext;
+		private readonly IEmailService _emailService;
 
-        public ReleasedPackages(ProcurementDBContext procurementDBContext)
+        public ReleasedPackages(ProcurementDBContext procurementDBContext, IEmailService emailService)
         {
 			_procurementDBContext = procurementDBContext;
+			_emailService = emailService;
         }
 
-        public async Task<int> CancelReleasedPackage(int pkg_id)
+        public async Task<int> CancelReleasedPackage(int pkg_id , CancellationToken cancellationToken)
         {
-			var pkg_header = await _procurementDBContext.packages_header.Where(x => x.id == pkg_id).FirstOrDefaultAsync();
+			var pkg_header = await _procurementDBContext.packages_header
+								.Where(x => x.id == pkg_id)
+								.FirstOrDefaultAsync(cancellationToken);
 
-			var pkg_details = await _procurementDBContext.packages_details.Where(x => x.pkg_id == pkg_id).ToListAsync();
+			var pkg_details = await _procurementDBContext.packages_details
+									.Where(x => x.pkg_id == pkg_id)
+									.ToListAsync(cancellationToken);
 
 			pkg_header.cancelled = true;
 			_procurementDBContext.Entry(pkg_header).State = EntityState.Modified;
 
-			int result =  await _procurementDBContext.SaveChangesAsync();
+			int result = await _procurementDBContext.SaveChangesAsync(cancellationToken);
+            var userIds = pkg_details.Select(x => x.user_id).Distinct();
 
-			if (result > 0)
+            var users = await _procurementDBContext.user_header
+                .Where(u => userIds.Contains(u.id))
+                .Select(u => new { u.id, u.fname, u.email })
+                .ToListAsync(cancellationToken);
+
+            if (result > 0)
 			{
 				foreach (var item in pkg_details)
 				{
@@ -46,7 +59,75 @@ namespace EPROCUREMENT.Services.Implementation
 				}
 			}
 
-			return result;
+            var emailTasks = users.Select(user =>
+            {
+                string subject = "SIAC Cancelled Package Assigned";
+
+                string body = $@"
+							<html>
+							<body style='font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6;'>
+
+							<!-- English Section -->
+							<p>Dear {user.fname},</p>
+
+							<br/>
+
+							<p>
+							Please be informed that the below Request for Quotation (RFQ) has now been cancelled.
+							</p>
+
+							<p>
+							{pkg_header.pkg_name}
+							</p>
+
+							<br/>
+
+							<p>
+							No further action is required from your side regarding this RFQ.
+							</p>
+
+							<br/><hr/><br/>
+
+							<!-- Arabic Section -->
+							<div style='direction: rtl; text-align: right; font-family: Arial, sans-serif;'>
+
+							<p>السيد/ {user.fname}</p>
+
+							<br/>
+
+							<p>
+							يرجى العلم بأنه تم إلغاء طلب عرض السعر (RFQ) الذي تم إنشاؤه سابقًا من قبل شركة سياك للإنشاءات.
+							</p>
+
+
+							<p>
+							{pkg_header.pkg_name}
+							</p>
+
+							<br/>
+
+							<p>
+							لا يلزم اتخاذ أي إجراء من جانبكم بخصوص هذا الطلب.
+							</p>
+
+							</div>
+
+							<br/>
+
+							<p>
+							Best Regards,<br/>
+							Procurement Team
+							</p>
+
+							</body>
+							</html>";
+
+                return _emailService.SendEmailAsync(user.email, subject, body);
+            });
+
+            await Task.WhenAll(emailTasks);
+
+            return result;
         }
 
         public async Task<List<packages_header>> GetAllReleased(int vendor_id)
@@ -302,7 +383,6 @@ namespace EPROCUREMENT.Services.Implementation
 
             return result;
         }
-
         public async Task<List<int>> GetVendorIndustries(int vendor_id)
         {
 			var industries = await _procurementDBContext.user_detail
@@ -321,5 +401,251 @@ namespace EPROCUREMENT.Services.Implementation
         {
             return await Task.Run(() => _procurementDBContext.Vendors_Vms.FromSqlRaw("CALL assigned_vendors({0});", pkg_id));
         }
+        public async Task<List<UserAssignedDTO>> GetUserAssigned(int pkg_id, CancellationToken cancellationToken = default)
+        {
+            var usersAssigned = await _procurementDBContext.packages_details
+								   .Where(x => x.pkg_id == pkg_id)
+								   .Join(_procurementDBContext.user_header,
+										 detail => detail.user_id,
+										 header => header.id,
+										 (detail, header) => new { detail, header })
+								   .Select(x => new UserAssignedDTO
+								   {
+									   UserId = x.header.id,
+									   TaxId = x.header.tax_id,
+									   CompanyName = x.header.company
+								   })
+								   .ToListAsync(cancellationToken);
+
+            return usersAssigned;
+        }
+        public async Task<int> DeleteAssignedUser(
+			int pkg_id, 
+			int user_id, 
+			CancellationToken cancellationToken = default)
+        {
+            var userAssigned = await _procurementDBContext.packages_details
+                                 .Where(x => x.pkg_id == pkg_id && x.user_id == user_id)
+                                 .FirstOrDefaultAsync(cancellationToken);
+			
+            if (userAssigned != null)
+            {
+                _procurementDBContext.packages_details.Remove(userAssigned);
+                await _procurementDBContext.SaveChangesAsync(cancellationToken);
+
+                var userEmails = await _procurementDBContext.user_header
+                    .Where(u => u.id == user_id)
+                    .Select(u => new
+                    {
+                        u.email,
+                        u.fname,
+                    })
+                    .ToListAsync(cancellationToken);
+
+
+                var pkgName = await _procurementDBContext.packages_header
+                                .Where(ph => ph.id == pkg_id)
+                                .Select(ph => ph.pkg_name)
+                                .FirstOrDefaultAsync(cancellationToken);
+
+                var emailTasks = userEmails.Select(user =>
+                {
+                    string subject = "SIAC Cancelled Package Assigned";
+
+                    string body = $@"
+							<html>
+							<body style='font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6;'>
+
+							<!-- English Section -->
+							<p>Dear {user.fname},</p>
+
+							<br/>
+
+							<p>
+							Please be informed that the below Request for Quotation (RFQ) has now been cancelled.
+							</p>
+
+							<p>
+							{pkgName}
+							</p>
+
+							<br/>
+
+							<p>
+							No further action is required from your side regarding this RFQ.
+							</p>
+
+							<br/><hr/><br/>
+
+							<!-- Arabic Section -->
+							<div style='direction: rtl; text-align: right; font-family: Arial, sans-serif;'>
+
+							<p>السيد/ {user.fname}</p>
+
+							<br/>
+
+							<p>
+							يرجى العلم بأنه تم إلغاء طلب عرض السعر (RFQ) الذي تم إنشاؤه سابقًا من قبل شركة سياك للإنشاءات.
+							</p>
+
+
+							<p>
+							{pkgName}
+							</p>
+
+							<br/>
+
+							<p>
+							لا يلزم اتخاذ أي إجراء من جانبكم بخصوص هذا الطلب.
+							</p>
+
+							</div>
+
+							<br/>
+
+							<p>
+							Best Regards,<br/>
+							Procurement Team
+							</p>
+
+							</body>
+							</html>";
+
+                    return _emailService.SendEmailAsync(user.email, subject, body);
+                });
+
+                await Task.WhenAll(emailTasks);
+                return 1;
+            }
+
+            return 0;
+        }
+		public async Task<int> AssignUserToPackage(
+			int pkg_id,
+			int user_id,
+			CancellationToken cancellationToken = default)
+		{
+			var packagesDetails = await _procurementDBContext.packages_details
+								 .Where(x => x.pkg_id == pkg_id)
+								 .FirstOrDefaultAsync(cancellationToken);
+
+			if (packagesDetails != null)
+			{
+				var newAssignment = new packages_details
+				{
+					pkg_id = pkg_id,
+					user_id = user_id,
+					pr_num = packagesDetails.pr_num,
+					line_item = packagesDetails.line_item,
+					pr_date = packagesDetails.pr_date,
+					mtr_code = packagesDetails.mtr_code,
+					mtr_desc = packagesDetails.mtr_desc,
+					mtr_long_desc = packagesDetails.mtr_long_desc,
+					mtr_batch = packagesDetails.mtr_batch,
+					mtr_qty = packagesDetails.mtr_qty,
+					m_grp = packagesDetails.m_grp,
+					mtr_uom = packagesDetails.mtr_uom,
+					serial = packagesDetails.serial
+                };
+
+				await _procurementDBContext.packages_details.AddAsync(newAssignment, cancellationToken);
+				await _procurementDBContext.SaveChangesAsync(cancellationToken);
+
+				var pkgName = await _procurementDBContext.packages_header
+								.Where(ph => ph.id == pkg_id)
+								.Select(ph => ph.pkg_name)
+								.FirstOrDefaultAsync(cancellationToken);
+
+                var userEmails = await _procurementDBContext.user_header
+                                .Where(u => u.id == user_id)
+                                .Select(u => new
+                                {
+                                    u.email,
+                                    u.fname,
+                                })
+                                .ToListAsync(cancellationToken);
+
+                var emailTasks = userEmails.Select(user =>
+                {
+                    string subject = "SIAC New Package Assigned";
+
+                    string body = $@"
+                        <html>
+                        <body style='font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6;'>
+
+                        <!-- English Section -->
+                        <p>Dear {user.fname},</p>
+
+                        <br/>
+
+                        <p>
+                        Please be informed that a new Request for Quotation (RFQ) has been initiated by SIAC Construction Company and has been assigned to you.
+                        </p>
+
+                        <p><b>Package details are as follows:</b></p>
+
+                        <p>
+                        {pkgName}
+                        </p>
+
+                        <br/>
+
+                        <p>
+                        Kindly review the RFQ and submit your quotation accordingly.<br/>
+                        For further details, please refer to the following link:<br/>
+                        <a href='https://eproc.siac-construction.com:9443/'>
+                        https://eproc.siac-construction.com:9443/
+                        </a>
+                        </p>
+
+                        <br/><hr/><br/>
+
+                        <!-- Arabic Section -->
+                        <div style='direction: rtl; text-align: right; font-family: Arial, sans-serif;'>
+
+                        <p>السيد/ {user.fname}</p>
+
+                        <br/>
+
+                        <p>
+                        يرجى العلم بأنه تم إنشاء طلب عرض سعر (RFQ) جديد من قبل شركة سياك للإنشاءات، وقد تم إسناده إلى سيادتكم.
+                        </p>
+
+                        <p><b>تفاصيل حزمة الأعمال كما يلي:</b></p>
+
+                        <p>
+                        {pkgName}
+                        </p>
+
+                        <br/>
+
+                        <p>
+                        نرجو من سيادتكم مراجعة الطلب وتقديم عرض السعر الخاص بكم في أقرب وقت ممكن.<br/>
+                        لمزيد من التفاصيل، يرجى زيارة الرابط التالي:<br/>
+                        <a href='https://eproc.siac-construction.com:9443/'>
+                        https://eproc.siac-construction.com:9443/
+                        </a>
+                        </p>
+
+                        </div>
+
+                        <br/>
+
+                        <p>
+                        Best Regards,<br/>
+                        Procurement Team
+                        </p>
+
+                        </body>
+                        </html>";
+
+                    return _emailService.SendEmailAsync(user.email, subject, body);
+                });
+
+                await Task.WhenAll(emailTasks);
+                return 1;
+            }
+			return 0;
+		}
     }
 }

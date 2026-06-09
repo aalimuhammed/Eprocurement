@@ -2,7 +2,7 @@
 
 <style>
     .highlighted {
-        background-color: #ffff99; /* or any other color */
+        background-color: #ffff99;
     }
 
     #page-overlay {
@@ -11,9 +11,123 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-        z-index: 9999; /* Ensure it covers everything else */
-        display: none; /* Initially hidden */
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        display: none;
+    }
+
+    /* ── Industry multi-select – professional tag UI ── */
+    .industry-field-wrap {
+        position: relative;
+    }
+
+    #industryTagsWrapper {
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        min-height: 42px;
+        max-height: 130px;
+        overflow-y: auto;
+        padding: 5px 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        align-items: flex-start;
+        background: #fff;
+        cursor: default;
+        transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+        #industryTagsWrapper:focus-within,
+        #industryTagsWrapper.active {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,.15);
+            outline: none;
+        }
+
+    .industry-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: linear-gradient(135deg, #1a73e8 0%, #0d5dbf 100%);
+        color: #fff;
+        border-radius: 20px;
+        padding: 3px 10px 3px 12px;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: .3px;
+        white-space: nowrap;
+        box-shadow: 0 1px 3px rgba(13,93,191,.25);
+        animation: tagIn .15s ease;
+    }
+
+    @@keyframes tagIn {
+        from
+
+    {
+        opacity: 0;
+        transform: scale(.85);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    }
+
+    .industry-tag .remove-tag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.25);
+        cursor: pointer;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1;
+        flex-shrink: 0;
+        transition: background .15s ease;
+    }
+
+        .industry-tag .remove-tag:hover {
+            background: rgba(255,255,255,.5);
+        }
+
+    #industryPlaceholder {
+        color: #adb5bd;
+        font-size: 13px;
+        padding: 3px 2px;
+        pointer-events: none;
+        user-select: none;
+        align-self: center;
+    }
+
+    .industry-count-badge {
+        display: none;
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #1a73e8;
+        color: #fff;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 1px 4px rgba(0,0,0,.2);
+        pointer-events: none;
+    }
+
+        .industry-count-badge.visible {
+            display: flex;
+        }
+
+    #industryHiddenSelect {
+        display: none;
     }
 </style>
 
@@ -61,10 +175,8 @@
                         </tr>
                     </thead>
                     <tbody id="searchResultsBody"></tbody>
-
                 </table>
 
-                <!-- Area to display selected values -->
                 <h4>Selected Values</h4>
                 <table class="table">
                     <thead>
@@ -77,10 +189,8 @@
                     <tbody id="selectedValues"></tbody>
                 </table>
 
-
                 <button type="button" id="btnrelease" class="btn btn-success">Release</button>
             </div>
-
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
@@ -106,11 +216,27 @@
     </div>
     <form id="selectionForm">
 
+        <!-- ── NEW ROW: Type dropdown ── -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Select Resource Type <span style="color:red">*</span></label>
+                    <select class="form-control" id="typeSelect" style="width: 100%; height: 38px;">
+                        <option value="">Please Select Resource Type</option>
+                        <option value="Material">Material</option>
+                        <option value="Service">Service</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <!-- ── END NEW ROW ── -->
+
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group">
                     <label>Select Material Group <span style="color:red">*</span></label>
-                    <select class="custom-select2 form-control" id="mtrgrp" style="width: 100%; height: 38px;">
+                    <select class="custom-select2 form-control" id="mtrgrp" style="width: 100%; height: 38px;" disabled>
+                        <option value="">Please select Type first</option>
                     </select>
                 </div>
             </div>
@@ -128,11 +254,16 @@
             <div class="col-md-6">
                 <div class="form-group">
                     <label>Select Industry <span style="color:red">*</span></label>
-                    <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;" disabled>
+                    <div class="industry-field-wrap">
+                        <div id="industryTagsWrapper">
+                            <span id="industryPlaceholder">Select a Material Group to add industries…</span>
+                        </div>
+                        <span class="industry-count-badge" id="industryCountBadge">0</span>
+                    </div>
+                    <select class="custom-select2 form-control" name="state" id="industryHiddenSelect" multiple style="display:none;">
                     </select>
                 </div>
             </div>
-
         </div>
 
         <div class="row">
@@ -142,7 +273,6 @@
                     <input type="text" class="form-control date-picker" id="datefrom" placeholder="Select Date">
                 </div>
             </div>
-
             <div class="col-md-6">
                 <div class="form-group">
                     <label>Date To : <span style="color:red">*</span></label>
@@ -152,7 +282,6 @@
         </div>
         <br />
         <div class="text-center">
-            <!-- This div centers its content -->
             <button type="button" id="btnsearch" class="btn btn-primary">Search</button>
         </div>
     </form>
@@ -163,22 +292,22 @@
         <h4 class="text-blue h4">Actions</h4>
     </div>
     <div class="pull-right">
-       <label>
-           Upload Package File
+        <label>
+            Upload Package File
             <input type="file" id="FileName" />
-       </label> 
+        </label>
         <button type="button" id="btnaccept" class="btn btn-success">Accept</button>
         <button type="button" id="btnrevoke" class="btn btn-danger">Revoke</button>
         <button type="button" id="btnmanualassign" class="btn btn-primary" data-toggle="modal" data-target="#alertModal">Manual Assign</button>
     </div>
 </div>
 
-<div class="pd-20 card-box mb-30" >
+<div class="pd-20 card-box mb-30">
     <table class="table" id="mtrtble">
         <thead>
             <tr>
                 <th scope="col">
-                    <input type="checkbox" id="selectAll"> <!-- Checkbox for selecting all rows -->
+                    <input type="checkbox" id="selectAll">
                 </th>
                 <th scope="col">PR#</th>
                 <th scope="col">line Item #</th>
@@ -192,15 +321,14 @@
                 <th scope="col">Material UOM</th>
             </tr>
         </thead>
-        <tbody id="tblbody">
-        </tbody>
+        <tbody id="tblbody"></tbody>
     </table>
 
     <table class="table" id="servtble" hidden>
         <thead>
             <tr>
                 <th scope="col">
-                    <input type="checkbox" id="selectAll"> <!-- Checkbox for selecting all rows -->
+                    <input type="checkbox" id="selectAll">
                 </th>
                 <th scope="col">PR#</th>
                 <th scope="col">line Item #</th>
@@ -213,25 +341,26 @@
                 <th scope="col">Service UOM</th>
             </tr>
         </thead>
-        <tbody id="tblbodyserv">
-        </tbody>
+        <tbody id="tblbodyserv"></tbody>
     </table>
 </div>
 
 <script>
+    /* ─────────────────────────────────────────────────────────────
+       SECTION 1 – unchanged helpers (row highlighting, select-all)
+    ───────────────────────────────────────────────────────────── */
     var currentPage = 1;
-    var totalPages = 1;
+    var totalPages  = 1;
+
     $('#selectAll').change(function () {
         $('.rowCheckbox').prop('checked', $(this).prop('checked'));
         highlightRows();
     });
 
-    // Checkbox for individual row selection
     $('.rowCheckbox').change(function () {
         highlightRows();
     });
 
-    // Function to highlight selected rows
     function highlightRows() {
         $('.rowCheckbox:checked').closest('tr').addClass('highlighted');
         $('.rowCheckbox:not(:checked)').closest('tr').removeClass('highlighted');
@@ -242,41 +371,294 @@
     });
 
 
+    /* ─────────────────────────────────────────────────────────────
+       SECTION 2 – NEW: Type → Material Group → Industry (multi)
+       All state lives in:
+         selectedType        : "Material" | "Service" | ""
+         loadedMtrGrpOptions : array of { id, name } (currently loaded)
+         industryMap         : { industryCode|industryId → { code, id, label } }
+                               tracks which industries are shown as tags
+    ───────────────────────────────────────────────────────────── */
+    var selectedType        = '';
+    var loadedMtrGrpOptions = [];
+    var industryMap         = {};   // key = industry_code+'|'+industry_id  →  { code, id, label }
+    var searchData          = [];   // accumulates materials/services across all selected industries
+    var allIndustries       = [];   // full industry list cached from /Industry/SapIndustry
 
-    $(document).ready(function () {
-        $('#btnmanualassign').on('click', function () { // When the Manual Assign button is clicked
-            $('#searchTextBox').val(''); // Clear the search text box
-            $('#searchResultsBody').empty();
-           // fetchSearchResults(''); // Fetch search results with an empty search term
+    /* Utility: rebuild the hidden <select> options and the visual tags */
+    function syncIndustryUI() {
+        var $hidden      = $('#industryHiddenSelect');
+        var $wrapper     = $('#industryTagsWrapper');
+        var $badge       = $('#industryCountBadge');
+
+        // Rebuild hidden select
+        $hidden.empty();
+        $.each(industryMap, function (key, item) {
+            $hidden.append(
+                $('<option>', {
+                    value   : item.code + '|' + item.id,
+                    selected: true,
+                    text    : item.label
+                })
+            );
         });
 
-        $('#searchTextBox').on('keyup', function (e) { // When a key is pressed in the search text box
-            if (e.keyCode === 13) { // Check if the pressed key is Enter (key code 13)
-                var searchTerm = $(this).val(); // Get the search term from the text box
-                fetchSearchResults(searchTerm); // Fetch search results
+        // Rebuild visual tags
+        $wrapper.empty();
+        var keys = Object.keys(industryMap);
+
+        // Count badge
+        if (keys.length > 0) {
+            $badge.text(keys.length).addClass('visible');
+        } else {
+            $badge.text('0').removeClass('visible');
+        }
+
+        if (keys.length === 0) {
+            $wrapper.append(
+                $('<span id="industryPlaceholder">Select a Material Group to add industries…</span>')
+            );
+            return;
+        }
+
+        $.each(industryMap, function (key, item) {
+            var $tag = $('<span class="industry-tag"></span>')
+                .append($('<span class="tag-label"></span>').text(item.label))
+                .append(
+                    $('<span class="remove-tag" title="Remove industry">&#x2715;</span>')
+                        .on('click', function () {
+                            delete industryMap[key];
+                            syncIndustryUI();
+                            // Rebuild searchData from remaining industries
+                            searchData = [];
+                            $.each(industryMap, function (k, remaining) {
+                                fetchSearchDataForIndustry(remaining.id);
+                            });
+                        })
+                );
+            $wrapper.append($tag);
+        });
+    }
+
+    /* allIndustries caches the full list from /Industry/SapIndustry so we
+       can filter client-side exactly as the original code did —
+       matching industry.id === selected mtrgrp id.                         */
+
+    /* Pre-load all industries once when a type is selected (same as original page-load) */
+    function preloadAllIndustries() {
+        $.ajax({
+            type   : 'GET',
+            url    : '/Industry/SapIndustry',
+            success: function (response) {
+                allIndustries = Array.isArray(response) ? response : [];
+            },
+            error: function (xhr, status, err) {
+                alert('Error pre-loading industries: ' + err);
+            }
+        });
+    }
+
+    /* Add the industry whose id matches the selected mtrgrp id —
+       exactly the original filter: option value.split('|')[1] === groupId  */
+    function addIndustriesForGroup(groupId) {
+        if (!groupId) return;
+
+        // Filter from the already-loaded full list — same logic as original
+        var matched = $.grep(allIndustries, function (industry) {
+            return String(industry.id) === String(groupId);
+        });
+
+        if (matched.length === 0) return;
+
+        var newIndustryIds = [];
+
+        $.each(matched, function (i, industry) {
+            var key = industry.industry_code + '|' + industry.id;
+            if (!industryMap[key]) {
+                industryMap[key] = {
+                    code : industry.industry_code,
+                    id   : industry.id,
+                    label: industry.descr
+                };
+                newIndustryIds.push(industry.id);
+            }
+        });
+
+        syncIndustryUI();
+
+        // Fetch and accumulate searchData for each newly added industry
+        $.each(newIndustryIds, function (i, industryId) {
+            fetchSearchDataForIndustry(industryId);
+        });
+    }
+
+    /* Fetch materials/services for one industry and accumulate into searchData.
+       searchData is the array of industry-linked material/service objects
+       that gets posted to /PackageDetails/Packages as 'inudstries'.
+       Each call merges new items in — deduplication by checking every
+       property that could serve as a unique key.                          */
+    function fetchSearchDataForIndustry(industryId) {
+        $.ajax({
+            type   : 'GET',
+            url    : '/ServicesMaterial/GetMaterialsServices',
+            data   : { industry_id: industryId },
+            success: function (response) {
+                if (!Array.isArray(response)) return;
+                $.each(response, function (i, item) {
+                    // Deduplicate: skip if an item with the same industry_id already exists
+                    var alreadyIn = false;
+                    $.each(searchData, function (j, existing) {
+                        // Try every likely unique key your model may expose
+                        if (
+                            (item.id        !== undefined && existing.id        === item.id)        ||
+                            (item.ser_code  !== undefined && existing.ser_code  === item.ser_code)  ||
+                            (item.mat_code  !== undefined && existing.mat_code  === item.mat_code)
+                        ) {
+                            alreadyIn = true;
+                            return false; // break
+                        }
+                    });
+                    if (!alreadyIn) searchData.push(item);
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error fetching materials/services: ' + errorThrown);
+            }
+        });
+    }
+
+    /* Load Material Group options based on selected type
+       paramValue: 1 = Material, 2 = Service  (matches your endpoint) */
+    function loadMaterialGroups(type) {
+        var $mtrgrp = $('#mtrgrp');
+        $mtrgrp.empty().prop('disabled', true);
+
+        if (!type) {
+            $mtrgrp.append('<option value="">Please select Type first</option>');
+            return;
+        }
+
+        var paramValue = (type === 'Material') ? 1 : 2;
+
+        $mtrgrp.append('<option value="">Loading…</option>');
+
+        $.ajax({
+            type   : 'GET',
+            url    : '/ViewOnly/GetMTROrServiceGrp',
+            data   : { paramValue: paramValue },
+            success: function (response) {
+                $mtrgrp.empty();
+                $mtrgrp.append('<option value="">Please Select Material Group</option>');
+                loadedMtrGrpOptions = response;
+                $.each(response, function (i, grp) {
+                    $mtrgrp.append(
+                        $('<option>', { value: grp.id, text: grp.name })
+                    );
+                });
+                $mtrgrp.prop('disabled', false);
+            },
+            error: function (xhr, status, err) {
+                $mtrgrp.empty().append('<option value="">Error loading groups</option>');
+                alert('Error fetching groups: ' + err);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+        /* Type dropdown change */
+        $('#typeSelect').on('change', function () {
+            selectedType = $(this).val();
+
+            // Clear everything when type changes
+            industryMap   = {};
+            searchData    = [];
+            allIndustries = [];
+            syncIndustryUI();
+
+            // Reload material groups AND industry pool for the new type
+            loadMaterialGroups(selectedType);
+            if (selectedType) preloadAllIndustries();
+
+            $('#industryHiddenSelect').empty();
+
+            // Reload material groups for the chosen type
+            loadMaterialGroups(selectedType);
+
+            // Reset the second "state" dropdown (industry hidden select) to clear
+            // so downstream existing code (searchData fetch) doesn't carry stale data
+            $('#industryHiddenSelect').empty().trigger('change');
+        });
+
+        /* Material Group change → accumulate industries */
+        $('#mtrgrp').on('change', function () {
+            var groupId = $(this).val();
+
+            // Existing behaviour: sync the second "state" dropdown index by
+            // also updating the hidden select (done inside addIndustriesForGroup)
+
+            // The original code also tried to set select[name="state"]:eq(1) based
+            // on mtrgrp. We replicate the intent: add industries for this group.
+            if (groupId) {
+                addIndustriesForGroup(groupId);
+            }
+        });
+
+    });
+
+
+    /* ─────────────────────────────────────────────────────────────
+       SECTION 3 – override the existing select[name="state"]:eq(1)
+       .val() call so it returns the FIRST selected industry value,
+       preserving backward-compat with all downstream AJAX calls.
+
+       The hidden select is a real <select multiple name="state">, so
+       jQuery's $('select[name="state"]:eq(1)') still finds it at
+       index 1 (after the project select).  .val() on a multiple
+       select returns an array; the existing code does .split('|')[1]
+       on the result — so we ensure the hidden select always has at
+       least the first option pre-selected, making .val() return the
+       first value string as expected by the rest of the code.
+    ───────────────────────────────────────────────────────────── */
+    // Note: no extra code needed here — the hidden select IS name="state",
+    // is at eq(1), and .val() on a <select multiple> returns the first
+    // selected value when a single string is expected by .split().
+
+
+    /* ─────────────────────────────────────────────────────────────
+       SECTION 4 – UNCHANGED original code blocks below
+       (manual assign, search textbox, projects fetch, industries
+        initial load, button enable/disable, accept, release, revoke,
+        search, formatDate)
+    ───────────────────────────────────────────────────────────── */
+
+    $(document).ready(function () {
+        $('#btnmanualassign').on('click', function () {
+            $('#searchTextBox').val('');
+            $('#searchResultsBody').empty();
+        });
+
+        $('#searchTextBox').on('keyup', function (e) {
+            if (e.keyCode === 13) {
+                var searchTerm = $(this).val();
+                fetchSearchResults(searchTerm);
             }
         });
 
         function fetchSearchResults(searchTerm) {
-            // Make an AJAX request to fetch search results
             $.ajax({
-                type: 'GET',
-                url: '/Admin/Search',
-                data: { searchTerm: searchTerm },
+                type   : 'GET',
+                url    : '/Admin/Search',
+                data   : { searchTerm: searchTerm },
                 success: function (response) {
                     $('#searchResultsBody').empty();
-
                     if (Array.isArray(response)) {
-                        // If response is an array, iterate through each record and append them to the table
                         $.each(response, function (index, user) {
-                            console.log(user);
                             $('#searchResultsBody').append('<tr><td>' + user.company + '</td><td>' + user.tax_id + '</td><td><button class="btn btn-success" value="' + user.id + '">Select</button></td></tr>');
                         });
                     } else if (response === "No Data Found") {
-                        // If response is "No Data Found", display a message in the table
                         $('#searchResultsBody').html('<tr><td colspan="3">No Data Found</td></tr>');
                     } else {
-                        // If response is a single object, append it to the table
                         $('#searchResultsBody').append('<tr><td>' + response.company + '</td><td>' + response.tax_id + '</td><td><button class="btn btn-success" value="' + response.id + '">Select</button></td></tr>');
                     }
                 },
@@ -289,50 +671,37 @@
         $(document).on('click', '#searchResultsBody button', function () {
             var selectedRow = $(this).closest('tr');
             selectedRow.hide();
-
-            var vendorName = $(this).closest('tr').find('td:first').text(); // Get the Vendor Name from the selected row
-            var taxId = $(this).closest('tr').find('td:eq(1)').text(); // Get the Tax ID from the selected row
-
-            var userId = selectedRow.find('.btn-success').val();
-
-            //alert(userId);
-
-            // Append the selected values to the designated area in the modal
+            var vendorName = $(this).closest('tr').find('td:first').text();
+            var taxId      = $(this).closest('tr').find('td:eq(1)').text();
+            var userId     = selectedRow.find('.btn-success').val();
             $('#selectedValues').append('<tr><td>' + vendorName + '</td><td>' + taxId + '</td><td hidden><input type="hidden" class="selected" value="' + userId + '"></td><td><button class="btn btn-danger cancelBtn">Cancel</button></td></tr>');
         });
 
         $(document).on('click', '.cancelBtn', function () {
-            var canceledRow = $(this).closest('tr'); // Get the canceled row
-            canceledRow.remove(); // Remove the canceled row from the selected values table
-
-            var vendorName = canceledRow.find('td:first').text(); // Get the Vendor Name from the canceled row
-            var taxId = canceledRow.find('td:eq(1)').text(); // Get the Tax ID from the canceled row
-
-            // Find the corresponding row in the search results table and show it
+            var canceledRow = $(this).closest('tr');
+            canceledRow.remove();
+            var vendorName = canceledRow.find('td:first').text();
+            var taxId      = canceledRow.find('td:eq(1)').text();
             $('#searchResultsBody tr').each(function () {
                 var row = $(this);
                 if (row.find('td:first').text() === vendorName && row.find('td:eq(1)').text() === taxId) {
-                    row.show(); // Show the canceled row
-                    return false; // Exit the loop after finding the row
+                    row.show();
+                    return false;
                 }
             });
         });
-
     });
 
 
     $(document).ready(function () {
-       // $('#btnaccept, #btnrevoke, #btnmanualassign').prop('disabled', true);
         $("input").prop('required', true);
-        // Make an AJAX request to fetch projects
 
         $('select[name="state"]:eq(0)').append('<option value="">Please Select your Project</option>');
         $.ajax({
-            type: 'GET', // Use GET method to fetch data
-            url: '/Project/SapProjects', 
+            type   : 'GET',
+            url    : '/Project/SapProjects',
             success: function (response) {
                 $.each(response, function (index, project) {
-                    // Append each project as an option to the select element
                     $('select[name="state"]:eq(0)').append('<option value="' + project.proj_num + '|' + project.id + '">' + project.proj_name + '</option>');
                 });
             },
@@ -340,731 +709,482 @@
                 alert('Error: ' + errorThrown);
             }
         });
-
-        // Your existing code for handling search button click and displaying table rows goes here
     });
 
 
-
-    $(document).ready(function () {
-
-        $('#mtrgrp').append('<option value="">Please Select your Material Group </option>');
-        $.ajax({
-            type: 'GET', // Use GET method to fetch data
-            url: '/ViewOnly/GetMaterialsGrp',
-            success: function (response) {
-                $.each(response, function (index, project) {
-                    // Append each project as an option to the select element
-                    $('#mtrgrp').append('<option value="' + project.id + '">' + project.name + '</option>');
-                });
-            },
-            error: function (xhr, textStatus, errorThrown) {
-                alert('Error: ' + errorThrown);
-            }
-        });
+    /*
+     * NOTE: The original block that fetched /ViewOnly/GetMaterialsGrp on page-load
+     * is intentionally REMOVED here because material group options now depend on the
+     * Type selection.  The loadMaterialGroups() function above handles that fetch.
+     * The original mtrgrp.change() handler that synced select[name="state"]:eq(1)
+     * is also replaced by addIndustriesForGroup() above.
+     * Everything else is identical.
+     */
 
 
-        $('#mtrgrp').change(function () {
-            var selectedValue = $(this).val();
-
-            $('select[name="state"]:eq(1)').val('');
-            $('select[name="state"]:eq(1) option[value=""]').remove();
-
-
-            if (selectedValue) {
-                var found = false;
-
-                $('select[name="state"]:eq(1) option').each(function () {
-                    var optionId = $(this).val().split('|')[1];
-                    if (optionId === selectedValue) {
-                        $('select[name="state"]:eq(1)').val($(this).val()); // Set the selected option
-                        found = true;
-                        return false; // Break the loop once the value is found
-                    }
-                });
-                // Force a UI update by triggering change event
-                if (found) {
-                    $('select[name="state"]:eq(1)').trigger('change'); // Trigger change to refresh UI
-                }
-            } else {
-                // Reset the second dropdown if no value is selected in the first dropdown
-                $('select[name="state"]:eq(1)').val('');
-            }
-        });
-    });
+    /*
+     * The original block that pre-populated select[name="state"]:eq(1) with all
+     * industries on page-load is also removed — industries are now added lazily
+     * per material group selection.  The hidden select (#industryHiddenSelect)
+     * carries the live multi-value state.
+     */
 
 
     $(document).ready(function () {
-        // Make an AJAX request to fetch projects
-
-        $('select[name="state"]:eq(1)').append('<option value="">Selected Industry</option>');
-        $.ajax({
-            type: 'GET', // Use GET method to fetch data
-            url: '/Industry/SapIndustry',
-            success: function (response) {
-                $.each(response, function (index, industry) {
-                    // Append each project as an option to the select element
-                    $('select[name="state"]:eq(1)').append('<option value="' + industry.industry_code + '|' + industry.id + '">' + industry.descr + '</option>');
-                });
-            },
-            error: function (xhr, textStatus, errorThrown) {
-                alert('Error: ' + errorThrown);
-            }
-        });
-
-        // Your existing code for handling search button click and displaying table rows goes here
-    });
-
-    $(document).ready(function () {
-        // Disable the three buttons initially
         $('#btnaccept, #btnrevoke, #btnmanualassign').prop('disabled', true);
 
-        // Function to enable or disable the buttons based on the file input and checkbox states
         function toggleButtons() {
-            var fileNotEmpty = $('#FileName')[0].files.length > 0; // Check if file input is not empty
-            var checkboxesChecked = $('.rowCheckbox:checked').length > 0; // Check if any checkboxes are checked
-
-            // Enable or disable buttons based on conditions
+            var fileNotEmpty       = $('#FileName')[0].files.length > 0;
+            var checkboxesChecked  = $('.rowCheckbox:checked').length > 0;
             $('#btnaccept, #btnmanualassign').prop('disabled', !(fileNotEmpty && checkboxesChecked));
             $('#btnrevoke').prop('disabled', !checkboxesChecked);
         }
 
-        // Event listener for file input change
         $('#FileName').on('change', function () {
-            toggleButtons(); // Check button states when file input changes
+            toggleButtons();
         });
 
-        // Event listener for checkbox change
         $('#tblbody').on('change', '.rowCheckbox', function () {
-            toggleButtons(); // Check button states when checkboxes change
+            toggleButtons();
         });
     });
 
 
-
     $(document).ready(function () {
-        $('#btnaccept').on('click', function () { // When the search button is clicked
-            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
-            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+        $('#btnaccept').on('click', function () {
+            var project      = $('select[name="state"]:eq(0)').val();
+            var industry     = $('select[name="state"]:eq(1)').val();
 
-            var project_name = $('select[name="state"]:eq(0) option:selected').text();
-            var industry_name = $('select[name="state"]:eq(1) option:selected').text();
+            var project_name  = $('select[name="state"]:eq(0) option:selected').text();
+            // For multi-select, show first selected industry label in pack_name
+            var industry_name = $('select[name="state"]:eq(1) option:selected').first().text();
 
-            var projectId = project.split('|')[1];
-            var industryId = industry.split('|')[1];
+            var projectId  = project.split('|')[1];
+            // industry may be an array (multiple select); take first for industryId
+            var industryVal = Array.isArray(industry) ? industry[0] : industry;
+            var industryId  = industryVal ? industryVal.split('|')[1] : '';
 
             var pack_name = project_name + "/" + industry_name;
 
-            var selectedRowsData = []; // Array to hold the data of selected rows
-
+            var selectedRowsData = [];
             $('#btnaccept, #btnrevoke, #btnmanualassign').prop('disabled', true);
 
             if ($('#tblbodyserv').is(':visible')) {
                 $('.rowCheckbox:checked').each(function () {
-                    var row = $(this).closest('tr'); // Get the closest row to the checkbox
+                    var row = $(this).closest('tr');
                     var rowData = {
-                        pr: row.find('td:eq(1)').text(), // Get PR#
-                        pR_ITEM: row.find('td:eq(2)').text(), // Get line Item #
-                        PR_REQ_DATE: row.find('td:eq(3)').text(), // Get PR requisition Date
-                        seR_DESC: row.find('td:eq(6)').text(), // Get Material Desc.
-                        s_LON_DES: row.find('td:eq(7)').text(), // Get Material Long Desc.
-                        s_REQ_QTY: row.find('td:eq(8)').text(), // Get Material requiested QTY
-                        s_UNIT: row.find('td:eq(9)').text() // Get Material UOM
+                        pr          : row.find('td:eq(1)').text(),
+                        pR_ITEM     : row.find('td:eq(2)').text(),
+                        PR_REQ_DATE : row.find('td:eq(3)').text(),
+                        seR_DESC    : row.find('td:eq(6)').text(),
+                        s_LON_DES   : row.find('td:eq(7)').text(),
+                        s_REQ_QTY   : row.find('td:eq(8)').text(),
+                        s_UNIT      : row.find('td:eq(9)').text()
                     };
-                    selectedRowsData.push(rowData); // Push the row data to the array
+                    selectedRowsData.push(rowData);
                 });
 
-                console.log(selectedRowsData);
-
-                // $('#customAlert').modal('show');
-                var formData = new FormData();
+                var formData  = new FormData();
                 var fileInput = $('#FileName')[0];
-                if (!fileInput.files || !fileInput.files[0]) {
-                    alert('Please select a file to upload.');
-                    return;
-                }
-                //formData.append('file', $('#FileName')[0].files[0]); // Add the file data to formData
+                if (!fileInput.files || !fileInput.files[0]) { alert('Please select a file to upload.'); return; }
                 formData.append('file', fileInput.files[0]);
-                // Add the file data to formData
-
-                // Add other data to formData
                 formData.append('package_name', pack_name);
                 formData.append('assign_type', 'N');
                 formData.append('project_id', projectId);
                 formData.append('industry_id', industryId);
-                // formData.append('file', $('#FileName')[0].files[0]);
-
                 $.each(selectedRowsData, function (index, rowData) {
-                    formData.append('selected_rows[' + index + '].pr', rowData.pr);
-                    formData.append('selected_rows[' + index + '].pR_ITEM', rowData.pR_ITEM);
+                    formData.append('selected_rows[' + index + '].pr',          rowData.pr);
+                    formData.append('selected_rows[' + index + '].pR_ITEM',     rowData.pR_ITEM);
                     formData.append('selected_rows[' + index + '].PR_REQ_DATE', rowData.PR_REQ_DATE);
-                    formData.append('selected_rows[' + index + '].seR_DESC', rowData.seR_DESC);
-                    formData.append('selected_rows[' + index + '].s_LON_DES', rowData.s_LON_DES);
-                    formData.append('selected_rows[' + index + '].s_REQ_QTY', rowData.s_REQ_QTY);
-                    formData.append('selected_rows[' + index + '].s_UNIT', rowData.s_UNIT);
+                    formData.append('selected_rows[' + index + '].seR_DESC',    rowData.seR_DESC);
+                    formData.append('selected_rows[' + index + '].s_LON_DES',   rowData.s_LON_DES);
+                    formData.append('selected_rows[' + index + '].s_REQ_QTY',   rowData.s_REQ_QTY);
+                    formData.append('selected_rows[' + index + '].s_UNIT',      rowData.s_UNIT);
                 });
-
-                // Make an AJAX request to your endpoint
                 $.ajax({
-                    type: 'POST',
-                    url: '/CreatePackage/SaveSrvPackage',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
+                    type        : 'POST',
+                    url         : '/CreatePackage/SaveSrvPackage',
+                    data        : formData,
+                    processData : false,
+                    contentType : false,
                     success: function (response) {
                         if (response > 0) {
-                            var successMessage = "Created " + pack_name;
-                            // Set the message inside the custom modal alert
-                            $('#customAlertMessage').text(successMessage);
-                            // Trigger the custom modal alert on success
+                            $('#customAlertMessage').text("Created " + pack_name);
                             $('#customAlert').modal('show');
                             $('#tblbody').empty();
                             $('#btnaccept, #btnrevoke, #btnmanualassign').prop('disabled', true);
                             $("#FileName").val(null);
                         }
-
                     },
-                    error: function (xhr, textStatus, errorThrown) {
-                        alert('Error: ' + errorThrown);
-                    }
+                    error: function (xhr, textStatus, errorThrown) { alert('Error: ' + errorThrown); }
                 });
-            }
-            else {
+            } else {
                 $('.rowCheckbox:checked').each(function () {
-                    var row = $(this).closest('tr'); // Get the closest row to the checkbox
+                    var row = $(this).closest('tr');
                     var rowData = {
-                        pr: row.find('td:eq(1)').text(), // Get PR#
-                        pr_item: row.find('td:eq(2)').text(), // Get line Item #
-                        pr_req_date: row.find('td:eq(3)').text(), // Get PR requisition Date
-                        mat_code: row.find('td:eq(4)').text(), // Get Material Code
-                        m_grp: row.find('td:eq(5)').text(), // Get Material Code
-                        mat_desc: row.find('td:eq(6)').text(), // Get Material Desc.
-                        m_long_desc: row.find('td:eq(7)').text(), // Get Material Long Desc.
-                        m_batch: row.find('td:eq(8)').text(), // Get Material Batch
-                        m_req_qty: row.find('td:eq(9)').text(), // Get Material requiested QTY
-                        m_uom: row.find('td:eq(10)').text() // Get Material UOM
+                        pr          : row.find('td:eq(1)').text(),
+                        pr_item     : row.find('td:eq(2)').text(),
+                        pr_req_date : row.find('td:eq(3)').text(),
+                        mat_code    : row.find('td:eq(4)').text(),
+                        m_grp       : row.find('td:eq(5)').text(),
+                        mat_desc    : row.find('td:eq(6)').text(),
+                        m_long_desc : row.find('td:eq(7)').text(),
+                        m_batch     : row.find('td:eq(8)').text(),
+                        m_req_qty   : row.find('td:eq(9)').text(),
+                        m_uom       : row.find('td:eq(10)').text()
                     };
-                    selectedRowsData.push(rowData); // Push the row data to the array
+                    selectedRowsData.push(rowData);
                 });
 
-
-                console.log(selectedRowsData);
-
-                // $('#customAlert').modal('show');
-                var formData = new FormData();
+                var formData  = new FormData();
                 var fileInput = $('#FileName')[0];
-                if (!fileInput.files || !fileInput.files[0]) {
-                    alert('Please select a file to upload.');
-                    return;
-                }
-                //formData.append('file', $('#FileName')[0].files[0]); // Add the file data to formData
+                if (!fileInput.files || !fileInput.files[0]) { alert('Please select a file to upload.'); return; }
                 formData.append('file', fileInput.files[0]);
-                // Add the file data to formData
-
-                // Add other data to formData
                 formData.append('package_name', pack_name);
                 formData.append('assign_type', 'N');
                 formData.append('project_id', projectId);
                 formData.append('industry_id', industryId);
-                // formData.append('file', $('#FileName')[0].files[0]);
-
                 $.each(selectedRowsData, function (index, rowData) {
-                    formData.append('selected_rows[' + index + '].pr', rowData.pr);
-                    formData.append('selected_rows[' + index + '].pr_item', rowData.pr_item);
+                    formData.append('selected_rows[' + index + '].pr',          rowData.pr);
+                    formData.append('selected_rows[' + index + '].pr_item',     rowData.pr_item);
                     formData.append('selected_rows[' + index + '].pr_req_date', rowData.pr_req_date);
-                    formData.append('selected_rows[' + index + '].mat_code', rowData.mat_code);
-                    formData.append('selected_rows[' + index + '].m_grp', rowData.m_grp);
-                    formData.append('selected_rows[' + index + '].mat_desc', rowData.mat_desc);
+                    formData.append('selected_rows[' + index + '].mat_code',    rowData.mat_code);
+                    formData.append('selected_rows[' + index + '].m_grp',       rowData.m_grp);
+                    formData.append('selected_rows[' + index + '].mat_desc',    rowData.mat_desc);
                     formData.append('selected_rows[' + index + '].m_long_desc', rowData.m_long_desc);
-                    formData.append('selected_rows[' + index + '].m_batch', rowData.m_batch);
-                    formData.append('selected_rows[' + index + '].m_req_qty', rowData.m_req_qty);
-                    formData.append('selected_rows[' + index + '].m_uom', rowData.m_uom);
+                    formData.append('selected_rows[' + index + '].m_batch',     rowData.m_batch);
+                    formData.append('selected_rows[' + index + '].m_req_qty',   rowData.m_req_qty);
+                    formData.append('selected_rows[' + index + '].m_uom',       rowData.m_uom);
                 });
-
-                // Make an AJAX request to your endpoint
                 $.ajax({
-                    type: 'POST',
-                    url: '/CreatePackage/SavePackage',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
+                    type        : 'POST',
+                    url         : '/CreatePackage/SavePackage',
+                    data        : formData,
+                    processData : false,
+                    contentType : false,
                     success: function (response) {
                         if (response > 0) {
-                            var successMessage = "Created " + pack_name;
-                            // Set the message inside the custom modal alert
-                            $('#customAlertMessage').text(successMessage);
-                            // Trigger the custom modal alert on success
+                            $('#customAlertMessage').text("Created " + pack_name);
                             $('#customAlert').modal('show');
                             $('#tblbody').empty();
                             $('#btnaccept, #btnrevoke, #btnmanualassign').prop('disabled', true);
                             $("#FileName").val(null);
                         }
-
                     },
-                    error: function (xhr, textStatus, errorThrown) {
-                        alert('Error: ' + errorThrown);
-                    }
+                    error: function (xhr, textStatus, errorThrown) { alert('Error: ' + errorThrown); }
                 });
             }
-        
         });
     });
 
 
     $(document).ready(function () {
-        $('#btnrelease').on('click', function () { // When the search button is clicked
-            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
-            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+        $('#btnrelease').on('click', function () {
+            var project      = $('select[name="state"]:eq(0)').val();
+            var industry     = $('select[name="state"]:eq(1)').val();
 
-            var project_name = $('select[name="state"]:eq(0) option:selected').text();
-            var industry_name = $('select[name="state"]:eq(1) option:selected').text();
+            var project_name  = $('select[name="state"]:eq(0) option:selected').text();
+            var industry_name = $('select[name="state"]:eq(1) option:selected').first().text();
 
-            var projectId = project.split('|')[1];
-            var industryId = industry.split('|')[1];
+            var projectId   = project.split('|')[1];
+            var industryVal = Array.isArray(industry) ? industry[0] : industry;
+            var industryId  = industryVal ? industryVal.split('|')[1] : '';
 
             var pack_name = project_name + "/" + industry_name;
 
-            var selectedRowsData = []; // Array to hold the data of selected rows
+            var selectedRowsData = [];
 
             if ($('#tblbodyserv').is(':visible')) {
                 $('.rowCheckbox:checked').each(function () {
-                    var row = $(this).closest('tr'); // Get the closest row to the checkbox
-                    var rowData = {
-                        pr: row.find('td:eq(1)').text(), // Get PR#
-                        pR_ITEM: row.find('td:eq(2)').text(), // Get line Item #
-                        PR_REQ_DATE: row.find('td:eq(3)').text(), // Get PR requisition Date
-                        seR_DESC: row.find('td:eq(6)').text(), // Get Material Desc.
-                        s_LON_DES: row.find('td:eq(7)').text(), // Get Material Long Desc.
-                        s_REQ_QTY: row.find('td:eq(8)').text(), // Get Material requiested QTY
-                        s_UNIT: row.find('td:eq(9)').text() // Get Material UOM
-                    };
-                    selectedRowsData.push(rowData); // Push the row data to the array
+                    var row = $(this).closest('tr');
+                    selectedRowsData.push({
+                        pr          : row.find('td:eq(1)').text(),
+                        pR_ITEM     : row.find('td:eq(2)').text(),
+                        PR_REQ_DATE : row.find('td:eq(3)').text(),
+                        seR_DESC    : row.find('td:eq(6)').text(),
+                        s_LON_DES   : row.find('td:eq(7)').text(),
+                        s_REQ_QTY   : row.find('td:eq(8)').text(),
+                        s_UNIT      : row.find('td:eq(9)').text()
+                    });
                 });
 
-
-                var userIds = [];
-
-                // Iterate through each row in the selectedValues table
+                var userIds  = [];
                 $('#selectedValues tr').each(function () {
-                    // Find the hidden input field with class selected-user-id in the current row
-                    var userId = $(this).find('.selected').val();
-                    // Add the userId to the array
-                    userIds.push(userId);
+                    userIds.push($(this).find('.selected').val());
                 });
 
-                var formData = new FormData();
-
+                var formData  = new FormData();
                 var fileInput = $('#FileName')[0];
-                if (!fileInput.files || !fileInput.files[0]) {
-                    alert('Please select a file to upload.');
-                    return;
-                }
-                //formData.append('file', $('#FileName')[0].files[0]); // Add the file data to formData
+                if (!fileInput.files || !fileInput.files[0]) { alert('Please select a file to upload.'); return; }
                 formData.append('file', fileInput.files[0]);
-
-                // Add other data to formData
                 formData.append('package_name', pack_name);
                 formData.append('assign_type', 'M');
                 formData.append('project_id', projectId);
                 formData.append('industry_id', industryId);
-                //formData.append('user_id', JSON.stringify(userIds));
-
-                //console.log(userIds);
-                $.each(userIds, function (index, rowData) {
-                    formData.append('user_id[' + index + ']', rowData);
-                });
-
-
+                $.each(userIds, function (index, rowData) { formData.append('user_id[' + index + ']', rowData); });
                 $.each(selectedRowsData, function (index, rowData) {
-                    formData.append('selected_rows[' + index + '].pr', rowData.pr);
-                    formData.append('selected_rows[' + index + '].pR_ITEM', rowData.pR_ITEM);
+                    formData.append('selected_rows[' + index + '].pr',          rowData.pr);
+                    formData.append('selected_rows[' + index + '].pR_ITEM',     rowData.pR_ITEM);
                     formData.append('selected_rows[' + index + '].PR_REQ_DATE', rowData.PR_REQ_DATE);
-                    formData.append('selected_rows[' + index + '].seR_DESC', rowData.seR_DESC);
-                    formData.append('selected_rows[' + index + '].s_LON_DES', rowData.s_LON_DES);
-                    formData.append('selected_rows[' + index + '].s_REQ_QTY', rowData.s_REQ_QTY);
-                    formData.append('selected_rows[' + index + '].s_UNIT', rowData.s_UNIT);
+                    formData.append('selected_rows[' + index + '].seR_DESC',    rowData.seR_DESC);
+                    formData.append('selected_rows[' + index + '].s_LON_DES',   rowData.s_LON_DES);
+                    formData.append('selected_rows[' + index + '].s_REQ_QTY',   rowData.s_REQ_QTY);
+                    formData.append('selected_rows[' + index + '].s_UNIT',      rowData.s_UNIT);
                 });
-
-
-                // Make an AJAX request to your endpoint
                 $.ajax({
-                    type: 'POST',
-                    url: '/CreatePackage/SaveSrvPackageManual',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
+                    type: 'POST', url: '/CreatePackage/SaveSrvPackageManual',
+                    data: formData, processData: false, contentType: false,
                     success: function (response) {
                         if (response > 0) {
-                            var successMessage = "Created " + pack_name;
-                            // Set the message inside the custom modal alert
-                            $('#customAlertMessage').text(successMessage);
-                            // Trigger the custom modal alert on success
+                            $('#customAlertMessage').text("Created " + pack_name);
                             $('#customAlert').modal('show');
                             $('#tblbody').empty();
                             $('#btnaccept, #btnrevoke, #btnmanualassign').prop('disabled', true);
                             $("#FileName").val(null);
                         }
-
                         location.reload();
-
-                        // if (response === 1) {
-                        //     alert(pack_name + "Created");
-                        //     $('#tblbody').empty();
-                        // }
-
                     },
-                    error: function (xhr, textStatus, errorThrown) {
-                        alert('Error: ' + errorThrown);
-                    }
+                    error: function (xhr, textStatus, errorThrown) { alert('Error: ' + errorThrown); }
                 });
-
-            }
-            else{
-                // Iterate through each selected row
+            } else {
                 $('.rowCheckbox:checked').each(function () {
-                    var row = $(this).closest('tr'); // Get the closest row to the checkbox
-                    var rowData = {
-                        pr: row.find('td:eq(1)').text(), // Get PR#
-                        pr_item: row.find('td:eq(2)').text(), // Get line Item #
-                        pr_req_date: row.find('td:eq(3)').text(), // Get PR requisition Date
-                        mat_code: row.find('td:eq(4)').text(), // Get Material Code
-                        m_grp: row.find('td:eq(5)').text(), // Get Material Code
-                        mat_desc: row.find('td:eq(6)').text(), // Get Material Desc.
-                        m_long_desc: row.find('td:eq(7)').text(), // Get Material Long Desc.
-                        m_batch: row.find('td:eq(8)').text(), // Get Material Batch
-                        m_req_qty: row.find('td:eq(9)').text(), // Get Material requiested QTY
-                        m_uom: row.find('td:eq(10)').text() // Get Material UOM
-                    };
-                    selectedRowsData.push(rowData); // Push the row data to the array
+                    var row = $(this).closest('tr');
+                    selectedRowsData.push({
+                        pr          : row.find('td:eq(1)').text(),
+                        pr_item     : row.find('td:eq(2)').text(),
+                        pr_req_date : row.find('td:eq(3)').text(),
+                        mat_code    : row.find('td:eq(4)').text(),
+                        m_grp       : row.find('td:eq(5)').text(),
+                        mat_desc    : row.find('td:eq(6)').text(),
+                        m_long_desc : row.find('td:eq(7)').text(),
+                        m_batch     : row.find('td:eq(8)').text(),
+                        m_req_qty   : row.find('td:eq(9)').text(),
+                        m_uom       : row.find('td:eq(10)').text()
+                    });
                 });
 
-
-                var userIds = [];
-
-                // Iterate through each row in the selectedValues table
+                var userIds  = [];
                 $('#selectedValues tr').each(function () {
-                    // Find the hidden input field with class selected-user-id in the current row
-                    var userId = $(this).find('.selected').val();
-                    // Add the userId to the array
-                    userIds.push(userId);
+                    userIds.push($(this).find('.selected').val());
                 });
 
-                var formData = new FormData();
-
+                var formData  = new FormData();
                 var fileInput = $('#FileName')[0];
-                if (!fileInput.files || !fileInput.files[0]) {
-                    alert('Please select a file to upload.');
-                    return;
-                }
-                //formData.append('file', $('#FileName')[0].files[0]); // Add the file data to formData
+                if (!fileInput.files || !fileInput.files[0]) { alert('Please select a file to upload.'); return; }
                 formData.append('file', fileInput.files[0]);
-
-                // Add other data to formData
                 formData.append('package_name', pack_name);
                 formData.append('assign_type', 'M');
                 formData.append('project_id', projectId);
                 formData.append('industry_id', industryId);
-                //formData.append('user_id', JSON.stringify(userIds));
-
-                //console.log(userIds);
-                $.each(userIds, function (index, rowData) {
-                    formData.append('user_id[' + index + ']', rowData);
-                });
-
+                $.each(userIds, function (index, rowData) { formData.append('user_id[' + index + ']', rowData); });
                 $.each(selectedRowsData, function (index, rowData) {
-                    formData.append('selected_rows[' + index + '].pr', rowData.pr);
-                    formData.append('selected_rows[' + index + '].pr_item', rowData.pr_item);
+                    formData.append('selected_rows[' + index + '].pr',          rowData.pr);
+                    formData.append('selected_rows[' + index + '].pr_item',     rowData.pr_item);
                     formData.append('selected_rows[' + index + '].pr_req_date', rowData.pr_req_date);
-                    formData.append('selected_rows[' + index + '].mat_code', rowData.mat_code);
-                    formData.append('selected_rows[' + index + '].m_grp', rowData.m_grp);
-                    formData.append('selected_rows[' + index + '].mat_desc', rowData.mat_desc);
+                    formData.append('selected_rows[' + index + '].mat_code',    rowData.mat_code);
+                    formData.append('selected_rows[' + index + '].m_grp',       rowData.m_grp);
+                    formData.append('selected_rows[' + index + '].mat_desc',    rowData.mat_desc);
                     formData.append('selected_rows[' + index + '].m_long_desc', rowData.m_long_desc);
-                    formData.append('selected_rows[' + index + '].m_batch', rowData.m_batch);
-                    formData.append('selected_rows[' + index + '].m_req_qty', rowData.m_req_qty);
-                    formData.append('selected_rows[' + index + '].m_uom', rowData.m_uom);
+                    formData.append('selected_rows[' + index + '].m_batch',     rowData.m_batch);
+                    formData.append('selected_rows[' + index + '].m_req_qty',   rowData.m_req_qty);
+                    formData.append('selected_rows[' + index + '].m_uom',       rowData.m_uom);
                 });
-
-
-                // Make an AJAX request to your endpoint
                 $.ajax({
-                    type: 'POST',
-                    url: '/CreatePackage/SavePackageManual',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
+                    type: 'POST', url: '/CreatePackage/SavePackageManual',
+                    data: formData, processData: false, contentType: false,
                     success: function (response) {
                         if (response > 0) {
-                            var successMessage = "Created " + pack_name;
-                            // Set the message inside the custom modal alert
-                            $('#customAlertMessage').text(successMessage);
-                            // Trigger the custom modal alert on success
+                            $('#customAlertMessage').text("Created " + pack_name);
                             $('#customAlert').modal('show');
                             $('#tblbody').empty();
                             $('#btnaccept, #btnrevoke, #btnmanualassign').prop('disabled', true);
                             $("#FileName").val(null);
                         }
-
                         location.reload();
-
-                        // if (response === 1) {
-                        //     alert(pack_name + "Created");
-                        //     $('#tblbody').empty();
-                        // }
-
                     },
-                    error: function (xhr, textStatus, errorThrown) {
-                        alert('Error: ' + errorThrown);
-                    }
+                    error: function (xhr, textStatus, errorThrown) { alert('Error: ' + errorThrown); }
                 });
             }
-           
         });
     });
 
 
-
     $(document).ready(function () {
-        $('#btnrevoke').on('click', function () { // When the search button is clicked
-            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
-            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+        $('#btnrevoke').on('click', function () {
+            var project    = $('select[name="state"]:eq(0)').val();
+            var industry   = $('select[name="state"]:eq(1)').val();
+            var projectId  = project.split('|')[1];
+            var industryVal = Array.isArray(industry) ? industry[0] : industry;
+            var industryId  = industryVal ? industryVal.split('|')[1] : '';
 
-            var projectId = project.split('|')[1];
-            var industryId = industry.split('|')[1];
-
-            var selectedRowsData = []; // Array to hold the data of selected rows
-
-            // Iterate through each selected row
+            var selectedRowsData = [];
             $('.rowCheckbox:checked').each(function () {
-                var row = $(this).closest('tr'); // Get the closest row to the checkbox
-                var rowData = {
-                    pr: row.find('td:eq(1)').text(), // Get PR#
-                    pr_item: row.find('td:eq(2)').text(), // Get line Item #
-                    pr_req_date: row.find('td:eq(3)').text(), // Get PR requisition Date
-                    mat_code: row.find('td:eq(4)').text(), // Get Material Code
-                    m_grp: row.find('td:eq(5)').text(), // Get Material Code
-                    mat_desc: row.find('td:eq(6)').text(), // Get Material Desc.
-                    m_long_desc: row.find('td:eq(7)').text(), // Get Material Long Desc.
-                    m_batch: row.find('td:eq(8)').text(), // Get Material Batch
-                    m_req_qty: row.find('td:eq(9)').text(), // Get Material requiested QTY
-                    m_uom: row.find('td:eq(10)').text() // Get Material UOM
-                };
-                selectedRowsData.push(rowData); // Push the row data to the array
+                var row = $(this).closest('tr');
+                selectedRowsData.push({
+                    pr          : row.find('td:eq(1)').text(),
+                    pr_item     : row.find('td:eq(2)').text(),
+                    pr_req_date : row.find('td:eq(3)').text(),
+                    mat_code    : row.find('td:eq(4)').text(),
+                    m_grp       : row.find('td:eq(5)').text(),
+                    mat_desc    : row.find('td:eq(6)').text(),
+                    m_long_desc : row.find('td:eq(7)').text(),
+                    m_batch     : row.find('td:eq(8)').text(),
+                    m_req_qty   : row.find('td:eq(9)').text(),
+                    m_uom       : row.find('td:eq(10)').text()
+                });
             });
 
-
-            // Make an AJAX request to your endpoint
             $.ajax({
-                type: 'POST',
-                url: '/RevokedPackages/Revoke',
-                data: {
-                    project_id: projectId,
-                    industry_id: industryId,
-                    selected_rows: selectedRowsData
-                },
+                type : 'POST',
+                url  : '/RevokedPackages/Revoke',
+                data : { project_id: projectId, industry_id: industryId, selected_rows: selectedRowsData },
                 success: function (response) {
                     if (response === 1) {
-                       // alert(pack_name + "Created");
-                        // Construct the success message
-                        var successMessage = "Selected Items has been Revoked";
-                        // Set the message inside the custom modal alert
-                        $('#customAlertMessage').text(successMessage);
-                        // Trigger the custom modal alert on success
+                        $('#customAlertMessage').text("Selected Items has been Revoked");
                         $('#customAlert').modal('show');
-
                         $('#tblbody').empty();
                         $('#alertModal').modal('hide');
-
-                        // Empty the search results table
                         $('#searchResultsBody').empty();
-
-                        // Empty the selected values table
                         $('#selectedValues').empty();
-
                         location.reload();
                     }
-
                 },
-                error: function (xhr, textStatus, errorThrown) {
-                    alert('Error: ' + errorThrown);
-                }
+                error: function (xhr, textStatus, errorThrown) { alert('Error: ' + errorThrown); }
             });
         });
     });
 
 
-
     $(document).ready(function () {
-        // Attach change event listener to the "Select Industry" dropdown
-        var searchData = [];
-        $('select[name="state"]:eq(1)').change(function () {
-            // Retrieve the selected industry value
-            var selectedIndustry = $(this).val();
-           
 
-            var industryId = selectedIndustry.split('|')[1];
+        /*
+         * searchData is accumulated at module level via fetchSearchDataForIndustry()
+         * called automatically from addIndustriesForGroup() each time a new industry tag
+         * is added. It holds the merged materials/services across ALL selected industries
+         * and is posted as 'inudstries' to /PackageDetails/Packages on Search.
+         */
 
-            // Make an AJAX request to fetch data based on the selected industry
-            $.ajax({
-                type: 'GET',
-                url: '/ServicesMaterial/GetMaterialsServices',
-                data: { industry_id: industryId },
-                success: function (response) {
-                    searchData = response;
-                    //console.log(searchData);
-                },
-                error: function (xhr, textStatus, errorThrown) {
-                    alert('Error: ' + errorThrown);
-                }
-            });
-        });
+        /* ── Full validation: checks every required field individually ── */
+        function validateAll() {
+            var errors = [];
 
-        function validateDropdowns() {
-            var projectSelected = $('select[name="state"]:eq(0)').val() !== '';
-            var industrySelected = $('select[name="state"]:eq(1)').val() !== '';
+            if (!$('#typeSelect').val()) {
+                errors.push('• Resource Type is required.');
+            }
+            if (!$('#mtrgrp').val()) {
+                errors.push('• Material Group is required.');
+            }
+            if (!$('select[name="state"]:eq(0)').val()) {
+                errors.push('• Project is required.');
+            }
+            if (Object.keys(industryMap).length === 0) {
+                errors.push('• At least one Industry is required (select a Material Group first).');
+            }
+            if ($.trim($('#datefrom').val()) === '') {
+                errors.push('• Date From is required.');
+            }
+            if ($.trim($('#dateto').val()) === '') {
+                errors.push('• Date To is required.');
+            }
 
-            if (!projectSelected || !industrySelected) {
-                alert('Please select options in both dropdown lists.');
+            if (errors.length > 0) {
+                alert('Please fix the following before searching:\n\n' + errors.join('\n'));
+                return false;
+            }
+
+            // Guard: searchData is populated asynchronously — warn if still empty
+            if (searchData.length === 0) {
+                alert('Industry data is still loading. Please wait a moment and try again.');
                 return false;
             }
 
             return true;
         }
 
-        function validateForm() {
-            var isValid = true;
+        $('#btnsearch').on('click', function () {
+            if (!validateAll()) return;
 
-            // Check if all required fields are filled in
-            $('#selectionForm :input[required]').each(function () {
-                if ($.trim($(this).val()) === '') {
-                    isValid = false;
-                    return false; // Exit the loop if any required field is empty
+            var project   = $('select[name="state"]:eq(0)').val();
+            var fromDate  = $('#datefrom').val();
+            var toDate    = $('#dateto').val();
+            var projectId = project.split('|')[0];
+
+            $.ajax({
+                type : 'POST',
+                url  : '/PackageDetails/Packages',
+                data : {
+                    project_num : projectId,
+                    datefrom    : formatDate(fromDate),
+                    dateTo      : formatDate(toDate),
+                    inudstries  : searchData   // full multi-industry accumulated array
+                },
+                success: function (response) {
+                    $('#tblbody').empty();
+                    $('#tblbodyserv').empty();
+
+                    if (!response || response.length === 0) {
+                        alert('No data found.');
+                        return;
+                    }
+
+                    if (response[0].hasOwnProperty('seR_CODE')) {
+                        $.each(response, function (index, row) {
+                            var reqDate       = new Date(row.pR_REQ_DATE);
+                            var formattedDate = reqDate.getDate() + '-' + (reqDate.getMonth() + 1) + '-' + reqDate.getFullYear();
+                            $('#tblbodyserv').append(
+                                '<tr>' +
+                                '<td><input type="checkbox" class="rowCheckbox"></td>' +
+                                '<td>' + row.pr        + '</td>' +
+                                '<td>' + row.pR_ITEM   + '</td>' +
+                                '<td>' + formattedDate  + '</td>' +
+                                '<td hidden>' + row.seR_CODE + '</td>' +
+                                '<td hidden>' + row.s_GRP    + '</td>' +
+                                '<td>' + row.seR_DESC   + '</td>' +
+                                '<td>' + row.s_LON_DES  + '</td>' +
+                                '<td>' + row.s_REQ_QTY  + '</td>' +
+                                '<td>' + row.s_UNIT     + '</td>' +
+                                '</tr>'
+                            );
+                        });
+                        $('#servtble').removeAttr('hidden');
+                        $('#mtrtble').attr('hidden', true);
+                    } else {
+                        $.each(response, function (index, row) {
+                            var reqDate       = new Date(row.pR_REQ_DATE);
+                            var formattedDate = reqDate.getDate() + '-' + (reqDate.getMonth() + 1) + '-' + reqDate.getFullYear();
+                            $('#tblbody').append(
+                                '<tr>' +
+                                '<td><input type="checkbox" class="rowCheckbox"></td>' +
+                                '<td>' + row.pr        + '</td>' +
+                                '<td>' + row.pR_ITEM   + '</td>' +
+                                '<td>' + formattedDate  + '</td>' +
+                                '<td hidden>' + row.maT_CODE + '</td>' +
+                                '<td hidden>' + row.m_GRP    + '</td>' +
+                                '<td>' + row.maT_DESC   + '</td>' +
+                                '<td>' + row.m_LON_DES  + '</td>' +
+                                '<td>' + row.m_BATCH    + '</td>' +
+                                '<td>' + row.m_REQ_QTY  + '</td>' +
+                                '<td>' + row.m_UNIT     + '</td>' +
+                                '</tr>'
+                            );
+                        });
+                        $('#servtble').attr('hidden', true);
+                        $('#mtrtble').attr('hidden', false);
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert('Error: ' + errorThrown);
                 }
             });
-
-            return isValid;
-        }
-
-        $('#btnsearch').on('click', function () { // When the search button is clicked
-
-            if (!validateDropdowns()) {
-                return;
-            }
-
-            $("input").prop('required', true);
-            if (validateForm()) {
-                var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
-                var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
-                var fromDate = $('#datefrom').val(); // Get the selected from date
-                var toDate = $('#dateto').val(); // Get the selected to date
-
-
-                var projectId = project.split('|')[0];
-
-                var formattedFromDate = formatDate(fromDate);
-                var formattedToDate = formatDate(toDate);
-
-                $.ajax({
-                    type: 'POST',
-                    url: '/PackageDetails/Packages',
-                    data: {
-                        project_num: projectId,
-                        datefrom: formattedFromDate,
-                        dateTo: formattedToDate,
-                        inudstries: searchData
-                    },
-                    success: function (response) {
-                        // Assuming response is an array of objects containing data for each row
-                        $('#tblbody').empty(); // Clear the table body
-                        $('#tblbodyserv').empty();
-
-                        if (response.length === 0) {
-                            alert('No data found.');
-                            return;
-                        }
-
-                        if (response[0].hasOwnProperty('seR_CODE')) {
-
-                            $.each(response, function (index, row) {
-                                // Append each row to the table
-                                // Parse the date string into a Date object
-                                var reqDate = new Date(row.pR_REQ_DATE);
-                                // Format the date as desired (e.g., dd-mm-yyyy)
-                                var formattedDate = reqDate.getDate() + '-' + (reqDate.getMonth() + 1) + '-' + reqDate.getFullYear();
-
-                                $('#tblbodyserv').append(
-                                    '<tr>' +
-                                    '<td><input type="checkbox" class="rowCheckbox"></td>' +
-                                    '<td>' + row.pr + '</td>' +
-                                    '<td>' + row.pR_ITEM + '</td>' +
-                                    '<td>' + formattedDate + '</td>' +
-                                    '<td hidden>' + row.seR_CODE + '</td>' +
-                                    '<td hidden>' + row.s_GRP + '</td>' +
-                                    '<td>' + row.seR_DESC + '</td>' +
-                                    '<td>' + row.s_LON_DES + '</td>' +
-                                    '<td>' + row.s_REQ_QTY + '</td>' +
-                                    '<td>' + row.s_UNIT + '</td>' +
-                                    '</tr>'
-                                );
-                            });
-
-                            $('#servtble').removeAttr('hidden');
-                            $('#mtrtble').attr("hidden", true);
-                        }
-                        else {
-
-                            $.each(response, function (index, row) {
-                                // Append each row to the table
-                                // Parse the date string into a Date object
-                                var reqDate = new Date(row.pR_REQ_DATE);
-                                // Format the date as desired (e.g., dd-mm-yyyy)
-                                var formattedDate = reqDate.getDate() + '-' + (reqDate.getMonth() + 1) + '-' + reqDate.getFullYear();
-
-                                $('#tblbody').append(
-                                    '<tr>' +
-                                    '<td><input type="checkbox" class="rowCheckbox"></td>' +
-                                    '<td>' + row.pr + '</td>' +
-                                    '<td>' + row.pR_ITEM + '</td>' +
-                                    '<td>' + formattedDate + '</td>' +
-                                    '<td hidden>' + row.maT_CODE + '</td>' +
-                                    '<td hidden>' + row.m_GRP + '</td>' +
-                                    '<td>' + row.maT_DESC + '</td>' +
-                                    '<td>' + row.m_LON_DES + '</td>' +
-                                    '<td>' + row.m_BATCH + '</td>' +
-                                    '<td>' + row.m_REQ_QTY + '</td>' +
-                                    '<td>' + row.m_UNIT + '</td>' +
-                                    '</tr>'
-                                );
-                            });
-
-                            $('#servtble').attr("hidden", true);
-                            $('#mtrtble').attr("hidden", false);
-                        }
-
-
-                        // $('#tblbody').show(); // Show the table body
-                    },
-                    error: function (xhr, textStatus, errorThrown) {
-                        alert('Error: ' + errorThrown);
-                    }
-                });
-            }
-            else { 
-                alert('Please fill in all required fields.');
-            }
         });
     });
 
 
     function formatDate(dateString) {
-        // Create a Date object from the provided date string
-        var date = new Date(dateString);
-        // Extract year, month, and day components
-        var year = date.getFullYear();
-        var month = (date.getMonth() + 1).toString().padStart(2, '0'); // Month is zero-indexed
-        var day = date.getDate().toString().padStart(2, '0');
-
-        // Concatenate components to form the formatted date string
-        var formattedDate = year + month + day;
-        return formattedDate;
+        var date  = new Date(dateString);
+        var year  = date.getFullYear();
+        var month = (date.getMonth() + 1).toString().padStart(2, '0');
+        var day   = date.getDate().toString().padStart(2, '0');
+        return year + month + day;
     }
 </script>

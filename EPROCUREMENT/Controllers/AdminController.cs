@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EPROCUREMENT.Controllers
@@ -92,14 +93,17 @@ namespace EPROCUREMENT.Controllers
                 TempData["ErrorMessage"] = "Username is required.";
                 return RedirectToAction("Register");
             }
-            if (!admin.username.EndsWith("@siac-construction.com", StringComparison.OrdinalIgnoreCase))
+            var username = admin.username.ToLower();
+
+            if (!(username.EndsWith("@siac-construction.com") ||
+                  username.EndsWith("@siacholding.com")))
             {
-                TempData["ErrorMessage"] = "Only siac-construction.com emails are allowed.";
+                TempData["ErrorMessage"] = "Only siac-construction.com and siacholding.com emails are allowed.";
                 return RedirectToAction("Register");
             }
 
             var exists = await procurementDBContext.siac_admin
-                                .AnyAsync(x => x.username == admin.username);
+                                .AnyAsync(x => x.username.ToLower() == username);
             if (exists)
             {
                 TempData["ErrorMessage"] = "Username already exists.";
@@ -119,9 +123,10 @@ namespace EPROCUREMENT.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditAdmin(int id, string username)
         {
-            if (!username.EndsWith("@siac-construction.com", StringComparison.OrdinalIgnoreCase))
+            if (!(username.EndsWith("@siac-construction.com") ||
+                  username.EndsWith("@siacholding.com")))
             {
-                TempData["ErrorMessage"] = "Only siac-construction.com emails are allowed.";
+                TempData["ErrorMessage"] = "Only siac-construction.com and siacholding.com emails are allowed.";
                 return RedirectToAction("Register");
             }
 
@@ -219,7 +224,7 @@ namespace EPROCUREMENT.Controllers
                 else
                 {
                     user_verifyed = procurementDBContext.user_header
-                                                .Where(u => EF.Functions.Like(u.fname, $"%{searchTerm}%"))
+                                                .Where(u => EF.Functions.Like(u.company, $"%{searchTerm}%"))
                                                 .Where(h => h.verifyied == true);
                 }
 
@@ -239,7 +244,60 @@ namespace EPROCUREMENT.Controllers
             {
                 return BadRequest("Invalid search term format");
             }
+        }
 
+        [HttpGet]
+        public async Task<ActionResult> ReAssignSearch(string searchTerm , int pkg_id , CancellationToken cancellationToken)
+        {
+            IQueryable<user_header> user_verifyed;
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                var packageUsers = await procurementDBContext.packages_details
+                                            .Where(u => u.pkg_id == pkg_id)
+                                            .Select(p => p.user_id)
+                                        .ToListAsync(cancellationToken);
+
+
+                if (Regex.IsMatch(searchTerm, @"^\d{15}$"))
+                {
+                    user_verifyed = procurementDBContext.user_header
+                        .Where(u => EF.Functions.Like(u.tax_id, $"%{searchTerm}%"))
+                        .Where(h => h.verifyied == true)
+                        .Where(u => !packageUsers.Contains(u.id));
+                }
+                else if (Regex.IsMatch(searchTerm, @"^\w{3}-\w{3}-\w{3}$"))
+                {
+                    user_verifyed = procurementDBContext.user_header
+                        .Where(u => EF.Functions.Like(u.tax_id, $"%{searchTerm}%"))
+                        .Where(h => h.verifyied == true)
+                        .Where(u => !packageUsers.Contains(u.id));
+                }
+                else
+                {
+                    user_verifyed = procurementDBContext.user_header
+                        .Where(u => EF.Functions.Like(u.company, $"%{searchTerm}%"))
+                        .Where(h => h.verifyied == true)
+                        .Where(u => !packageUsers.Contains(u.id)); 
+                }
+
+                var userHeaderResult = await user_verifyed
+                                    .OrderBy(u => u.id)
+                                    .Take(10)
+                                    .ToListAsync(cancellationToken);
+
+                if (userHeaderResult.Any())
+                {
+                    return Ok(userHeaderResult);
+                }
+
+
+                return Ok("No Data Found");
+            }
+            else
+            {
+                return BadRequest("Invalid search term format");
+            }
         }
 
     }

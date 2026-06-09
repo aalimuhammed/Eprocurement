@@ -23,11 +23,6 @@ namespace EPROCUREMENT.sap
                 {
                     new { SIGN = "I", OPTION = "BT", LOW = sapPackagesApiDTO.datefrom, HIGH = sapPackagesApiDTO.dateTo }
                 },
-                //M_GROUP = new[]
-                //{
-                //	new { MATKL = "41406003" },
-                //	//new { MATKL = "10202005" }
-                //}
                 M_GROUP = sapPackagesApiDTO.inudstries.Select(dto => new { MATKL = dto.MtrSrvGrpCode }).ToList()
             };
 
@@ -35,12 +30,6 @@ namespace EPROCUREMENT.sap
 
             // Serialize JSON body
             var requestBody = JsonConvert.SerializeObject(jsonBody);
-
-            //string apiUrl = "http://siac-s4h-qas.siac.local:8000/ze-proq_package?project=10010&ind=1";
-
-            //string apiUrl = "http://62.240.120.107:8000/ze-proq_package?project=10010&ind=1";
-
-            //string apiUrl = "http://10.1.1.57:8050/ze-proq_package?project=50013&ind=1";
 
             // Create HttpClientHandler with CookieContainer
             var handler = new HttpClientHandler();
@@ -70,12 +59,6 @@ namespace EPROCUREMENT.sap
                     var responseContent = await response.Content.ReadAsStringAsync();
                     packagesResponses = JsonConvert.DeserializeObject<List<PackagesResponse>>(responseContent);
 
-                    //packagesResponses = packagesResponses
-                    //				  .GroupBy(po => po.PR)
-                    //				  .Select(g => g.First())
-                    //				  .ToList();
-
-                    //Console.WriteLine($"Response: {responseContent}");
 
                     packagesResponses = packagesResponses
                                           .OrderBy(po => po.PR)                // Primary sorting by PR
@@ -83,7 +66,6 @@ namespace EPROCUREMENT.sap
                                           .ToList();
                 }
 
-                // Return response
                 return packagesResponses;
             }
         }
@@ -145,18 +127,12 @@ namespace EPROCUREMENT.sap
                         var responseContent = await response.Content.ReadAsStringAsync();
                         packagesResponses = JsonConvert.DeserializeObject<List<PackagesResponseService>>(responseContent);
 
-                    //packagesResponses = packagesResponses
-                    //				  .GroupBy(po => po.PR)
-                    //				  .Select(g => g.First())
-                    //				  .ToList();
 
-                    //Console.WriteLine($"Response: {responseContent}");
-
-                    packagesResponses = packagesResponses
-                                       .OrderBy(po => po.PR)                // Primary sorting by PR
-                                       .ThenBy(po => po.PR_ITEM)            // Secondary sorting by PRItem
-                                       .ToList();
-                }
+                        packagesResponses = packagesResponses
+                                           .OrderBy(po => po.PR)                // Primary sorting by PR
+                                           .ThenBy(po => po.PR_ITEM)            // Secondary sorting by PRItem
+                                           .ToList();
+                    }
 
                     // Return response
                     return packagesResponses;

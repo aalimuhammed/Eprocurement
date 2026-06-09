@@ -33,7 +33,7 @@ namespace EPROCUREMENT
             services.AddControllersWithViews();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
 
-            services.Configure<MailSettings>(Configuration.GetSection("MailSettings"));
+            services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
 
 
             services.AddSession(options => {
@@ -45,7 +45,8 @@ namespace EPROCUREMENT
             var defaultConnectionString = Configuration.GetConnectionString("DefaultConnection");
 
 
-            services.AddDbContext<ProcurementDBContext>(options => options.UseMySql(defaultConnectionString, ServerVersion.AutoDetect(defaultConnectionString)));
+            services.AddDbContext<ProcurementDBContext>(options => options.UseMySql(
+                defaultConnectionString, ServerVersion.AutoDetect(defaultConnectionString)));
 
             //var mappingconfig = new MapperConfiguration(o =>
             //{
@@ -72,7 +73,7 @@ namespace EPROCUREMENT
 
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-            services.AddTransient<IMailService, MailService>();
+            services.AddTransient<IEmailService, EmailService>();
 
             services.AddScoped<IProjectsList, ProjectServices>();
             services.AddScoped<IRetrievePackage, RetrieveProjectPackages>();

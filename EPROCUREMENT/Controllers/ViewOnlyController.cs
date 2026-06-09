@@ -1,5 +1,6 @@
 ﻿using EPROCUREMENT.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EPROCUREMENT.Controllers
@@ -30,6 +31,18 @@ namespace EPROCUREMENT.Controllers
 			var industry = await _getMaterialGrp.Get_Industry(mtr_id);
 			return Ok(industry);
 		}
-		
+
+        [HttpGet]
+        public async Task<IActionResult> GetMTROrServiceGrp(int paramValue , CancellationToken cancellationToken)
+        {
+			if (paramValue == 1)
+			{
+                var materials = await _getMaterialGrp.GetMaterials(cancellationToken);
+				return Ok(materials);
+            }
+            var services = await _getMaterialGrp.GetServices(cancellationToken);
+            return Ok(services);
+        }
+
     }
 }

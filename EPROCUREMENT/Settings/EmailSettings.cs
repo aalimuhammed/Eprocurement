@@ -1,6 +1,6 @@
 ﻿namespace EPROCUREMENT.Settings
 {
-    public class MailSettings
+    public class EmailSettings
     {
         public string Mail { get; set; }
         public string DisplayName { get; set; }

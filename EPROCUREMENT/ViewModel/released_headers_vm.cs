@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace EPROCUREMENT.ViewModel
 {
@@ -20,5 +21,7 @@ namespace EPROCUREMENT.ViewModel
         public bool cancelled { get; set; }
 
 		public string admin { get; set; }
+
+        public DateTime inserted_date { get; set; }
     }
 }
