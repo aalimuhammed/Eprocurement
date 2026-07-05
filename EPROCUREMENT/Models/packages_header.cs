@@ -20,14 +20,10 @@ namespace EPROCUREMENT.Models
 		public int pkg_num { get; set; }
 
 		public bool bid { get; set; }
-
 		public bool cancelled { get; set; }
-
 		public bool excl_import { get; set; }
-
 		public int? assigned_by { get; set; }
-
 		public bool is_service { get; set; }
-
+        public string currency { get; set; }
     }
 }

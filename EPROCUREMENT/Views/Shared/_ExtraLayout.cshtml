@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var controller = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["Action"]?.ToString();
+}
+
+<!DOCTYPE html>
 
 <html>
 <head>
@@ -14,13 +19,12 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
 
-    <title>SIAC E-PROCUREMENT </title>
+    <title>SIAC E-PROCUREMENT</title>
     <!-- Font Icon -->
     <link rel="stylesheet" href="~/newpages/fonts/material-icon/css/material-design-iconic-font.min.css">
-    <link rel="icon" href="data:image/png;base64,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" type="imag/gif" sizes="16x16">
-    <link rel="stylesheet" href="~/css/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAAB9CAMAAADQgdxqAAAAilBMVEX///8ANnvyizAAM3n4+vvv8vcALXUEOX0AKnPm6/KIosLBzt8cS4nQ2ufg5u+uwNULPYCVrMgyXZV1krgcR4bxhSU5ZJkAJXDZ4etUd6YnVI8WQoKjt9BDa55afapniLH++fP97uHyjzj2qWf61bT5zKP0nlL73sP85dHzlEH4vov2r3H3t3/wfhnEFus1AAAJoklEQVR4nO1aiZKbOBAdLCFuxGXG3Njj8Zz5/9/bbgkwCDyb2WzKIcXbZFPGMvRT3y0eHjZs2LBhw4YNGzZs2LBhw4YNGzZs+NtAPdu5twz/C6wws/17C/E/gIaRltv6vcX4dfCKMJKG9N5y/CKokwVMY0bKV87EqQtGNNBJtWom1GsCxgxNI6ZWOytm4scu0yRY0nirZWLZORuIEHe16QR4ELSrjgnLbX+VOqFhSrQxSLTKxEh5pTHNGBFhWhqujwnwCJg21Yipxd695fo2nMwgxJgSYW5o3Vuu78KrFX0YwCOPD/eW67vwGtecerpGSBKvLmod4oQxQ+XRrE4fOiQQRR+Q2bPVOboOCWTKwyBMy1ZXa+k8NUzVP4yK43fH472l+wZ4ZSh2ZTAjKlEf7fP53tL9PBwIvGrAMnMbE8jx+enj5d7y/Sy8ulDsChNhjD17e37bn55e7y3hz8FrCqZWJloRoz7a58t+vz99rIKJDwlEtStsqeCr4/nyYwc4vX/p8L89tNEvPg3ATmrGI6ixNWzPl90eiewvN5lQquuWPoOv0+vzaHdxQQI6+s2SgFQsmD7AE4vV1cjDnFTuGHhFs96en/aCB7C5PC8yobrDQ9uGPxPA55J7g2Qex4tx6M0mZVY5/CYO50mLPvgOL9UHxGFYcudgTZbr4bgj7IgEKSaQ9uVJ2JVk8nRu5zz0g2PXVeTOEWWN7Rw6wXmdBEliVKVaR1Oe4jcCQR6rjQ+1DjzOqlQ8IBngRmlWNyEfzxNoWaFnT8BIxEGC9vXptN8NOC0EYerF8IwkMOYIEtdNG0cy4VlADINFs4YAwgzpf6FpUaloTHfqyE2KIpg+IQgKuHue2tf6ifLMUOwKiEQh8nj53I147PZvH6+KTughdk2TEcLMRwVwlZmm2w1heAa7Qx5nRKzQJfAFLMX/m0Y9reyAR4D3Z3CrCRjCJFHYV7RipKg6upHYaNzHj90U+7d3JQjrYYFyCK/CvwO07iIJbGHIsF0Q3k2VCHWqcfoiWjAdNx9qvIc2uXX3AHGNVXa3koNmlY5Q07qE/jm2q2WH9xpIP2ATRpLFIzRN3FTGown/PcpZJRAhC0T8JhFESFQnwk+Z8M3rPuWPKLIZRGmVdagAaa6Z+FzTzbqljVw5zYQRBg8KClGIAJWnKROeCXWypOaHK3zft3wncxOwbqNCK71BhJau1GRug+0R7EeD+nB1YC+TDWuRNnZYdggBdpwWwrgM9wsiJJdTk5enOZHd5TxmUlZCySznFh1BWo2Nuqlt57ZGHJzYwM+N2KNlytA0TNe+LuE5hiFIaaHnWwNgn3yPN8LCjKBfGkPsVZkEVcfkMtMJBOGXdkQk64iUhyGn9VQO3HEcD/Rzk4gVB0JQA2PkIRYWzoz0mkzKQtzd5fMmFTSOqOteuU5cqM4OP61K9Pb25TLTyW4/DsJgWkxSt50OHuDgW7p16HXzcIMIdEBiD7si20mlHZG4X0PDQG7T0tBW9+Tzhs9Onajhl5hFxlEnWDDOiJw+r0HYa0ypzyLqfbEGNODtsY3Jt5dpgQj1MJKBW5BaKI2GrikeHvXHS5IIIdFSt91XNtcLvFajlmZAQMeM+HB8P81U8gPqx56JZRcyFrIutANE8NWMALJvBcZNbxHR7UAIPpwmQSshfbTqftQR0dKfGxvoPJu7iVY0qLT29XM/t663IXRRp3bNKwdJQ1KD7Av5N++GlAtEeCTFdMuuZAJBpGH3/v5NIg9+mc6SO3SHsSey+9NCEL6GLgsqISyEChQbb0E6QuajSNXMFdF3gcihEa7JgtSxfHArCAteHBiD8/8HItSyI1Uloj/s69+5w1/60EV1zyttiLIiUaVpGuUCbtHdxRTdwJyIHkYiFbKkskVqQNSJIVO2nG1+lwjsjh2ZKhWm5Q0yOT5f5kRO1yCMTmdZIoRwAZm27FqeeplVuZQQoTbpKlXwpQj44980B6XiiR/LhR6/JEKp4uwCng21m2pdj66Nm3l8nxHZ7feyzRoyYOedtL+I0VAmgcheIuLH0tPRCM1RoQlOJqhUzsM4as0bLqrLbePKZS/OZ8MHICL4nueRa7//EBMiHa37cLAWWjsaRl8QwaJXk3XfqLBlXQWqmUnjX/OIy2fnM8BD2nCufuHELiPT8x1pWlg8znhA9SjqYJ1jxoBCaD7ntqBfu0nEyXDbDALFoIIoEckeYpkOpVgi40FdYokyNLpQpRx43WlxtoNOo41TfD98mBfzu1EDT0OovAMtqEr/+hTxSJ9XgZAinRaNYm8teWwMKcQOFdiyToQsCU93clGLGUUWghE5AzgPM8FRG2qt0Q7Ck6/WBeG3Fs3d8fNtIfwOyd0x0MohhtbXEh6VFNeVK/ZcLeN9occI9wxyuO0dFHg8wnRKRDLRaykSSSIs3keFfCR5sCSaEXmwympoeYmWNHLq+642JYDT51BuWcBeyEREAsSOVOxTQEy5sVrsq0SoB/KhRy8d6enU7sIddCZ4oCmr0q4rlP9IdxIeNjRWYzeBNqZ3E9NoRE5qn9++jL0Pvp10fcDQePf9t9Arycuu1R0RsUW6IEb3nQIvM0WLldQHcLTInCUGuUF4d5bYiykG0gkRW/VYZGLc0Z4Xisbd06gl0Z0mD5jar3dgRt6/88UrcQXzPOWR/DqxF48m9TCRAVmD7z07S5P5QECEarz7fLwkmWDoQrqZnMKf57lwBwGrHf0E+qdMzDlmSNwoi/l1HGQUhZHCfcHTDbHg1hGS14gFRgALKE6b0nw6DErwY453t5ZUipvhxVBKmySTUfK81Fi9KW071ChigDYDVPGe1z9JDujs0ENX7xbwG6+1Ua+7HY5IqA4NGu863AHwmTuec4vHAwZhqB/lCwLtQquLgxR13qhjtSb6zwlEkhxEpVZ3USwWy62br+fR/m7S9CxRLExGprJl++r9PupkoH8RaF6X6t63z+W56RKWVowXfyHF0pJbd77JJJb6eF0YokDgXcXpgoQueBw/5zR2EHjvLd03QGWBtZDQpxOUVeD4POexgwRyb7m+i/b59K8JZA1YSugQsJYPev5gLM/l5gnkT0e7kND/9TD0T0T7/mOuj5UcT0/QPi/wWMsLAxMc32exd1WJ8IrjxzT6ni6rSyAS41NpEbCWzqVXgXZ8xLO/vLf3Fug/A98Iugbe9t7i/AKOz/JdGghY60sgE3RzIEgg6+YxMFlhIlQALeLpx1oTyAR4WHX5C3jgy3Pvq00gU7y+rN3RN2zYsGHDhg0bNmzYsGHDhg0bNmzY8NvxD4CL0nlC+ZArAAAAAElFTkSuQmCC" type="image/png" sizes="16x16">
 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
     <!-- Libraries Stylesheet -->
     <link href="~/vendorlogin/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
@@ -35,24 +39,301 @@
 
     <!-- Template Stylesheet -->
     <link href="~/vendorlogin/css/style.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="~/css/style.css">
+
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
     <style>
+        :root {
+            /* Brand colors sampled directly from the SIAC Construction logo */
+            --siac-blue: #1f419b;
+            --siac-blue-dark: #16306f;
+            --siac-blue-light: #2c54c2;
+            --siac-orange: #f5821f;
+            --siac-orange-dark: #d96b0f;
+            /* Aliases kept so existing rules below don't need renaming */
+            --siac-dark: var(--siac-blue-dark);
+            --siac-dark-2: var(--siac-blue);
+            --siac-accent: var(--siac-orange);
+            --siac-green: var(--siac-blue);
+            --page-max-width: 1280px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            min-height: 100%;
+        }
+
+        body {
+            background: #f4f6f9;
+            font-family: 'Open Sans', sans-serif;
+            color: #1f2933;
+        }
+
         .custom-image {
-            width: 250px; /* Adjust width as needed */
-            height: auto; /* Maintain aspect ratio */
+            width: 220px;
+            height: auto;
+            max-width: 100%;
+        }
+
+        /* ================= NAVBAR ================= */
+        .container-fluid.sticky-top {
+            background: #ffffff !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border-bottom: 1px solid #e6e9ec;
+        }
+
+        .navbar {
+            max-width: var(--page-max-width);
+            margin: 0 auto;
+            width: 100%;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .navbar-brand h1 {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-nav .nav-link {
+            font-weight: 600;
+            font-size: .92rem;
+            text-transform: uppercase;
+            letter-spacing: .02em;
+            color: var(--text-main, #1f2933) !important;
+            padding: 1.6rem 1rem !important;
+            position: relative;
+            transition: color .2s ease;
+        }
+
+            .navbar-nav .nav-link.active {
+                color: var(--siac-blue) !important;
+            }
+
+                .navbar-nav .nav-link.active::after {
+                    transform: scaleX(1);
+                }
+
+
+            .navbar-nav .nav-link:hover,
+            .navbar-nav li.active .nav-link {
+                color: var(--siac-blue) !important;
+            }
+
+            .navbar-nav .nav-link::after {
+                content: "";
+                position: absolute;
+                left: 1rem;
+                right: 1rem;
+                bottom: 14px;
+                height: 2px;
+                background: var(--siac-accent);
+                transform: scaleX(0);
+                transition: transform .2s ease;
+            }
+
+            .navbar-nav .nav-link:hover::after,
+            .navbar-nav li.active .nav-link::after {
+                transform: scaleX(1);
+            }
+
+        .nav-item.dropdown > .nav-link.dropdown-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dropdown-menu {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+            padding: 8px;
+            margin-top: 10px !important;
+        }
+
+            .dropdown-menu .dropdown-item {
+                border-radius: 6px;
+                padding: 10px 14px;
+                font-size: .9rem;
+                font-weight: 500;
+                color: #1f2933;
+            }
+
+                .dropdown-menu .dropdown-item:hover {
+                    background: #f1f3f6;
+                    color: var(--siac-green);
+                }
+
+        .navbar-toggler {
+            border: none;
+            box-shadow: none !important;
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='%231f419b' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E") !important;
+        }
+
+        /* ================= MAIN CONTENT / FIX FOR SHIFTED LAYOUT ================= */
+        /* The base admin template assumes a left sidebar that doesn't exist on this
+                   vendor-facing layout. These overrides remove that offset and properly
+                   center the page content instead of letting it hug the left edge. */
+        .main-container {
+            margin-left: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            transition: none !important;
+        }
+
+        .pd-ltr-20 {
+            padding: 0 !important;
+        }
+
+        .page-content-wrap {
+            max-width: var(--page-max-width);
+            margin: 0 auto;
+            width: 100%;
+            padding: 32px 20px 10px;
+        }
+
+        .min-height-200px {
+            min-height: 200px;
+        }
+
+        /* Generic page header banner used inside content pages */
+        .page-header {
+            background: linear-gradient(135deg, var(--siac-blue) 0%, var(--siac-blue-light) 100%);
+            border-radius: 16px;
+            padding: 40px 32px;
+            box-shadow: 0 10px 26px rgba(31, 65, 155, 0.25);
+        }
+
+            .page-header h1 {
+                font-size: 2.2rem;
+                font-weight: 700;
+            }
+
+            .page-header h6 a {
+                color: rgba(255, 255, 255, 0.9);
+                text-decoration: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+                padding-bottom: 2px;
+            }
+
+        .main-container,
+        #main-wrapper,
+        .wrapper {
+            margin-left: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            left: 0 !important;
+            position: static !important;
+        }
+
+        #sidebar,
+        .sidebar,
+        .left-sidebar,
+        .sidebar-wrapper,
+        .nav-left-sidebar,
+        #sidebar-menu {
+            display: none !important;
+            width: 0 !important;
+        }
+
+        html, body {
+            overflow-x: hidden;
+        }
+        /* ---- END ADDED BLOCK ---- */
+
+        .custom-image {
+            width: 220px;
+            height: auto;
+            max-width: 100%;
+        }
+
+        /* ================= FOOTER ================= */
+        .footer-wrap {
+            max-width: var(--page-max-width);
+            margin: 24px auto 30px;
+            text-align: center;
+            background: #ffffff;
+            border: 1px solid #e6e9ec;
+            border-radius: 12px;
+            padding: 16px 20px;
+            color: #6b7280;
+            font-size: .9rem;
+        }
+
+            .footer-wrap a {
+                color: var(--siac-green);
+                font-weight: 600;
+                text-decoration: none;
+            }
+
+                .footer-wrap a:hover {
+                    text-decoration: underline;
+                }
+
+        /* ================= RESPONSIVE ================= */
+        @@media (max-width: 991px) {
+            .navbar-collapse {
+                background: #ffffff;
+                border: 1px solid #e6e9ec;
+                border-radius: 10px;
+                padding: 10px 16px;
+                margin-top: 12px;
+            }
+
+            .navbar-nav .nav-link {
+                padding: .8rem 0.5rem !important;
+            }
+
+                .navbar-nav .nav-link::after {
+                    display: none;
+                }
+        }
+
+        @@media (max-width: 768px) {
+            .page-content-wrap {
+                padding: 20px 14px 6px;
+            }
+
+            .page-header {
+                padding: 26px 20px;
+                border-radius: 12px;
+            }
+
+                .page-header h1 {
+                    font-size: 1.6rem;
+                }
+
+            .custom-image {
+                width: 170px;
+            }
+        }
+
+        @@media (max-width: 480px) {
+            .footer-wrap {
+                margin: 18px 14px 22px;
+                font-size: .82rem;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Navbar Start -->
-    <div class="container-fluid sticky-top bg-dark bg-light-radial shadow-sm px-5 pe-lg-0">
-        <nav class="navbar navbar-expand-lg bg-dark bg-light-radial navbar-dark py-3 py-lg-0">
-            <a href="index.html" class="navbar-brand">
+    <div class="container-fluid sticky-top px-3 px-lg-0">
+        <nav class="navbar navbar-expand-lg navbar-white py-2 py-lg-0">
+            <a href="@Url.Action("VendorPackages", "ExternalUser")" class="navbar-brand">
                 <h1 class="m-0 display-4 text-uppercase text-white">
-                    <img src="https://www.siac.com.eg/sites/all/themes/siac/images-siac/logo@2x.png" alt="Custom Image" class="custom-image me-2">
-
+                    <img src="https://www.siac.com.eg/sites/all/themes/siac/images-siac/logo@2x.png" alt="SIAC Logo" class="custom-image">
                 </h1>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
@@ -60,19 +341,33 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <div class="navbar-nav ms-auto py-0">
-                    <a href="@Url.Action("VendorPackages" , "ExternalUser")" class="nav-item nav-link">New Packages</a>
-                    <a href="@Url.Action("ReBidding" , "Bidding")" class="nav-item nav-link">My Submitted Bids</a>
-                    <a href="@Url.Action("AwardedPackages" , "Bidding")" class="nav-item nav-link">Bid Result/Status</a>
-                   @*  <a href="@Url.Action("NotAwardedPackages" , "Bidding")" class="nav-item nav-link">Not Awarded Packages</a> *@
+
+                    <a href="@Url.Action("VendorPackages", "ExternalUser")"
+                       class="nav-item nav-link @(controller == "ExternalUser" && action == "VendorPackages" ? "active" : "")">
+                        New Packages
+                    </a>
+
+                    <a href="@Url.Action("ReBidding", "Bidding")"
+                       class="nav-item nav-link @(controller == "Bidding" && action == "ReBidding" ? "active" : "")">
+                        My Submitted Bids
+                    </a>
+
+                    <a href="@Url.Action("AwardedPackages", "Bidding")"
+                       class="nav-item nav-link @(controller == "Bidding" && action == "AwardedPackages" ? "active" : "")">
+                        Bid Result/Status
+                    </a>
+
                 </div>
 
-                <div class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle " data-bs-toggle="dropdown">Actions</a>
-                    <div class="dropdown-menu m-0">
-                        <a href="@Url.Action("ExternalVendorProfile" , "VendorLogin")" class="dropdown-item">Profile</a>
-                        <a href="@Url.Action("VendorPackages" , "ExternalUser")" class="dropdown-item">Home Page</a>
-                        <a href="@Url.Action("VendorResetPassword" , "VendorLogin")" class="dropdown-item">Change Password</a>
-                        <a href="@Url.Action("Index" , "VendorLogin")" class="dropdown-item">Logout</a>
+                <div class="navbar-nav nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i> Actions
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end m-0">
+                        <a href="@Url.Action("ExternalVendorProfile", "VendorLogin")" class="dropdown-item">Profile</a>
+                        <a href="@Url.Action("VendorPackages", "ExternalUser")" class="dropdown-item">Home Page</a>
+                        <a href="@Url.Action("VendorResetPassword", "VendorLogin")" class="dropdown-item">Change Password</a>
+                        <a href="@Url.Action("Index", "VendorLogin")" class="dropdown-item">Logout</a>
                     </div>
                 </div>
             </div>
@@ -84,17 +379,19 @@
         <div class="mobile-menu-overlay"></div>
         <div class="main-container">
             <div class="pd-ltr-20 xs-pd-20-10">
-                <div class="min-height-200px">
-                    @RenderBody()
-                </div>
-                <div class="footer-wrap pd-20 mb-20 card-box">
-                    SIAC E-Procurement <a href="#" target="_blank">SIAC SOFTWARE DEVELOPMENT SECTION</a>
+                <div class="page-content-wrap">
+                    <div class="min-height-200px">
+                        @RenderBody()
+                    </div>
+                    <div class="footer-wrap mb-20">
+                        SIAC E-Procurement &mdash; <a href="#" target="_blank">SIAC Software Development Section</a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
     <!-- JavaScript Libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="~/vendorlogin/lib/easing/easing.min.js"></script>
@@ -104,28 +401,54 @@
     <script src="~/vendorlogin/lib/tempusdominus/js/moment-timezone.min.js"></script>
     <script src="~/vendorlogin/lib/tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
     <script src="~/vendorlogin/lib/isotope/isotope.pkgd.min.js"></script>
-    <script src="~/vendorlogin/ lib/lightbox/js/lightbox.min.js"></script>
+    <script src="~/vendorlogin/lib/lightbox/js/lightbox.min.js"></script>
 
     <script src="~/vendors/scripts/core.js"></script>
     <script src="~/vendors/scripts/script.min.js"></script>
     <script src="~/vendors/scripts/process.js"></script>
     <script src="~/vendors/scripts/layout-settings.js"></script>
-</body>
-<script>
-    $(document).ready(function () {
-        // Get the current URL path and remove the leading slash
-        var currentPath = window.location.pathname.substr(1);
 
-        // Find the <a> elements inside the navbar and iterate over them
-        $('.navbar-nav a').each(function () {
-            var href = $(this).attr('href');
+    <script>
+        $(document).ready(function () {
+            var currentPath = window.location.pathname.replace(/\/+$/, '').toLowerCase();
 
-            // Check if the current path matches the href attribute of the <a> element
-            if (href === currentPath) {
-                // Add the 'active' class to the parent <li> element
-                $(this).parent('li').addClass('active');
-            }
+            $('.navbar-nav a.nav-link').each(function () {
+                var href = $(this).attr('href');
+                if (!href) return;
+
+                var hrefPath = href.split('?')[0].replace(/\/+$/, '').toLowerCase();
+
+                if (hrefPath === currentPath) {
+                    $(this).closest('li, .nav-item').addClass('active');
+                }
+            });
         });
-    });
-</script>
+
+        (function () {
+            function forceCenterContent() {
+                $('.main-container, .pd-ltr-20, .xs-pd-20-10, #main-wrapper, .wrapper').each(function () {
+                    this.style.setProperty('margin-left', '0', 'important');
+                    this.style.setProperty('width', '100%', 'important');
+                    this.style.setProperty('max-width', '100%', 'important');
+                    this.style.setProperty('left', '0', 'important');
+                    this.style.setProperty('position', 'static', 'important');
+                });
+                $('body').removeClass('menu-pin menu-behind sidebar-noneoverflow');
+            }
+
+            forceCenterContent();
+            $(window).on('resize', forceCenterContent);
+
+            var target = document.querySelector('.main-container') || document.body;
+            var observer = new MutationObserver(forceCenterContent);
+            observer.observe(target, { attributes: true, attributeFilter: ['style', 'class'] });
+            observer.observe(document.body, { attributes: true, attributeFilter: ['style', 'class'] });
+        })();
+
+
+    </script>
+
+
+
+</body>
 </html>

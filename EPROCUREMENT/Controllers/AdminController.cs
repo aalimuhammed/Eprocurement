@@ -51,6 +51,10 @@ namespace EPROCUREMENT.Controllers
         {
             return View();
         }
+        public IActionResult AssignMaterialGrp()
+        {
+            return View();
+        }
 
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel loginModel)

@@ -15,6 +15,7 @@ namespace EPROCUREMENT.DTO
         public int assigned_by { get; set; }
 
         public string filePath { get; set; }
+        public string currency { get; set; }
 
         public List<SelectedRowsSrvDTO> selected_rows { get; set; }
         public List<int> user_id { get; set; }

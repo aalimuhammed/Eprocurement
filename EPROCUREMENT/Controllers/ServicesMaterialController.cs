@@ -1,5 +1,8 @@
-﻿using EPROCUREMENT.Services.Interfaces;
+﻿using EPROCUREMENT.DTO;
+using EPROCUREMENT.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EPROCUREMENT.Controllers
@@ -20,5 +23,20 @@ namespace EPROCUREMENT.Controllers
             return Ok(result);
         }
 
+        [HttpPost]
+        public async Task<IActionResult> AssignNewMaterialGroup(
+            [FromBody] AssignNewMaterialGroupDTO assignNewMaterialGroupDTO, 
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var result = await _serviceMaterials.AssignNewMaterialGroup(assignNewMaterialGroupDTO, cancellationToken);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

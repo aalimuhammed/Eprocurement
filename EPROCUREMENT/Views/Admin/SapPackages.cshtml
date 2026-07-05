@@ -5,15 +5,67 @@
         background-color: #ffff99;
     }
 
+    /* ── Busy / loading overlay (now fully styled & reusable) ── */
     #page-overlay {
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
+        background-color: rgba(0, 0, 0, 0.55);
         z-index: 9999;
         display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+        #page-overlay .busy-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            background: #ffffff;
+            padding: 28px 36px;
+            border-radius: 10px;
+            box-shadow: 0 6px 24px rgba(0,0,0,.35);
+            min-width: 220px;
+            max-width: 90vw;
+        }
+
+        #page-overlay .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            color: #1a73e8;
+        }
+
+        #page-overlay .busy-text {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+        }
+
+    /* Inline button spinner (used on the buttons themselves) */
+    .btn-spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255,255,255,.55);
+        border-top-color: #fff;
+        border-radius: 50%;
+        margin-right: 6px;
+        vertical-align: -2px;
+        animation: btnSpin .6s linear infinite;
+    }
+
+    @@keyframes btnSpin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
     }
 
     /* ── Industry multi-select – professional tag UI ── */
@@ -61,18 +113,15 @@
     }
 
     @@keyframes tagIn {
-        from
+        from {
+            opacity: 0;
+            transform: scale(.85);
+        }
 
-    {
-        opacity: 0;
-        transform: scale(.85);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
     }
 
     .industry-tag .remove-tag {
@@ -129,17 +178,102 @@
     #industryHiddenSelect {
         display: none;
     }
+
+    /* ── NEW: Table filter toolbar ── */
+    .table-filter-row th {
+        background: #f7f9fb;
+        padding: 6px 6px;
+        border-top: none;
+    }
+
+    .col-filter {
+        width: 100%;
+        font-size: 12px;
+        padding: 4px 6px;
+        height: 30px;
+        border: 1px solid #dfe3e8;
+        border-radius: 4px;
+    }
+
+    .table-responsive-wrap {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .no-results-row td {
+        text-align: center;
+        color: #9aa3ad;
+        font-style: italic;
+        padding: 18px;
+    }
+
+    /* ── NEW: Responsive tweaks ── */
+    @@media (max-width: 991px) {
+        .pd-20 {
+            padding: 14px !important;
+        }
+    }
+
+    @@media (max-width: 767px) {
+        .clearfix.mb-20 .pull-left,
+        .clearfix.mb-20 .pull-right {
+            float: none !important;
+            display: block;
+            width: 100%;
+        }
+
+            .clearfix.mb-20 .pull-right label,
+            .clearfix.mb-20 .pull-right .btn {
+                display: block;
+                width: 100%;
+                margin: 0 0 8px 0;
+                text-align: left;
+            }
+
+            .clearfix.mb-20 .pull-right input[type="file"] {
+                display: block;
+                width: 100%;
+                margin-top: 6px;
+            }
+
+        .text-center .btn {
+            width: 100%;
+        }
+
+        #industryTagsWrapper {
+            max-height: 110px;
+        }
+
+        .modal-dialog {
+            margin: 8px;
+        }
+
+        .col-filter {
+            font-size: 11px;
+        }
+    }
+
+    @@media (max-width: 575px) {
+        .table-filter-row {
+            display: none; /* keep small screens uncluttered; horizontal scroll still works */
+        }
+
+            .table-filter-row.force-show {
+                display: table-row;
+            }
+    }
 </style>
 
 <h2></h2>
 
 <!-- Custom Modal -->
-<div class="modal fade" id="customAlert" tabindex="-1" role="dialog" aria-labelledby="customAlertTitle" aria-hidden="true">
+<div class="modal fade" id="customAlert" tabindex="-1" role="dialog" aria-labelledby="customAlertTitle" aria-hidden="true" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="customAlertTitle">Success</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" id="customAlertCloseIcon" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -147,14 +281,14 @@
                 <p id="customAlertMessage" class="text-center" style="font-size: 20px;"></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" id="customAlertCloseBtn">Close</button>
             </div>
         </div>
     </div>
 </div>
 
 <div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="alertModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-dialog-scrollable" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="alertModalLabel">Manual Assign</h5>
@@ -166,28 +300,32 @@
                 <div class="form-group">
                     <input type="text" id="searchTextBox" class="form-control" placeholder="Search by Namr Or Tax-ID">
                 </div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Vendor Name</th>
-                            <th>Tax ID</th>
-                            <th>Select</th>
-                        </tr>
-                    </thead>
-                    <tbody id="searchResultsBody"></tbody>
-                </table>
+                <div class="table-responsive-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Vendor Name</th>
+                                <th>Tax ID</th>
+                                <th>Select</th>
+                            </tr>
+                        </thead>
+                        <tbody id="searchResultsBody"></tbody>
+                    </table>
+                </div>
 
                 <h4>Selected Values</h4>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Vendor Name</th>
-                            <th>Tax ID</th>
-                            <th>Cancel</th>
-                        </tr>
-                    </thead>
-                    <tbody id="selectedValues"></tbody>
-                </table>
+                <div class="table-responsive-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Vendor Name</th>
+                                <th>Tax ID</th>
+                                <th>Cancel</th>
+                            </tr>
+                        </thead>
+                        <tbody id="selectedValues"></tbody>
+                    </table>
+                </div>
 
                 <button type="button" id="btnrelease" class="btn btn-success">Release</button>
             </div>
@@ -195,6 +333,14 @@
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- ── NEW: Busy / processing overlay ── -->
+<div id="page-overlay">
+    <div class="busy-box">
+        <div class="spinner-border" role="status" aria-hidden="true"></div>
+        <div id="page-overlay-text" class="busy-text">Processing…</div>
     </div>
 </div>
 
@@ -218,7 +364,7 @@
 
         <!-- ── NEW ROW: Type dropdown ── -->
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6 col-sm-12">
                 <div class="form-group">
                     <label>Select Resource Type <span style="color:red">*</span></label>
                     <select class="form-control" id="typeSelect" style="width: 100%; height: 38px;">
@@ -232,7 +378,7 @@
         <!-- ── END NEW ROW ── -->
 
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6 col-sm-12">
                 <div class="form-group">
                     <label>Select Material Group <span style="color:red">*</span></label>
                     <select class="custom-select2 form-control" id="mtrgrp" style="width: 100%; height: 38px;" disabled>
@@ -243,7 +389,7 @@
         </div>
 
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6 col-sm-12">
                 <div class="form-group">
                     <label>Select Project <span style="color:red">*</span></label>
                     <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
@@ -251,7 +397,7 @@
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-6 col-sm-12">
                 <div class="form-group">
                     <label>Select Industry <span style="color:red">*</span></label>
                     <div class="industry-field-wrap">
@@ -264,16 +410,30 @@
                     </select>
                 </div>
             </div>
+
+            <div class="col-md-6 col-sm-12">
+                <div class="form-group">
+                    <label>Select Currency <span style="color:red">*</span></label>
+                    <select class="form-control" id="currencySelect" style="width: 100%; height: 38px;">
+                        <option value="">Please Select Currency</option>
+                        <option value="EGP">EGP</option>
+                        <option value="USD">USD</option>
+                        <option value="EUR">EUR</option>
+                        <option value="SAR">SAR</option>
+                        <option value="AED">AED</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6 col-sm-12">
                 <div class="form-group">
                     <label>Date From : <span style="color:red">*</span></label>
                     <input type="text" class="form-control date-picker" id="datefrom" placeholder="Select Date">
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-6 col-sm-12">
                 <div class="form-group">
                     <label>Date To : <span style="color:red">*</span></label>
                     <input type="text" class="form-control date-picker" id="dateto" placeholder="Select Date">
@@ -303,62 +463,151 @@
 </div>
 
 <div class="pd-20 card-box mb-30">
-    <table class="table" id="mtrtble">
-        <thead>
-            <tr>
-                <th scope="col">
-                    <input type="checkbox" id="selectAll">
-                </th>
-                <th scope="col">PR#</th>
-                <th scope="col">line Item #</th>
-                <th scope="col">PR requisition Date</th>
-                <th hidden scope="col">Material Code</th>
-                <th hidden scope="col">Material Group</th>
-                <th scope="col">Material Desc.</th>
-                <th scope="col">Material Long Desc.</th>
-                <th scope="col">Material Batch</th>
-                <th scope="col">Material requiested QTY</th>
-                <th scope="col">Material UOM</th>
-            </tr>
-        </thead>
-        <tbody id="tblbody"></tbody>
-    </table>
 
-    <table class="table" id="servtble" hidden>
-        <thead>
-            <tr>
-                <th scope="col">
-                    <input type="checkbox" id="selectAll">
-                </th>
-                <th scope="col">PR#</th>
-                <th scope="col">line Item #</th>
-                <th scope="col">PR requisition Date</th>
-                <th hidden scope="col">Service Code</th>
-                <th hidden scope="col">Service Group</th>
-                <th scope="col">Service Desc.</th>
-                <th scope="col">Service Long Desc.</th>
-                <th scope="col">Service requiested QTY</th>
-                <th scope="col">Service UOM</th>
-            </tr>
-        </thead>
-        <tbody id="tblbodyserv"></tbody>
-    </table>
+    <div class="table-responsive-wrap">
+        <table class="table" id="mtrtble">
+            <thead>
+                <tr>
+                    <th scope="col">
+                        <input type="checkbox" id="selectAllMaterial">
+                    </th>
+                    <th scope="col">PR#</th>
+                    <th scope="col">line Item #</th>
+                    <th scope="col">PR requisition Date</th>
+                    <th hidden scope="col">Material Code</th>
+                    <th hidden scope="col">Material Group</th>
+                    <th scope="col">Material Desc.</th>
+                    <th scope="col">Material Long Desc.</th>
+                    <th scope="col">Material Batch</th>
+                    <th scope="col">Material requiested QTY</th>
+                    <th scope="col">Material UOM</th>
+                </tr>
+                <!-- ── NEW: filter row (client-side, visual filtering only) ── -->
+                <tr class="table-filter-row">
+                    <th></th>
+                    <th><input type="text" class="col-filter" data-col="1" placeholder="Filter PR#"></th>
+                    <th><input type="text" class="col-filter" data-col="2" placeholder="Filter Item#"></th>
+                    <th><input type="text" class="col-filter" data-col="3" placeholder="Filter Date"></th>
+                    <th hidden></th>
+                    <th hidden></th>
+                    <th><input type="text" class="col-filter" data-col="6" placeholder="Filter Desc."></th>
+                    <th><input type="text" class="col-filter" data-col="7" placeholder="Filter Long Desc."></th>
+                    <th><input type="text" class="col-filter" data-col="8" placeholder="Filter Batch"></th>
+                    <th><input type="text" class="col-filter" data-col="9" placeholder="Filter Qty"></th>
+                    <th><input type="text" class="col-filter" data-col="10" placeholder="Filter UOM"></th>
+                </tr>
+            </thead>
+            <tbody id="tblbody"></tbody>
+        </table>
+    </div>
+
+    <div class="table-responsive-wrap">
+        <table class="table" id="servtble" hidden>
+            <thead>
+                <tr>
+                    <th scope="col">
+                        <input type="checkbox" id="selectAllService">
+                    </th>
+                    <th scope="col">PR#</th>
+                    <th scope="col">line Item #</th>
+                    <th scope="col">PR requisition Date</th>
+                    <th hidden scope="col">Service Code</th>
+                    <th hidden scope="col">Service Group</th>
+                    <th scope="col">Service Desc.</th>
+                    <th scope="col">Service Long Desc.</th>
+                    <th scope="col">Service requiested QTY</th>
+                    <th scope="col">Service UOM</th>
+                </tr>
+                <!-- ── NEW: filter row (client-side, visual filtering only) ── -->
+                <tr class="table-filter-row">
+                    <th></th>
+                    <th><input type="text" class="col-filter" data-col="1" placeholder="Filter PR#"></th>
+                    <th><input type="text" class="col-filter" data-col="2" placeholder="Filter Item#"></th>
+                    <th><input type="text" class="col-filter" data-col="3" placeholder="Filter Date"></th>
+                    <th hidden></th>
+                    <th hidden></th>
+                    <th><input type="text" class="col-filter" data-col="6" placeholder="Filter Desc."></th>
+                    <th><input type="text" class="col-filter" data-col="7" placeholder="Filter Long Desc."></th>
+                    <th><input type="text" class="col-filter" data-col="8" placeholder="Filter Qty"></th>
+                    <th><input type="text" class="col-filter" data-col="9" placeholder="Filter UOM"></th>
+                </tr>
+            </thead>
+            <tbody id="tblbodyserv"></tbody>
+        </table>
+    </div>
+
 </div>
 
 <script>
     /* ─────────────────────────────────────────────────────────────
        SECTION 1 – unchanged helpers (row highlighting, select-all)
     ───────────────────────────────────────────────────────────── */
-    var currentPage = 1;
-    var totalPages  = 1;
 
-    $('#selectAll').change(function () {
-        $('.rowCheckbox').prop('checked', $(this).prop('checked'));
+        function highlightRows() {
+        $('.rowCheckbox:checked').closest('tr').addClass('highlighted');
+        $('.rowCheckbox:not(:checked)').closest('tr').removeClass('highlighted');
+    }
+
+    function toggleButtons() {
+        var fileNotEmpty      = $('#FileName')[0].files.length > 0;
+        var checkboxesChecked = $('.rowCheckbox:checked').length > 0;
+        $('#btnaccept, #btnmanualassign').prop('disabled', !(fileNotEmpty && checkboxesChecked));
+        $('#btnrevoke').prop('disabled', !checkboxesChecked);
+    }
+
+    $('#tblbody').on('click', 'tr', function () {
         highlightRows();
     });
 
-    $('.rowCheckbox').change(function () {
+    var currentPage = 1;
+    var totalPages  = 1;
+
+    // $('#selectAll').change(function () {
+    //     $('.rowCheckbox').prop('checked', $(this).prop('checked'));
+    //     highlightRows();
+    // });
+
+    // $('.rowCheckbox').change(function () {
+    //     highlightRows();
+    // });
+
+        $(document).on('change', '#selectAllMaterial', function () {
+
+        $('#tblbody .rowCheckbox').prop('checked', this.checked);
+
         highlightRows();
+        toggleButtons();
+    });
+
+    $(document).on('change', '#selectAllService', function () {
+
+        $('#tblbodyserv .rowCheckbox').prop('checked', this.checked);
+
+        highlightRows();
+        toggleButtons();
+    });
+
+    $(document).on('change', '.rowCheckbox', function () {
+            var visibleTable =
+        $('#tblbodyserv').is(':visible')
+            ? '#tblbodyserv'
+            : '#tblbody';
+
+    var total =
+        $(visibleTable + ' .rowCheckbox').length;
+
+    var checked =
+        $(visibleTable + ' .rowCheckbox:checked').length;
+
+    if (visibleTable === '#tblbody') {
+        $('#selectAllMaterial').prop('checked', total > 0 && total === checked);
+    } else {
+        $('#selectAllService').prop('checked', total > 0 && total === checked);
+    }
+
+        highlightRows();
+        toggleButtons();
+
     });
 
     function highlightRows() {
@@ -372,13 +621,142 @@
 
 
     /* ─────────────────────────────────────────────────────────────
-       SECTION 2 – NEW: Type → Material Group → Industry (multi)
-       All state lives in:
-         selectedType        : "Material" | "Service" | ""
-         loadedMtrGrpOptions : array of { id, name } (currently loaded)
-         industryMap         : { industryCode|industryId → { code, id, label } }
-                               tracks which industries are shown as tags
+       SECTION 1B – NEW: busy overlay helpers (purely presentational,
+       does not alter any request/response/business logic)
     ───────────────────────────────────────────────────────────── */
+    function showBusyOverlay(message) {
+        $('#page-overlay-text').text(message || 'Processing…');
+        $('#page-overlay').css('display', 'flex');
+    }
+
+    function hideBusyOverlay() {
+        $('#page-overlay').css('display', 'none');
+    }
+
+    function setButtonBusy($btn, busy, busyLabel) {
+        if (busy) {
+            if (!$btn.data('original-html')) {
+                $btn.data('original-html', $btn.html());
+            }
+            $btn.prop('disabled', true)
+                .html('<span class="btn-spinner"></span>' + (busyLabel || 'Please wait…'));
+        } else {
+            if ($btn.data('original-html')) {
+                $btn.html($btn.data('original-html'));
+            }
+        }
+    }
+
+    /* ─────────────────────────────────────────────────────────────
+       NEW: closing the mandatory success alert reloads the page.
+       The modal uses a static backdrop + disabled keyboard dismiss
+       on purpose (so the user must acknowledge it), but that also
+       means Bootstrap's own dismiss handling is bypassed here —
+       so the close icon / Close button explicitly trigger a full
+       reload instead of just calling .modal('hide').
+    ───────────────────────────────────────────────────────────── */
+    $(document).on('click', '#customAlertCloseIcon, #customAlertCloseBtn', function () {
+        location.reload();
+    });
+
+
+    /* ─────────────────────────────────────────────────────────────
+       SECTION 1C – NEW: client-side table filters (visual only,
+       does not touch searchData / selection / submission logic)
+    ───────────────────────────────────────────────────────────── */
+    function applyTableFilters($table) {
+        var filters = [];
+        $table.find('thead .col-filter').each(function () {
+            var val = $.trim($(this).val()).toLowerCase();
+            if (val) {
+                filters.push({ col: parseInt($(this).data('col'), 10), val: val });
+            }
+        });
+
+        var visibleCount = 0;
+        $table.find('tbody tr').not('.no-results-row').each(function () {
+            var $row = $(this);
+            var match = true;
+            $.each(filters, function (i, f) {
+                var cellText = $row.find('td').eq(f.col).text().toLowerCase();
+                if (cellText.indexOf(f.val) === -1) {
+                    match = false;
+                    return false;
+                }
+            });
+            $row.toggle(match);
+            if (match) visibleCount++;
+        });
+
+        $table.find('tbody .no-results-row').remove();
+        if (visibleCount === 0 && $table.find('tbody tr').not('.no-results-row').length > 0) {
+            var colCount = $table.find('thead tr:first th').length;
+            $table.find('tbody').append(
+                '<tr class="no-results-row"><td colspan="' + colCount + '">No matching rows for the current filter.</td></tr>'
+            );
+        }
+    }
+
+    $(document).on('keyup change', '#mtrtble .col-filter', function () {
+        applyTableFilters($('#mtrtble'));
+    });
+
+    $(document).on('keyup change', '#servtble .col-filter', function () {
+        applyTableFilters($('#servtble'));
+    });
+
+    function clearTableFilters() {
+        $('.col-filter').val('');
+        $('#mtrtble, #servtble').find('tbody .no-results-row').remove();
+        $('#mtrtble tbody tr, #servtble tbody tr').show();
+    }
+
+
+    /* ─────────────────────────────────────────────────────────────
+       SECTION 1D – NEW: soft reset (replaces location.reload()).
+       Restores the UI to its initial state WITHOUT a full page
+       navigation, mirroring exactly what a reload used to leave
+       the user with.
+    ───────────────────────────────────────────────────────────── */
+    function softResetUI() {
+        // Clear result tables back to empty / default visible table
+        $('#tblbody').empty();
+        $('#tblbodyserv').empty();
+        $('#mtrtble').attr('hidden', false);
+        $('#servtble').attr('hidden', true);
+        clearTableFilters();
+
+        // Reset selection state & action buttons
+        $('#selectAllMaterial, #selectAllService').prop('checked', false);
+        $('#btnaccept, #btnrevoke, #btnmanualassign').prop('disabled', true);
+
+        // Reset uploaded file
+        $('#FileName').val(null);
+
+        // Reset Manual Assign modal content
+        $('#alertModal').modal('hide');
+        $('#searchResultsBody').empty();
+        $('#selectedValues').empty();
+        $('#searchTextBox').val('');
+
+        // Reset dates
+        $('#datefrom').val('');
+        $('#dateto').val('');
+
+        // Reset project selection
+        $('select[name="state"]:eq(0)').val('').trigger('change');
+
+        // Reset Type → this cascades into clearing Material Group,
+        // industries and searchData exactly like the existing
+        // typeSelect change handler already does.
+        $('#typeSelect').val('').trigger('change');
+    }
+
+
+    /* allIndustries caches the full list from /Industry/SapIndustry so we
+       can filter client-side exactly as the original code did —
+       matching industry.id === selected mtrgrp id.                         */
+
     var selectedType        = '';
     var loadedMtrGrpOptions = [];
     var industryMap         = {};   // key = industry_code+'|'+industry_id  →  { code, id, label }
@@ -439,10 +817,6 @@
             $wrapper.append($tag);
         });
     }
-
-    /* allIndustries caches the full list from /Industry/SapIndustry so we
-       can filter client-side exactly as the original code did —
-       matching industry.id === selected mtrgrp id.                         */
 
     /* Pre-load all industries once when a type is selected (same as original page-load) */
     function preloadAllIndustries() {
@@ -733,13 +1107,6 @@
     $(document).ready(function () {
         $('#btnaccept, #btnrevoke, #btnmanualassign').prop('disabled', true);
 
-        function toggleButtons() {
-            var fileNotEmpty       = $('#FileName')[0].files.length > 0;
-            var checkboxesChecked  = $('.rowCheckbox:checked').length > 0;
-            $('#btnaccept, #btnmanualassign').prop('disabled', !(fileNotEmpty && checkboxesChecked));
-            $('#btnrevoke').prop('disabled', !checkboxesChecked);
-        }
-
         $('#FileName').on('change', function () {
             toggleButtons();
         });
@@ -754,6 +1121,7 @@
         $('#btnaccept').on('click', function () {
             var project      = $('select[name="state"]:eq(0)').val();
             var industry     = $('select[name="state"]:eq(1)').val();
+            var currencySelect = $('#currencySelect').val();
 
             var project_name  = $('select[name="state"]:eq(0) option:selected').text();
             // For multi-select, show first selected industry label in pack_name
@@ -767,6 +1135,7 @@
             var pack_name = project_name + "/" + industry_name;
 
             var selectedRowsData = [];
+            var $acceptBtn = $(this);
             $('#btnaccept, #btnrevoke, #btnmanualassign').prop('disabled', true);
 
             if ($('#tblbodyserv').is(':visible')) {
@@ -792,6 +1161,7 @@
                 formData.append('assign_type', 'N');
                 formData.append('project_id', projectId);
                 formData.append('industry_id', industryId);
+                formData.append('currency', currencySelect);
                 $.each(selectedRowsData, function (index, rowData) {
                     formData.append('selected_rows[' + index + '].pr',          rowData.pr);
                     formData.append('selected_rows[' + index + '].pR_ITEM',     rowData.pR_ITEM);
@@ -807,6 +1177,10 @@
                     data        : formData,
                     processData : false,
                     contentType : false,
+                    beforeSend  : function () {
+                        showBusyOverlay('Creating package…');
+                        setButtonBusy($acceptBtn, true, 'Creating…');
+                    },
                     success: function (response) {
                         if (response > 0) {
                             $('#customAlertMessage').text("Created " + pack_name);
@@ -816,7 +1190,11 @@
                             $("#FileName").val(null);
                         }
                     },
-                    error: function (xhr, textStatus, errorThrown) { alert('Error: ' + errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { alert('Error: ' + errorThrown); },
+                    complete: function () {
+                        hideBusyOverlay();
+                        setButtonBusy($acceptBtn, false);
+                    }
                 });
             } else {
                 $('.rowCheckbox:checked').each(function () {
@@ -844,6 +1222,7 @@
                 formData.append('assign_type', 'N');
                 formData.append('project_id', projectId);
                 formData.append('industry_id', industryId);
+                formData.append('currency', currencySelect);
                 $.each(selectedRowsData, function (index, rowData) {
                     formData.append('selected_rows[' + index + '].pr',          rowData.pr);
                     formData.append('selected_rows[' + index + '].pr_item',     rowData.pr_item);
@@ -862,6 +1241,10 @@
                     data        : formData,
                     processData : false,
                     contentType : false,
+                    beforeSend  : function () {
+                        showBusyOverlay('Creating package…');
+                        setButtonBusy($acceptBtn, true, 'Creating…');
+                    },
                     success: function (response) {
                         if (response > 0) {
                             $('#customAlertMessage').text("Created " + pack_name);
@@ -871,7 +1254,11 @@
                             $("#FileName").val(null);
                         }
                     },
-                    error: function (xhr, textStatus, errorThrown) { alert('Error: ' + errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { alert('Error: ' + errorThrown); },
+                    complete: function () {
+                        hideBusyOverlay();
+                        setButtonBusy($acceptBtn, false);
+                    }
                 });
             }
         });
@@ -882,6 +1269,7 @@
         $('#btnrelease').on('click', function () {
             var project      = $('select[name="state"]:eq(0)').val();
             var industry     = $('select[name="state"]:eq(1)').val();
+            var currencySelect = $('#currencySelect').val();
 
             var project_name  = $('select[name="state"]:eq(0) option:selected').text();
             var industry_name = $('select[name="state"]:eq(1) option:selected').first().text();
@@ -893,6 +1281,7 @@
             var pack_name = project_name + "/" + industry_name;
 
             var selectedRowsData = [];
+            var $releaseBtn = $(this);
 
             if ($('#tblbodyserv').is(':visible')) {
                 $('.rowCheckbox:checked').each(function () {
@@ -921,6 +1310,7 @@
                 formData.append('assign_type', 'M');
                 formData.append('project_id', projectId);
                 formData.append('industry_id', industryId);
+                formData.append('currency', currencySelect);
                 $.each(userIds, function (index, rowData) { formData.append('user_id[' + index + ']', rowData); });
                 $.each(selectedRowsData, function (index, rowData) {
                     formData.append('selected_rows[' + index + '].pr',          rowData.pr);
@@ -931,9 +1321,16 @@
                     formData.append('selected_rows[' + index + '].s_REQ_QTY',   rowData.s_REQ_QTY);
                     formData.append('selected_rows[' + index + '].s_UNIT',      rowData.s_UNIT);
                 });
+
+                console.log(formData);
+
                 $.ajax({
                     type: 'POST', url: '/CreatePackage/SaveSrvPackageManual',
                     data: formData, processData: false, contentType: false,
+                    beforeSend: function () {
+                        showBusyOverlay('Releasing package…');
+                        setButtonBusy($releaseBtn, true, 'Releasing…');
+                    },
                     success: function (response) {
                         if (response > 0) {
                             $('#customAlertMessage').text("Created " + pack_name);
@@ -942,9 +1339,13 @@
                             $('#btnaccept, #btnrevoke, #btnmanualassign').prop('disabled', true);
                             $("#FileName").val(null);
                         }
-                        location.reload();
+                        softResetUI();
                     },
-                    error: function (xhr, textStatus, errorThrown) { alert('Error: ' + errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { alert('Error: ' + errorThrown); },
+                    complete: function () {
+                        hideBusyOverlay();
+                        setButtonBusy($releaseBtn, false);
+                    }
                 });
             } else {
                 $('.rowCheckbox:checked').each(function () {
@@ -976,6 +1377,7 @@
                 formData.append('assign_type', 'M');
                 formData.append('project_id', projectId);
                 formData.append('industry_id', industryId);
+                formData.append('currency', currencySelect);
                 $.each(userIds, function (index, rowData) { formData.append('user_id[' + index + ']', rowData); });
                 $.each(selectedRowsData, function (index, rowData) {
                     formData.append('selected_rows[' + index + '].pr',          rowData.pr);
@@ -989,9 +1391,17 @@
                     formData.append('selected_rows[' + index + '].m_req_qty',   rowData.m_req_qty);
                     formData.append('selected_rows[' + index + '].m_uom',       rowData.m_uom);
                 });
+
                 $.ajax({
-                    type: 'POST', url: '/CreatePackage/SavePackageManual',
-                    data: formData, processData: false, contentType: false,
+                    type: 'POST',
+                    url: '/CreatePackage/SavePackageManual',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function () {
+                        showBusyOverlay('Releasing package…');
+                        setButtonBusy($releaseBtn, true, 'Releasing…');
+                    },
                     success: function (response) {
                         if (response > 0) {
                             $('#customAlertMessage').text("Created " + pack_name);
@@ -1000,9 +1410,13 @@
                             $('#btnaccept, #btnrevoke, #btnmanualassign').prop('disabled', true);
                             $("#FileName").val(null);
                         }
-                        location.reload();
+                        softResetUI();
                     },
-                    error: function (xhr, textStatus, errorThrown) { alert('Error: ' + errorThrown); }
+                    error: function (xhr, textStatus, errorThrown) { alert('Error: ' + errorThrown); },
+                    complete: function () {
+                        hideBusyOverlay();
+                        setButtonBusy($releaseBtn, false);
+                    }
                 });
             }
         });
@@ -1046,7 +1460,7 @@
                         $('#alertModal').modal('hide');
                         $('#searchResultsBody').empty();
                         $('#selectedValues').empty();
-                        location.reload();
+                        softResetUI();
                     }
                 },
                 error: function (xhr, textStatus, errorThrown) { alert('Error: ' + errorThrown); }
@@ -1087,6 +1501,10 @@
                 errors.push('• Date To is required.');
             }
 
+            if ($.trim($('#currencySelect').val()) === '') {
+                errors.push('• Currency is required.');
+            }
+
             if (errors.length > 0) {
                 alert('Please fix the following before searching:\n\n' + errors.join('\n'));
                 return false;
@@ -1118,9 +1536,13 @@
                     dateTo      : formatDate(toDate),
                     inudstries  : searchData   // full multi-industry accumulated array
                 },
+                beforeSend: function () {
+                    showBusyOverlay('Searching…');
+                },
                 success: function (response) {
                     $('#tblbody').empty();
                     $('#tblbodyserv').empty();
+                    clearTableFilters();
 
                     if (!response || response.length === 0) {
                         alert('No data found.');
@@ -1174,6 +1596,9 @@
                 },
                 error: function (xhr, textStatus, errorThrown) {
                     alert('Error: ' + errorThrown);
+                },
+                complete: function () {
+                    hideBusyOverlay();
                 }
             });
         });

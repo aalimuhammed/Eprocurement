@@ -3,10 +3,308 @@
 }
 
 <style>
+    :root {
+        --brand-primary: #1f419b;
+        --brand-primary-dark: #16306f;
+        --brand-accent: #f5821f;
+        --surface: #ffffff;
+        --surface-muted: #f7f9fb;
+        --border-soft: #e6e9ec;
+        --text-main: #1f2933;
+        --text-muted: #6b7280;
+        --radius: 14px;
+        --shadow-sm: 0 2px 6px rgba(16, 24, 40, 0.06);
+        --shadow-md: 0 8px 24px rgba(16, 24, 40, 0.08);
+    }
+
     .highlighted {
-        background-color: #ffff99; /* or any other color */
+        background-color: #fff6cc !important;
+        transition: background-color .2s ease;
+    }
+
+    /* ---------- Cards ---------- */
+    .pd-20.card-box {
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-soft);
+        padding: 24px;
+        margin-bottom: 24px;
+        transition: box-shadow .2s ease;
+    }
+
+        .pd-20.card-box:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 18px;
+    }
+
+        .section-title .badge-step {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--brand-primary);
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #eaf6ec;
+        color: #1e7e34;
+        font-size: .78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        padding: 4px 12px;
+        border-radius: 999px;
+        margin-left: auto;
+    }
+
+    /* ---------- Tables ---------- */
+    .table-responsive-wrap {
+        overflow-x: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border-soft);
+    }
+
+    .table {
+        margin-bottom: 0;
+        min-width: 600px;
+    }
+
+        .table thead th {
+            background: var(--surface-muted);
+            color: var(--text-main);
+            font-size: .8rem;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            border-bottom: 2px solid var(--border-soft);
+            white-space: nowrap;
+        }
+
+        .table tbody tr {
+            transition: background-color .15s ease;
+        }
+
+            .table tbody tr:hover {
+                background-color: var(--surface-muted);
+            }
+
+        .table tbody td {
+            vertical-align: middle;
+        }
+
+    #tblheader tr {
+        cursor: pointer;
+    }
+
+    .empty-state {
+        text-align: center;
+        color: var(--text-muted);
+        padding: 28px 12px;
+        font-size: .95rem;
+    }
+
+    /* ---------- Grand total ---------- */
+    .grand-total-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 14px;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px dashed var(--border-soft);
+    }
+
+        .grand-total-row .label {
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .grand-total-row input {
+            max-width: 220px;
+            font-weight: 700;
+            text-align: right;
+            color: var(--brand-accent);
+            background: var(--surface-muted);
+            border: 1px solid var(--border-soft);
+            font-size: 1.05rem;
+        }
+
+    /* ---------- VAT note ---------- */
+    .vat-note {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #fff4ea;
+        border: 1px solid #fbdcb9;
+        color: var(--brand-accent);
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-weight: 600;
+        font-size: .92rem;
+        margin: 0;
+    }
+
+    /* ---------- Form (read-only details) ---------- */
+    #biddingForm .col-form-label {
+        font-weight: 600;
+        color: var(--text-main);
+        font-size: .9rem;
+        margin-bottom: 6px;
+    }
+
+    #biddingForm .form-control {
+        border-radius: 8px;
+        border: 1px solid var(--border-soft);
+        padding: 10px 12px;
+        font-size: .95rem;
+        background-color: var(--surface-muted);
+        color: var(--text-main);
+        font-weight: 600;
+    }
+
+    .form-group.row {
+        row-gap: 16px;
+    }
+
+    /* ---------- Toast / alert banner ---------- */
+    #appToastContainer {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 380px;
+        width: calc(100% - 40px);
+    }
+
+    .app-toast {
+        background: var(--surface);
+        border-left: 5px solid #dc3545;
+        border-radius: 10px;
+        box-shadow: var(--shadow-md);
+        padding: 14px 16px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        animation: toastIn .25s ease;
+        font-size: .92rem;
+    }
+
+        .app-toast.success {
+            border-left-color: #1e7e34;
+        }
+
+        .app-toast .icon {
+            font-size: 1.2rem;
+            line-height: 1;
+            margin-top: 1px;
+        }
+
+        .app-toast .body {
+            flex: 1;
+        }
+
+        .app-toast .title {
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 2px;
+        }
+
+        .app-toast .msg {
+            color: var(--text-muted);
+        }
+
+        .app-toast .close-toast {
+            cursor: pointer;
+            color: var(--text-muted);
+            font-weight: 700;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+    @@keyframes toastIn {
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ---------- Responsive tweaks ---------- */
+    @@media (max-width: 768px) {
+        .pd-20.card-box {
+            padding: 16px;
+        }
+
+        .grand-total-row {
+            justify-content: stretch;
+        }
+
+            .grand-total-row input {
+                max-width: 100%;
+                flex: 1;
+            }
+
+        #appToastContainer {
+            top: 10px;
+            right: 10px;
+            left: 10px;
+            width: auto;
+            max-width: none;
+        }
+
+        .container-fluid.page-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .section-title {
+            flex-wrap: wrap;
+        }
+
+        .status-pill {
+            margin-left: 0;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .table thead th,
+        .table tbody td {
+            font-size: .82rem;
+            padding: .5rem .4rem;
+        }
     }
 </style>
+
+<div id="appToastContainer"></div>
+
 <div class="container-fluid page-header">
     <h1 class="display-3 text-uppercase text-white mb-3">Awarded Packages</h1>
     <div class="d-inline-flex text-white">
@@ -17,76 +315,81 @@
 <br />
 
 <div class="pd-20 card-box">
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">PackageName</th>
-                <th scope="col">PackageFile</th>
-            </tr>
-        </thead>
-        <tbody id="tblheader">
-        </tbody>
-    </table>
+    <div class="section-title">
+        <span class="badge-step">1</span> Select an Awarded Package
+        <span class="status-pill">&#10003; Awarded</span>
+    </div>
+    <div class="table-responsive-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Package Name</th>
+                    <th scope="col">Package File</th>
+                </tr>
+            </thead>
+            <tbody id="tblheader">
+                <tr><td colspan="2" class="empty-state">Loading your awarded packages…</td></tr>
+            </tbody>
+        </table>
+    </div>
 </div>
-
 
 <br />
 
-<h5 style="color:green">Prices Include all taxes and deductions,(excluding VAT for the Supply Only )</h5>
-
+<div class="vat-note">
+    <span>&#9432;</span>
+    <span>Prices include all taxes and deductions (excluding VAT for the Supply Only).</span>
+</div>
 
 <br />
 
 <div class="pd-20 card-box">
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Material Desc.</th>
-                <th scope="col">Material requiested QTY</th>
-                <th scope="col">Material UOM</th>
-                <th scope="col">Price per Unit</th>
-                <th scope="col">Total</th>
-            </tr>
-        </thead>
-        <tbody id="tblbody">
-        </tbody>
-    </table>
-    <div class="form-group">
-        <p class="class=" col-sm-12 col-md-2 col-form-label"">Grand Total</p>
-        <div class="col-sm-12 col-md-10">
-            <input type="text" class="form-control form-control-sm" readonly id="txtprice_sum" />
-        </div>
+    <div class="section-title"><span class="badge-step">2</span> Item Pricing</div>
+    <div class="table-responsive-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Material Desc.</th>
+                    <th scope="col">Requested QTY</th>
+                    <th scope="col">UOM</th>
+                    <th scope="col">Price per Unit</th>
+                    <th scope="col">Total</th>
+                </tr>
+            </thead>
+            <tbody id="tblbody">
+                <tr><td colspan="5" class="empty-state">Select a package above to view its items.</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="grand-total-row">
+        <p class="label">Grand Total</p>
+        <input type="text" class="form-control form-control-sm" readonly id="txtprice_sum" placeholder="0.00" />
     </div>
 </div>
 
 <br />
 
 <div class="pd-20 card-box">
-    <div class="clearfix">
-        <div class="pull-left">
-            <h4 class="text-blue h4">Details</h4>
-        </div>
-    </div>
+    <div class="section-title"><span class="badge-step">3</span> Bid Details</div>
     <form id="biddingForm">
 
         <div class="form-group row">
-
-            <p class="col-sm-12 col-md-2 col-form-label">Advanced Payment %</p>
             <div class="col-sm-12 col-md-4">
+                <p class="col-form-label">Advanced Payment %</p>
                 <input class="form-control"
                        type="text"
                        placeholder="Your Advanced Payment %" id="txtpayment" readonly />
             </div>
 
-            <p class="col-sm-12 col-md-2 col-form-label">Material Delivery Payment %</p>
             <div class="col-sm-12 col-md-4">
+                <p class="col-form-label">Material Delivery Payment %</p>
                 <input class="form-control payment-input"
                        type="text"
                        placeholder="Material Delivery Payment %" id="materialworks" readonly />
             </div>
 
-            <p class="col-sm-12 col-md-2 col-form-label">Works/Service Payment %</p>
             <div class="col-sm-12 col-md-4">
+                <p class="col-form-label">Works/Service Payment %</p>
                 <input class="form-control payment-input"
                        type="text"
                        placeholder="Works/Service Payment %" id="workspayment" readonly />
@@ -94,25 +397,24 @@
         </div>
 
         <div class="form-group row">
-            <p class="col-sm-12 col-md-2 col-form-label">Trasportation</p>
             <div class="col-sm-12 col-md-4">
+                <p class="col-form-label">Transportation</p>
                 <input class="form-control"
                        type="text"
                        placeholder="Support Transportation" id="trasn" readonly />
             </div>
-
-            </div>
+        </div>
 
         <div class="form-group row">
-            <p class="col-sm-12 col-md-2 col-form-label">Duration in Days</p>
-            <div class="col-sm-12 col-md-4">
+            <div class="col-sm-12 col-md-6">
+                <p class="col-form-label">Duration in Days</p>
                 <input class="form-control"
                        type="text"
                        placeholder="Your duration in Days" id="duration" readonly />
             </div>
 
-            <p class="col-sm-12 col-md-2 col-form-label">Start From</p>
-            <div class="col-sm-12 col-md-4">
+            <div class="col-sm-12 col-md-6">
+                <p class="col-form-label">Start From</p>
                 <input class="form-control"
                        placeholder="Delivery Date"
                        type="date"
@@ -122,123 +424,137 @@
             </div>
         </div>
     </form>
+</div>
+
 <script>
-        $(document).ready(function () {
-            // Highlight column when a row is clicked in #tblheader
-            $('#tblheader').on('click', 'tr', function () {
-                // Remove "highlighted" class from all rows
-                $('#tblheader tr').removeClass('highlighted');
-                // Add "highlighted" class to the clicked row
-                $(this).addClass('highlighted');
-            });
+
+    // ---------- Professional toast helper ----------
+    function showAppToast(title, message, type) {
+        type = type || 'error';
+        var icon = type === 'success' ? '&#9989;' : '&#9888;';
+        var $toast = $(
+            '<div class="app-toast ' + (type === 'success' ? 'success' : '') + '">' +
+                '<div class="icon">' + icon + '</div>' +
+                '<div class="body">' +
+                    '<div class="title">' + title + '</div>' +
+                    '<div class="msg">' + message + '</div>' +
+                '</div>' +
+                '<button type="button" class="close-toast">&times;</button>' +
+            '</div>'
+        );
+        $('#appToastContainer').append($toast);
+        $toast.find('.close-toast').on('click', function () {
+            $toast.fadeOut(150, function () { $(this).remove(); });
         });
+        setTimeout(function () {
+            $toast.fadeOut(250, function () { $(this).remove(); });
+        }, 6000);
+    }
 
-        $(document).ready(function () {
-            // Make an AJAX request to fetch projects
-            $.ajax({
-                type: 'GET', // Use GET method to fetch data
-                url: '/Bidding/GetAwardedPackages',
-                success: function (response) {
+    $(document).ready(function () {
+        $('#tblheader').on('click', 'tr', function () {
+            $('#tblheader tr').removeClass('highlighted');
+            $(this).addClass('highlighted');
+        });
+    });
 
-                    console.log(response);
-                    $('#tblheader').empty();
-                    $.each(response, function (index, row) {
+    $(document).ready(function () {
+        $.ajax({
+            type: 'GET',
+            url: '/Bidding/GetAwardedPackages',
+            success: function (response) {
+                $('#tblheader').empty();
 
-                        // Append each row to the table
-                        $('#tblheader').append(
-                            '<tr>' +
-                            '<td> <a class="pkgn" href="#" data-id="' + row.id + '">' + row.pkg_name + ' </a> </td>' +
-                            '<td> <a class="fileuploaded" href="#" data-id="' + row.filename + '">' + row.filename + ' </a> </td>' +
-                            '</tr>'
-                        );
-                    });
-                },
-                error: function (xhr, textStatus, errorThrown) {
-                    alert('Error: ' + errorThrown);
+                if (!response || response.length === 0) {
+                    $('#tblheader').append('<tr><td colspan="2" class="empty-state">You have no awarded packages yet.</td></tr>');
+                    return;
                 }
-            });
 
-            // Your existing code for handling search button click and displaying table rows goes here
+                $.each(response, function (index, row) {
+                    $('#tblheader').append(
+                        '<tr>' +
+                        '<td> <a class="pkgn" href="#" data-id="' + row.id + '">' + row.pkg_name + ' </a> </td>' +
+                        '<td> <a class="fileuploaded" href="#" data-id="' + row.filename + '">' + row.filename + ' </a> </td>' +
+                        '</tr>'
+                    );
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                $('#tblheader').html('<tr><td colspan="2" class="empty-state">Unable to load awarded packages. Please refresh the page.</td></tr>');
+                showAppToast('Could Not Load Packages', 'Please refresh the page or try again later.', 'error');
+            }
         });
+    });
 
-        $(document).on('click', '#tblheader .fileuploaded', function () {
-            var rowId = $(this).data('id');
-            // Create a hidden iframe
-            var iframe = $('<iframe>', {
-                id: 'hiddenDownloader',
-                style: 'display: none'
-            });
-            $('body').append(iframe);
-
-            // Set the iframe source to the download URL
-            $('#hiddenDownloader').attr('src', '/ReleasedPackages/DownloadPackageFile?fileName=' + rowId);
-
-            // Remove the iframe after download
-            $('#hiddenDownloader').on('load', function () {
-                $(this).remove();
-            });
-
+    $(document).on('click', '#tblheader .fileuploaded', function () {
+        var rowId = $(this).data('id');
+        var iframe = $('<iframe>', {
+            id: 'hiddenDownloader',
+            style: 'display: none'
         });
+        $('body').append(iframe);
 
-        $(document).on('click', '#tblheader .pkgn', function () {
-            var rowId = $(this).data('id');
-            $('html, body').animate({
-                scrollTop: $('.pd-20.card-box').offset().top // Scroll to the top position of the target element
-            }, 100); // Adjust the animation speed as needed (milliseconds)
+        $('#hiddenDownloader').attr('src', '/ReleasedPackages/DownloadPackageFile?fileName=' + rowId);
 
+        $('#hiddenDownloader').on('load', function () {
+            $(this).remove();
+        });
+    });
 
-            // Make an AJAX request to your endpoint
-            $.ajax({
-                type: 'GET',
-                url: '/Bidding/GetPackagesRebiddedDetails',
-                data: {
-                    pkg_id: rowId
-                },
-                success: function (response) {
+    $(document).on('click', '#tblheader .pkgn', function () {
+        var rowId = $(this).data('id');
+        $('html, body').animate({
+            scrollTop: $('.pd-20.card-box').offset().top
+        }, 100);
 
-                    console.log("details" , response);
-                    // Assuming response is an array of objects containing data for each row
-                    $('#tblbody').empty(); // Clear the table body
+        $('#tblbody').html('<tr><td colspan="5" class="empty-state">Loading items…</td></tr>');
 
-                    $.each(response, function (index, row) {
-                        $('#tblbody').append(
-                            '<tr>' +
-                            '<td>' + row.mtr_long_desc + '</td>' +
-                            //  '<td>' + row.mtr_long_desc + '</td>' +
-                            '<td class="qty">' + row.mtr_qty + '</td>' +
-                            '<td>' + row.mtr_uom + '</td>' +
-                            '<td><input type="text" class="txtprice" readonly value="' + row.price + '"></td>' +
-                            '<td><input type="text" class="txttotal" readonly value="' + (row.price * row.mtr_qty).toLocaleString() + '"></td>' +
-                            '<td><input type="hidden" class="id" value="' + row.id + '"></td>' +
-                            '</tr>'
-                        );
-                    });
+        $.ajax({
+            type: 'GET',
+            url: '/Bidding/GetPackagesRebiddedDetails',
+            data: {
+                pkg_id: rowId
+            },
+            success: function (response) {
+                $('#tblbody').empty();
 
-                    var totalSum = 0;
-                    $('.txttotal').each(function () {
-                        totalSum += parseFloat($(this).val().replace(/,/g, ''));
-                    });
-
-                    console.log(totalSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-
-                    $('#txtprice_sum').val(totalSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-
-                   // $('#txtprice_sum').val(totalSum);
-
-                    $('#txtdelivery').val(response[0].delivery_date.split('T')[0]);
-                    $('#txtpayment').val(response[0].advanced_payment);
-                    $('#materialworks').val(response[0].material_payment);
-                    $('#workspayment').val(response[0].works_payment);
-                    $('#duration').val(response[0].duration_days);
-                    $('#trasn').val(response[0].transportation);
-                    $('#FileNameLabel').text(response[0].filename);
-
-
-                },
-                error: function (xhr, textStatus, errorThrown) {
-                    alert('Error: ' + errorThrown);
+                if (!response || response.length === 0) {
+                    $('#tblbody').append('<tr><td colspan="5" class="empty-state">This package has no items.</td></tr>');
+                    return;
                 }
-            });
 
+                $.each(response, function (index, row) {
+                    $('#tblbody').append(
+                        '<tr>' +
+                        '<td>' + row.mtr_long_desc + '</td>' +
+                        '<td class="qty">' + row.mtr_qty + '</td>' +
+                        '<td>' + row.mtr_uom + '</td>' +
+                        '<td><input type="text" class="form-control form-control-sm txtprice" readonly value="' + row.price + '"></td>' +
+                        '<td><input type="text" class="form-control form-control-sm txttotal" readonly value="' + (row.price * row.mtr_qty).toLocaleString() + '"></td>' +
+                        '<td><input type="hidden" class="id" value="' + row.id + '"></td>' +
+                        '</tr>'
+                    );
+                });
+
+                var totalSum = 0;
+                $('#tblbody .txttotal').each(function () {
+                    totalSum += parseFloat($(this).val().replace(/,/g, '')) || 0;
+                });
+
+                $('#txtprice_sum').val(totalSum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+
+                $('#txtdelivery').val(response[0].delivery_date.split('T')[0]);
+                $('#txtpayment').val(response[0].advanced_payment);
+                $('#materialworks').val(response[0].material_payment);
+                $('#workspayment').val(response[0].works_payment);
+                $('#duration').val(response[0].duration_days);
+                $('#trasn').val(response[0].transportation);
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                $('#tblbody').html('<tr><td colspan="5" class="empty-state">Unable to load items for this package.</td></tr>');
+                showAppToast('Could Not Load Items', 'Please try selecting the package again.', 'error');
+            }
         });
+    });
+
 </script>

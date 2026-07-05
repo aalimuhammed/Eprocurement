@@ -1,15 +1,349 @@
-﻿
-@{
+﻿@{
     Layout = "_ExtraLayout";
 }
 
 @model IEnumerable<EPROCUREMENT.SapResponse.PackagesResponse>;
 
 <style>
+    :root {
+        /* Brand colors sampled directly from the SIAC Construction logo */
+        --brand-primary: #1f419b;
+        --brand-primary-dark: #16306f;
+        --brand-accent: #f5821f;
+        --surface: #ffffff;
+        --surface-muted: #f7f9fb;
+        --border-soft: #e6e9ec;
+        --text-main: #1f2933;
+        --text-muted: #6b7280;
+        --radius: 14px;
+        --shadow-sm: 0 2px 6px rgba(16, 24, 40, 0.06);
+        --shadow-md: 0 8px 24px rgba(16, 24, 40, 0.08);
+    }
+
     .highlighted {
-        background-color: #ffff99; /* or any other color */
+        background-color: #fff6cc !important;
+        transition: background-color .2s ease;
+    }
+
+    /* ---------- Cards ---------- */
+    .pd-20.card-box {
+        background: var(--surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-soft);
+        padding: 24px;
+        margin-bottom: 24px;
+        transition: box-shadow .2s ease;
+    }
+
+        .pd-20.card-box:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 18px;
+    }
+
+        .section-title .badge-step {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--brand-primary);
+            color: #fff;
+            font-size: .85rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+    /* ---------- Tables ---------- */
+    .table-responsive-wrap {
+        overflow-x: auto;
+        border-radius: 10px;
+        border: 1px solid var(--border-soft);
+    }
+
+    .table {
+        margin-bottom: 0;
+        min-width: 600px;
+    }
+
+        .table thead th {
+            background: var(--surface-muted);
+            color: var(--text-main);
+            font-size: .8rem;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            border-bottom: 2px solid var(--border-soft);
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+        }
+
+        .table tbody tr {
+            cursor: pointer;
+            transition: background-color .15s ease;
+        }
+
+            .table tbody tr:hover {
+                background-color: var(--surface-muted);
+            }
+
+        .table tbody td {
+            vertical-align: middle;
+        }
+
+    #tblheader tr {
+        cursor: pointer;
+    }
+
+    #tblbody tr.row-incomplete {
+        background-color: #fff4f4 !important;
+        outline: 1px solid #f1b0b7;
+    }
+
+    .empty-state {
+        text-align: center;
+        color: var(--text-muted);
+        padding: 28px 12px;
+        font-size: .95rem;
+    }
+
+    /* ---------- Grand total ---------- */
+    .grand-total-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 14px;
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px dashed var(--border-soft);
+    }
+
+        .grand-total-row .label {
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .grand-total-row input {
+            max-width: 220px;
+            font-weight: 700;
+            text-align: right;
+            color: var(--brand-accent);
+            background: var(--surface-muted);
+            border: 1px solid var(--border-soft);
+            font-size: 1.05rem;
+        }
+
+    /* ---------- VAT note ---------- */
+    .vat-note {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #fff4ea;
+        border: 1px solid #fbdcb9;
+        color: var(--brand-accent);
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-weight: 600;
+        font-size: .92rem;
+        margin: 0;
+    }
+
+    /* ---------- Form ---------- */
+    #biddingForm .col-form-label {
+        font-weight: 600;
+        color: var(--text-main);
+        font-size: .9rem;
+        margin-bottom: 6px;
+    }
+
+    #biddingForm .form-control {
+        border-radius: 8px;
+        border: 1px solid var(--border-soft);
+        padding: 10px 12px;
+        font-size: .95rem;
+    }
+
+        #biddingForm .form-control:focus {
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 3px rgba(30, 126, 52, 0.15);
+        }
+
+        #biddingForm .form-control.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.12);
+        }
+
+    .form-group.row {
+        row-gap: 16px;
+    }
+
+    .upload-box {
+        border: 2px dashed var(--border-soft);
+        border-radius: 10px;
+        padding: 16px;
+        background: var(--surface-muted);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+        .upload-box.is-invalid {
+            border-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .upload-box small {
+            color: var(--text-muted);
+        }
+
+    /* ---------- Apply button ---------- */
+    #btnapply {
+        padding: 10px 36px;
+        font-weight: 700;
+        border-radius: 8px;
+        letter-spacing: .02em;
+        border: 2px solid var(--brand-primary);
+        color: var(--brand-primary);
+        background: transparent;
+        transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease, color .15s ease;
+    }
+
+        #btnapply:hover {
+            background: var(--brand-primary);
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(31, 65, 155, 0.3);
+        }
+
+    /* ---------- Toast / alert banner ---------- */
+    #appToastContainer {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 380px;
+        width: calc(100% - 40px);
+    }
+
+    .app-toast {
+        background: var(--surface);
+        border-left: 5px solid #dc3545;
+        border-radius: 10px;
+        box-shadow: var(--shadow-md);
+        padding: 14px 16px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        animation: toastIn .25s ease;
+        font-size: .92rem;
+    }
+
+        .app-toast.success {
+            border-left-color: #1e7e34;
+        }
+
+        .app-toast .icon {
+            font-size: 1.2rem;
+            line-height: 1;
+            margin-top: 1px;
+        }
+
+        .app-toast .body {
+            flex: 1;
+        }
+
+        .app-toast .title {
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 2px;
+        }
+
+        .app-toast .msg {
+            color: var(--text-muted);
+        }
+
+        .app-toast .close-toast {
+            cursor: pointer;
+            color: var(--text-muted);
+            font-weight: 700;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+    @@keyframes toastIn {
+        from {
+            opacity: 0;
+            transform: translateY(-8px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ---------- Responsive tweaks ---------- */
+    @@media (max-width: 768px) {
+        .pd-20.card-box {
+            padding: 16px;
+        }
+
+        .grand-total-row {
+            justify-content: stretch;
+        }
+
+            .grand-total-row input {
+                max-width: 100%;
+                flex: 1;
+            }
+
+        #appToastContainer {
+            top: 10px;
+            right: 10px;
+            left: 10px;
+            width: auto;
+            max-width: none;
+        }
+
+        .container-fluid.page-header h1 {
+            font-size: 1.8rem;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .table thead th,
+        .table tbody td {
+            font-size: .82rem;
+            padding: .5rem .4rem;
+        }
+
+        #btnapply {
+            width: 100%;
+        }
     }
 </style>
+
+<div id="appToastContainer"></div>
+
 <div class="container-fluid page-header">
     <h1 class="display-3 text-uppercase text-white mb-3">New Packages</h1>
     <div class="d-inline-flex text-white">
@@ -20,120 +354,124 @@
 <br />
 
 <div class="pd-20 card-box">
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">PackageName</th>
-                <th scope="col">PackageFile</th>
-            </tr>
-        </thead>
-        <tbody id="tblheader">
-        </tbody>
-    </table>
+    <div class="section-title"><span class="badge-step">1</span> Select a Package</div>
+    <div class="table-responsive-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Package Name</th>
+                    <th scope="col">Package File</th>
+                    <th scope="col">Currency</th>
+                </tr>
+            </thead>
+            <tbody id="tblheader">
+                <tr><td colspan="3" class="empty-state">Loading packages…</td></tr>
+            </tbody>
+        </table>
+    </div>
 </div>
-
 
 <br />
 
-
-<h5 style="color:green">Prices Include all taxes and deductions,(excluding VAT for the Supply Only )</h5>
-
+<div class="vat-note">
+    <span>&#9432;</span>
+    <span>Prices include all taxes and deductions (excluding VAT for the Supply Only).</span>
+</div>
 
 <br />
 
 <div class="pd-20 card-box">
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Material Desc.</th>
-                <th scope="col">Material requiested QTY</th>
-                <th scope="col">Material UOM</th>
-                <th scope="col">Price per Unit</th>
-                <th scope="col">Total</th>
-            </tr>
-        </thead>
-        <tbody id="tblbody">
-        </tbody>
-    </table>
-    <div class="form-group">
-        <p class="class="col-sm-12 col-md-2 col-form-label"">Grand Total</p>
-        <div class="col-sm-12 col-md-10">
-            <input type="text" class="form-control form-control-sm" readonly id="txtprice_sum" />
-        </div>
+    <div class="section-title"><span class="badge-step">2</span> Enter Pricing per Item</div>
+    <div class="table-responsive-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Material Desc.</th>
+                    <th scope="col">Requested QTY</th>
+                    <th scope="col">UOM</th>
+                    <th scope="col">Price per Unit</th>
+                    <th scope="col">Total</th>
+                </tr>
+            </thead>
+            <tbody id="tblbody">
+                <tr><td colspan="5" class="empty-state">Please select a package above to load its items.</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="grand-total-row">
+        <p class="label">
+            Grand Total in <span id="currencyLabel"></span>
+        </p>
+        <input type="text" class="form-control form-control-sm" readonly id="txtprice_sum" placeholder="0.00" />
     </div>
 </div>
 
 <br />
 
 <div class="pd-20 card-box">
-    <div class="clearfix">
-        <div class="pull-left">
-            <h4 class="text-blue h4">Mandatory Fields</h4>
-        </div>
-    </div>
+    <div class="section-title"><span class="badge-step">3</span> Mandatory Fields</div>
     <form id="biddingForm">
- 
-        <div class="form-group row">
 
-            <p class="col-sm-12 col-md-2 col-form-label">Advanced Payment %</p>
+        <div class="form-group row">
             <div class="col-sm-12 col-md-4">
+                <p class="col-form-label">Advanced Payment %</p>
                 <input class="form-control"
                        type="text"
-                       placeholder="Enter here your Advanced Payment %" id="txtpayment" required />
+                       placeholder="Enter your Advanced Payment %" id="txtpayment" required />
             </div>
 
-            <p class="col-sm-12 col-md-2 col-form-label">Material Delivery Payment %</p>
             <div class="col-sm-12 col-md-4">
+                <p class="col-form-label">Material Delivery Payment %</p>
                 <input class="form-control payment-input"
                        type="text"
                        placeholder="Material Delivery Payment %" id="materialworks" required />
             </div>
 
-            <p class="col-sm-12 col-md-2 col-form-label">Works/Service Payment %</p>
             <div class="col-sm-12 col-md-4">
+                <p class="col-form-label">Works/Service Payment %</p>
                 <input class="form-control payment-input"
                        type="text"
                        placeholder="Works/Service Payment %" id="workspayment" required />
             </div>
         </div>
 
-
         <div class="form-group row">
-            <p class="col-sm-12 col-md-2 col-form-label">Please Upload your offer</p>
-            <div class="col-sm-12 col-md-10">
-                <label>
-                    <input type="file" id="FileName" accept=".pdf,.xlsx,.xls" required />
-                </label>
-
+            <div class="col-sm-12 col-md-12">
+                <p class="col-form-label">Please Upload Your Offer</p>
+                <div class="upload-box" id="uploadBox">
+                    <input type="file" id="FileName"
+                           accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png,.gif,.bmp,.webp,.tiff,.svg,image/*"
+                           required />
+                    <small>Accepted: PDF, Excel, or Image files</small>
+                </div>
             </div>
         </div>
 
         <div class="form-group row">
-            <p class="col-sm-12 col-md-2 col-form-label">Transportation</p>
-            <div class="col-sm-12 col-md-10">
-                
+            <div class="col-sm-12 col-md-6">
+                <p class="col-form-label">Transportation</p>
                 <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;" id="transportation" required>
-                <option value="YES">YES</option>
-                <option value="NO">NO</option>
+                    <option value="YES">YES</option>
+                    <option value="NO">NO</option>
                 </select>
             </div>
         </div>
 
         <div class="form-group row">
-            <p class="col-sm-12 col-md-2 col-form-label">Duration in Days</p>
-            <div class="col-sm-12 col-md-4">
+            <div class="col-sm-12 col-md-6">
+                <p class="col-form-label">Duration in Days</p>
                 <input class="form-control"
                        type="text"
                        placeholder="Enter your duration in Days" id="duration" required />
             </div>
 
-            <p class="col-sm-12 col-md-2 col-form-label">Start From</p>
-            <div class="col-sm-12 col-md-4">
+            <div class="col-sm-12 col-md-6">
+                <p class="col-form-label">Start From</p>
                 <input class="form-control"
                        placeholder="Select Delivery Date"
-                       type="date" 
-                       id="txtdelivery" 
-                       required 
+                       type="date"
+                       id="txtdelivery"
+                       required
                        onkeydown="return false;" />
             </div>
         </div>
@@ -141,14 +479,37 @@
 
     <br />
     <div class="text-center">
-    <button class="btn btn-outline-success" id="btnapply">Apply</button>
+        <button class="btn" id="btnapply" type="button">Apply</button>
     </div>
 </div>
 
 
-
-
 <script>
+
+    // ---------- Professional toast helper ----------
+    function showAppToast(title, message, type) {
+        type = type || 'error';
+        var icon = type === 'success' ? '&#9989;' : '&#9888;';
+        var $toast = $(
+            '<div class="app-toast ' + (type === 'success' ? 'success' : '') + '">' +
+                '<div class="icon">' + icon + '</div>' +
+                '<div class="body">' +
+                    '<div class="title">' + title + '</div>' +
+                    '<div class="msg">' + message + '</div>' +
+                '</div>' +
+                '<button type="button" class="close-toast">&times;</button>' +
+            '</div>'
+        );
+        $('#appToastContainer').append($toast);
+        $toast.find('.close-toast').on('click', function () {
+            $toast.fadeOut(150, function () { $(this).remove(); });
+        });
+        setTimeout(function () {
+            $toast.fadeOut(250, function () { $(this).remove(); });
+        }, 6000);
+    }
+
+    var selectedPackageId = null; // tracks which package the user has chosen
 
     $(document).ready(function () {
         var today = new Date().toISOString().split('T')[0];
@@ -157,37 +518,28 @@
 
     $(document).ready(function () {
         $('.payment-input').on('input', function () {
-            // Remove non-numeric characters
             $(this).val($(this).val().replace(/\D/g, ''));
 
-            // Ensure the value is not greater than 100
             if (parseInt($(this).val()) > 100) {
                 $(this).val('100');
             }
 
-            // Calculate the total sum of payments
             var total = 0;
             $('.payment-input').each(function () {
                 total += parseInt($(this).val() || 0);
             });
 
-            // Update the Advanced Payment input
             var advancedPayment = 100 - total;
-            if (advancedPayment < 0) advancedPayment = 0; // Ensure advanced payment is not negative
+            if (advancedPayment < 0) advancedPayment = 0;
             $('#txtpayment').val(advancedPayment);
         });
 
-        // Ensure the sum is 100% on load
         $('.payment-input').trigger('input');
     });
 
-
     $(document).ready(function () {
         $('#txtpayment').on('input', function () {
-            // Remove non-numeric characters
             $(this).val($(this).val().replace(/\D/g, ''));
-
-            // Ensure the value is not greater than 100
             if (parseInt($(this).val()) > 100) {
                 $(this).val('100');
             }
@@ -195,38 +547,32 @@
     });
 
     $(document).ready(function () {
-
         $('#duration').keypress(function () {
             this.value = this.value.replace(/[^0-9\.]/g, '');
         });
     });
 
     $(document).ready(function () {
-        // Highlight column when a row is clicked in #tblheader
         $('#tblheader').on('click', 'tr', function () {
-            // Remove "highlighted" class from all rows
             $('#tblheader tr').removeClass('highlighted');
-            // Add "highlighted" class to the clicked row
             $(this).addClass('highlighted');
         });
     });
 
     $(document).ready(function () {
-        $('#btnmanualassign').on('click', function () { // When the Manual Assign button is clicked
-            $('#searchTextBox').val(''); // Clear the search text box
+        $('#btnmanualassign').on('click', function () {
+            $('#searchTextBox').val('');
             $('#searchResultsBody').empty();
-            // fetchSearchResults(''); // Fetch search results with an empty search term
         });
 
-        $('#searchTextBox').on('keyup', function (e) { // When a key is pressed in the search text box
-            if (e.keyCode === 13) { // Check if the pressed key is Enter (key code 13)
-                var searchTerm = $(this).val(); // Get the search term from the text box
-                fetchSearchResults(searchTerm); // Fetch search results
+        $('#searchTextBox').on('keyup', function (e) {
+            if (e.keyCode === 13) {
+                var searchTerm = $(this).val();
+                fetchSearchResults(searchTerm);
             }
         });
 
         function fetchSearchResults(searchTerm) {
-            // Make an AJAX request to fetch search results
             $.ajax({
                 type: 'GET',
                 url: '/Admin/Search',
@@ -235,20 +581,17 @@
                     $('#searchResultsBody').empty();
 
                     if (Array.isArray(response)) {
-                        // If response is an array, iterate through each record and append them to the table
                         $.each(response, function (index, user) {
                             $('#searchResultsBody').append('<tr><td>' + user.fname + '</td><td>' + user.tax_id + '</td><td><button class="btn btn-success" value="' + user.id + '">Select</button></td></tr>');
                         });
                     } else if (response === "No Data Found") {
-                        // If response is "No Data Found", display a message in the table
                         $('#searchResultsBody').html('<tr><td colspan="3">No Data Found</td></tr>');
                     } else {
-                        // If response is a single object, append it to the table
                         $('#searchResultsBody').append('<tr><td>' + response.fname + '</td><td>' + response.tax_id + '</td><td><button class="btn btn-success" value="' + response.id + '">Select</button></td></tr>');
                     }
                 },
                 error: function (xhr, textStatus, errorThrown) {
-                    alert('Error: ' + errorThrown);
+                    showAppToast('Search failed', 'We could not complete your search. Please try again.', 'error');
                 }
             });
         }
@@ -257,102 +600,90 @@
             var selectedRow = $(this).closest('tr');
             selectedRow.hide();
 
-            var vendorName = $(this).closest('tr').find('td:first').text(); // Get the Vendor Name from the selected row
-            var taxId = $(this).closest('tr').find('td:eq(1)').text(); // Get the Tax ID from the selected row
+            var vendorName = $(this).closest('tr').find('td:first').text();
+            var taxId = $(this).closest('tr').find('td:eq(1)').text();
 
             var userId = selectedRow.find('.btn-success').val();
 
-            alert(userId);
-
-            // Append the selected values to the designated area in the modal
             $('#selectedValues').append('<tr><td>' + vendorName + '</td><td>' + taxId + '</td><td hidden><input type="hidden" class="selected" value="' + userId + '"></td><td><button class="btn btn-danger cancelBtn">Cancel</button></td></tr>');
         });
 
         $(document).on('click', '.cancelBtn', function () {
-            var canceledRow = $(this).closest('tr'); // Get the canceled row
-            canceledRow.remove(); // Remove the canceled row from the selected values table
+            var canceledRow = $(this).closest('tr');
+            canceledRow.remove();
 
-            var vendorName = canceledRow.find('td:first').text(); // Get the Vendor Name from the canceled row
-            var taxId = canceledRow.find('td:eq(1)').text(); // Get the Tax ID from the canceled row
+            var vendorName = canceledRow.find('td:first').text();
+            var taxId = canceledRow.find('td:eq(1)').text();
 
-            // Find the corresponding row in the search results table and show it
             $('#searchResultsBody tr').each(function () {
                 var row = $(this);
                 if (row.find('td:first').text() === vendorName && row.find('td:eq(1)').text() === taxId) {
-                    row.show(); // Show the canceled row
-                    return false; // Exit the loop after finding the row
+                    row.show();
+                    return false;
                 }
             });
         });
-
     });
 
-
     $(document).ready(function () {
-        // Make an AJAX request to fetch projects
         $.ajax({
-            type: 'GET', // Use GET method to fetch data
+            type: 'GET',
             url: '/ExternalUser/GetAllReleased',
             success: function (response) {
-
-                console.log(response);
                 $('#tblheader').empty();
+
+                if (!response || response.length === 0) {
+                    $('#tblheader').append('<tr><td colspan="2" class="empty-state">No packages are available right now.</td></tr>');
+                    return;
+                }
+
+                var currency ;
                 $.each(response, function (index, row) {
-                   // var filename = row.file_path.substring(row.file_path.lastIndexOf('/') + 1);
-                    // Find the index of "packages/" and add its length to get the start of the file name
                     var start_index = row.file_path.indexOf("packages/") + "packages/".length;
-
-                    // Extract the file name using substring
                     var file_name = row.file_path.substring(start_index);
-
-                    // Append each row to the table
+                    currency = row.currency;
                     $('#tblheader').append(
                         '<tr>' +
                         '<td> <a href="#" data-id="' + row.id + '">' + row.pkg_name + ' </a> </td>' +
                         '<td> <a class="fileuploaded" href="#" data-id="' + file_name + '">' + file_name + ' </a> </td>' +
+                        '<td> <a  href="#">' + row.currency + ' </a> </td>' +
                         '</tr>'
                     );
+
+                 
                 });
+              $('#currencyLabel').text(currency)
             },
             error: function (xhr, textStatus, errorThrown) {
-                alert('Error: ' + errorThrown);
+                $('#tblheader').html('<tr><td colspan="2" class="empty-state">Unable to load packages. Please refresh the page.</td></tr>');
+                showAppToast('Could not load packages', 'Please refresh the page or try again later.', 'error');
             }
         });
-
-        // Your existing code for handling search button click and displaying table rows goes here
     });
-
-
 
     $(document).on('click', '#tblheader .fileuploaded', function () {
         var rowId = $(this).data('id');
-        // Create a hidden iframe
         var iframe = $('<iframe>', {
             id: 'hiddenDownloader',
             style: 'display: none'
         });
         $('body').append(iframe);
 
-        // Set the iframe source to the download URL
         $('#hiddenDownloader').attr('src', '/ReleasedPackages/DownloadPackageFile?fileName=' + rowId);
 
-        // Remove the iframe after download
         $('#hiddenDownloader').on('load', function () {
             $(this).remove();
         });
-
     });
-    $(document).ready(function () {
-        $('#btnsearch').on('click', function () { // When the search button is clicked
-            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
-            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
-            var fromDate = $('input[name="datefrom"]').val(); // Get the selected from date
-            var toDate = $('input[name="dateto"]').val(); // Get the selected to date
 
-             var projectId = project.split('|')[1];
+    $(document).ready(function () {
+        $('#btnsearch').on('click', function () {
+            var project = $('select[name="state"]:eq(0)').val();
+            var industry = $('select[name="state"]:eq(1)').val();
+
+            var projectId = project.split('|')[1];
             var industryId = industry.split('|')[1];
 
-            // Make an AJAX request to your endpoint
             $.ajax({
                 type: 'POST',
                 url: '/ExternalUser/GetPackages',
@@ -361,59 +692,223 @@
                     industry_id: industryId
                 },
                 success: function (response) {
-                    // Assuming response is an array of objects containing data for each row
-                    $('#tblbody').empty(); // Clear the table body
+                    $('#tblbody').empty();
 
                     $.each(response, function (index, row) {
-                        // Append each row to the table
                         $('#tblbody').append(
                             '<tr>' +
                             '<td>' + row.mtr_desc + '</td>' +
-                          //  '<td>' + row.mtr_long_desc + '</td>' +
-                            '<td>' + row.mtr_qty + '</td>' +
+                            '<td class="qty">' + row.mtr_qty + '</td>' +
                             '<td>' + row.mtr_uom + '</td>' +
-                            '<td><input type="textbox" class="txtprice"></td>' +
-                            '<td><input type="textbox" class="txttotal" disabled></td>' +
+                            '<td><input type="text" class="form-control form-control-sm txtprice" placeholder="0.00"></td>' +
+                            '<td><input type="text" class="form-control form-control-sm txttotal" disabled></td>' +
                             '<td><input type="hidden" class="id" value="' + row.id + '"></td>' +
                             '</tr>'
                         );
                     });
-                    // $('#tblbody').show(); // Show the table body
                 },
                 error: function (xhr, textStatus, errorThrown) {
-                    alert('Error: ' + errorThrown);
+                    showAppToast('Could not load items', 'There was a problem fetching the package items.', 'error');
                 }
             });
         });
     });
 
+    $(document).on('click', '#tblheader a', function () {
+        var rowId = $(this).data('id');
+        selectedPackageId = rowId;
+
+        $('html, body').animate({
+            scrollTop: $('.pd-20.card-box').offset().top
+        }, 100);
+
+        $('#tblbody').html('<tr><td colspan="5" class="empty-state">Loading items…</td></tr>');
+
+        $.ajax({
+            type: 'GET',
+            url: '/ExternalUser/GetPackages',
+            data: {
+                pkg_id: rowId
+            },
+            success: function (response) {
+                $('#tblbody').empty();
+
+                if (!response || response.length === 0) {
+                    $('#tblbody').append('<tr><td colspan="5" class="empty-state">This package has no items.</td></tr>');
+                    return;
+                }
+
+                $.each(response, function (index, row) {
+                    $('#tblbody').append(
+                        '<tr>' +
+                        '<td>' + row.mtr_long_desc + '</td>' +
+                        '<td class="qty">' + row.mtr_qty + '</td>' +
+                        '<td>' + row.mtr_uom + '</td>' +
+                        '<td><input type="text" class="form-control form-control-sm txtprice" placeholder="0.00"></td>' +
+                        '<td><input type="text" class="form-control form-control-sm txttotal" readonly></td>' +
+                        '<td><input type="hidden" class="id" value="' + row.id + '"></td>' +
+                        '</tr>'
+                    );
+                });
+
+                updateTotal();
+                updateTotalSum();
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                $('#tblbody').html('<tr><td colspan="5" class="empty-state">Unable to load items for this package.</td></tr>');
+                showAppToast('Could not load items', 'Please try selecting the package again.', 'error');
+            }
+        });
+    });
+
+    $(document).on('input', 'input.txtprice', function () {
+        var value = $(this).val();
+        value = value.replace(/[^0-9.]/g, '');
+        $(this).val(value);
+        $(this).closest('tr').removeClass('row-incomplete');
+    });
+
+    function updateTotal() {
+        $('#tblbody tr').each(function () {
+            var price = parseFloat($(this).find('.txtprice').val());
+            var qty = parseFloat($(this).find('.qty').text());
+            if (!isNaN(price) && !isNaN(qty)) {
+                var total = price * qty;
+                $(this).find('.txttotal').val(total.toFixed(2));
+            } else {
+                $(this).find('.txttotal').val('');
+            }
+        });
+    }
+
+    updateTotal();
+
+    $(document).on('input', 'input.txtprice', function () {
+        updateTotal();
+        updateTotalSum();
+    });
+
+    function updateTotalSum() {
+        var sum = 0;
+        $('#tblbody tr').each(function () {
+            var total = parseFloat($(this).find('.txttotal').val());
+            if (!isNaN(total)) {
+                sum += total;
+            }
+        });
+
+        var formattedGrandTotal = sum.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        $('#txtprice_sum').val(formattedGrandTotal);
+    }
+
+    updateTotalSum();
+
+    $(document).ready(function () {
+        $('#FileName').on('change', function () {
+            var fileName = $(this).val();
+            var ext = fileName.split('.').pop().toLowerCase();
+
+            var allowedExtensions = [
+                'pdf', 'xlsx', 'xls',
+                'jpg', 'jpeg', 'png',
+                'gif', 'bmp', 'webp',
+                'tiff', 'svg'
+            ];
+
+            if ($.inArray(ext, allowedExtensions) === -1) {
+                showAppToast('Unsupported file', 'Please select a PDF, Excel, or Image file.', 'error');
+                $(this).val('');
+                $('#uploadBox').addClass('is-invalid');
+            } else {
+                $('#uploadBox').removeClass('is-invalid');
+            }
+        });
+    });
+
+    // ---------- Apply / submit with professional validation ----------
     $(document).ready(function () {
         $('#btnapply').on('click', function () {
 
-            event.preventDefault(); // Prevent the default form submission
+            var hasPackageRows = $('#tblbody tr').not(function () {
+                return $(this).find('.id').length === 0;
+            }).length > 0;
 
-            var isValid = true;
-            $('#biddingForm input[required], #biddingForm select[required]').each(function () {
-                if ($(this).val() === '' || ($(this).attr('type') === 'file' && this.files.length === 0)) {
-                    isValid = false;
-                    $(this).addClass('is-invalid'); // Add a class to highlight the invalid input
+            // 1) No package selected at all
+            if (!selectedPackageId || !hasPackageRows) {
+                showAppToast(
+                    'No Package Selected',
+                    'Please select a package from the list above before submitting your bid.',
+                    'error'
+                );
+                $('html, body').animate({ scrollTop: $('.pd-20.card-box').first().offset().top - 20 }, 300);
+                return;
+            }
+
+            // 2) Every item must have a price
+            var missingPriceCount = 0;
+            $('#tblbody tr').each(function () {
+                var $row = $(this);
+                var priceVal = $row.find('.txtprice').val();
+                if (priceVal === undefined || priceVal === '' || parseFloat(priceVal) <= 0 || isNaN(parseFloat(priceVal))) {
+                    $row.addClass('row-incomplete');
+                    missingPriceCount++;
                 } else {
-                    $(this).removeClass('is-invalid'); // Remove the class if input is valid
+                    $row.removeClass('row-incomplete');
+                }
+            });
+
+            if (missingPriceCount > 0) {
+                showAppToast(
+                    'Missing Item Pricing',
+                    'Please enter a valid price for every item (' + missingPriceCount + ' item' + (missingPriceCount > 1 ? 's' : '') + ' missing).',
+                    'error'
+                );
+                $('html, body').animate({ scrollTop: $('#tblbody').closest('.pd-20.card-box').offset().top - 20 }, 300);
+                return;
+            }
+
+            // 3) Mandatory fields validation
+            var isValid = true;
+            var firstInvalid = null;
+
+            $('#biddingForm input[required], #biddingForm select[required]').each(function () {
+                var isFile = $(this).attr('type') === 'file';
+                var invalid = isFile ? this.files.length === 0 : $(this).val() === '';
+
+                if (invalid) {
+                    isValid = false;
+                    $(this).addClass('is-invalid');
+                    if (isFile) { $('#uploadBox').addClass('is-invalid'); }
+                    if (!firstInvalid) { firstInvalid = $(this); }
+                } else {
+                    $(this).removeClass('is-invalid');
+                    if (isFile) { $('#uploadBox').removeClass('is-invalid'); }
                 }
             });
 
             if (!isValid) {
-                alert('Please fill all required fields.');
+                showAppToast(
+                    'Incomplete Form',
+                    'Please fill in all mandatory fields, including the offer file upload, before submitting.',
+                    'error'
+                );
+                if (firstInvalid) {
+                    $('html, body').animate({ scrollTop: firstInvalid.offset().top - 100 }, 300);
+                }
                 return;
             }
-            var BiddingSelectedRowsDTO = []; // Array to hold the data of selected rows
 
+            // ---- Build payload ----
+            var BiddingSelectedRowsDTO = [];
 
             $('#tblbody tr').each(function () {
-                var price = $(this).find('.txtprice').val(); // Get the price value for this row
-                var id = $(this).find('.id').val(); // Get the ID value for this row
+                var price = $(this).find('.txtprice').val();
+                var id = $(this).find('.id').val();
 
-                // Add the price and ID to the selectedRowsData array
                 BiddingSelectedRowsDTO.push({
                     price: price,
                     pkg_details_id: id
@@ -422,18 +917,12 @@
 
             var advanced_payment = $('#txtpayment').val();
             var delivery_date = $('#txtdelivery').val();
-
             var workspayment = $('#workspayment').val();
             var materialworks = $('#materialworks').val();
             var transportation = $('#transportation').val();
             var duration = $('#duration').val();
 
             var formData = new FormData();
-
-
-            // public List < BiddingSelectedRowsDTO > biddingSelectedRowsDTOs { get; set; }
-            // public DateTime ? delivery_date { get; set; }
-            // public string advanced_payment { get; set; }
 
             formData.append('advanced_payment', advanced_payment);
             formData.append('delivery_date', delivery_date);
@@ -448,8 +937,9 @@
                 formData.append('biddingSelectedRowsDTOs[' + index + '].pkg_details_id', rowData.pkg_details_id);
             });
 
+            var $btn = $('#btnapply');
+            $btn.prop('disabled', true).text('Submitting…');
 
-            // Make an AJAX request to your endpoint
             $.ajax({
                 type: 'POST',
                 url: '/Bidding/VendorBidding',
@@ -458,23 +948,27 @@
                 contentType: false,
                 success: function (response) {
                     if (response === 1) {
-                        alert("Thank you for your biddings");
-                        window.location.href = window.location.href;
+                        showAppToast('Bid Submitted', 'Thank you — your bidding has been received successfully.', 'success');
+                        setTimeout(function () {
+                            window.location.href = window.location.href;
+                        }, 1200);
+                    } else {
+                        showAppToast('Submission Issue', 'Your bid could not be processed. Please review your entries and try again.', 'error');
+                        $btn.prop('disabled', false).text('Apply');
                     }
-
                 },
                 error: function (xhr, textStatus, errorThrown) {
-                    alert('Error: ' + errorThrown);
+                    showAppToast('Submission Failed', 'Something went wrong while submitting your bid. Please try again.', 'error');
+                    $btn.prop('disabled', false).text('Apply');
                 }
             });
         });
     });
 
-
     $(document).ready(function () {
-        $('#btnrelease').on('click', function () { // When the search button is clicked
-            var project = $('select[name="state"]:eq(0)').val(); // Get the selected project
-            var industry = $('select[name="state"]:eq(1)').val(); // Get the selected industry
+        $('#btnrelease').on('click', function () {
+            var project = $('select[name="state"]:eq(0)').val();
+            var industry = $('select[name="state"]:eq(1)').val();
 
             var project_name = $('select[name="state"]:eq(0) option:selected').text();
             var industry_name = $('select[name="state"]:eq(1) option:selected').text();
@@ -484,39 +978,32 @@
 
             var pack_name = project_name + "/" + industry_name;
 
-            var selectedRowsData = []; // Array to hold the data of selected rows
+            var selectedRowsData = [];
 
-            // Iterate through each selected row
             $('.rowCheckbox:checked').each(function () {
-                var row = $(this).closest('tr'); // Get the closest row to the checkbox
+                var row = $(this).closest('tr');
                 var rowData = {
-                    pr: row.find('td:eq(1)').text(), // Get PR#
-                    pr_item: row.find('td:eq(2)').text(), // Get line Item #
-                    pr_req_date: row.find('td:eq(3)').text(), // Get PR requisition Date
-                    mat_code: row.find('td:eq(4)').text(), // Get Material Code
-                    m_grp: row.find('td:eq(5)').text(), // Get Material Code
-                    mat_desc: row.find('td:eq(6)').text(), // Get Material Desc.
-                    m_long_desc: row.find('td:eq(7)').text(), // Get Material Long Desc.
-                    m_batch: row.find('td:eq(8)').text(), // Get Material Batch
-                    m_req_qty: row.find('td:eq(9)').text(), // Get Material requiested QTY
-                    m_uom: row.find('td:eq(10)').text() // Get Material UOM
+                    pr: row.find('td:eq(1)').text(),
+                    pr_item: row.find('td:eq(2)').text(),
+                    pr_req_date: row.find('td:eq(3)').text(),
+                    mat_code: row.find('td:eq(4)').text(),
+                    m_grp: row.find('td:eq(5)').text(),
+                    mat_desc: row.find('td:eq(6)').text(),
+                    m_long_desc: row.find('td:eq(7)').text(),
+                    m_batch: row.find('td:eq(8)').text(),
+                    m_req_qty: row.find('td:eq(9)').text(),
+                    m_uom: row.find('td:eq(10)').text()
                 };
-                selectedRowsData.push(rowData); // Push the row data to the array
+                selectedRowsData.push(rowData);
             });
-
 
             var userIds = [];
 
-            // Iterate through each row in the selectedValues table
             $('#selectedValues tr').each(function () {
-                // Find the hidden input field with class selected-user-id in the current row
                 var userId = $(this).find('.selected').val();
-                // Add the userId to the array
                 userIds.push(userId);
             });
 
-
-            // Make an AJAX request to your endpoint
             $.ajax({
                 type: 'POST',
                 url: '/CreatePackage/SavePackageManual',
@@ -530,138 +1017,15 @@
                 },
                 success: function (response) {
                     if (response === 1) {
-                        alert(pack_name + "Created");
+                        showAppToast('Package Created', pack_name + ' was created successfully.', 'success');
                         $('#tblbody').empty();
                     }
-
                 },
                 error: function (xhr, textStatus, errorThrown) {
-                    alert('Error: ' + errorThrown);
+                    showAppToast('Could Not Create Package', 'Please try again.', 'error');
                 }
             });
         });
     });
-
-
-    $(document).on('click', '#tblheader a', function () {
-        var rowId = $(this).data('id');
-        $('html, body').animate({
-            scrollTop: $('.pd-20.card-box').offset().top // Scroll to the top position of the target element
-        }, 100); // Adjust the animation speed as needed (milliseconds)
-
-
-        // Make an AJAX request to your endpoint
-        $.ajax({
-            type: 'GET',
-            url: '/ExternalUser/GetPackages',
-            data: {
-                pkg_id: rowId
-            },
-            success: function (response) {
-                console.log(response);
-                // Assuming response is an array of objects containing data for each row
-                $('#tblbody').empty(); // Clear the table body
-
-                $.each(response, function (index, row) {
-                $('#tblbody').append(
-                    '<tr>' +
-                    '<td>' + row.mtr_long_desc + '</td>' +
-                  //  '<td>' + row.mtr_long_desc + '</td>' +
-                    '<td class="qty">' + row.mtr_qty + '</td>' +
-                    '<td>' + row.mtr_uom + '</td>' +
-                    '<td><input type="text" class="txtprice"></td>' +
-                    '<td><input type="text" class="txttotal" readonly></td>' +
-                    '<td><input type="hidden" class="id" value="' + row.id + '"></td>' +
-                    '</tr>'
-                );
-                });
-
-            },
-            error: function (xhr, textStatus, errorThrown) {
-                alert('Error: ' + errorThrown);
-            }
-        });
-
-    });
-
-    // Listen for input events on .txtprice elements
-    $(document).on('input', 'input.txtprice', function () {
-        // Get the current value of the input field
-        var value = $(this).val();
-        // Remove any non-numeric characters using regular expression
-        value = value.replace(/[^0-9.]/g, '');
-        // Update the input field value with the cleaned value
-        $(this).val(value);
-    });
-
-
-
-    // Function to update the total based on price and quantity
-    function updateTotal() {
-        $('#tblbody tr').each(function () {
-            var price = parseFloat($(this).find('.txtprice').val());
-            var qty = parseFloat($(this).find('.qty').text());
-            if (!isNaN(price) && !isNaN(qty)) {
-                var total = price * qty;
-                $(this).find('.txttotal').val(total.toFixed(2)); // Set the total value in the corresponding input field
-            } else {
-                // If either price or quantity is not a valid number, set total as empty or any default value
-                $(this).find('.txttotal').val('');
-            }
-
-        });
-    }
-
-    // Call updateTotal initially to calculate total on page load
-    updateTotal();
-
-    // Listen for changes in txtprice elements and update total accordingly
-    $(document).on('input', 'input.txtprice', function () {
-        updateTotal();
-    });
-
-
-    function updateTotalSum() {
-        var sum = 0;
-        // Loop through each row and sum up the values in the corresponding .txttotal input
-        $('#tblbody tr').each(function () {
-            var total = parseFloat($(this).find('.txttotal').val());
-            if (!isNaN(total)) {
-                sum += total;
-            }
-        });
-        // Update the value of txtprice_sum element with the sum
-     //   $('#txtprice_sum').val(sum.toFixed(2));
-
-        var formattedGrandTotal = sum.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-
-        // Set the formatted grandTotal to the txtprice_sum input field
-        $('#txtprice_sum').val(formattedGrandTotal);
-    }
-
-    // Call updateTotalSum initially to calculate sum on page load
-    updateTotalSum();
-
-    // Listen for changes in txttotal elements
-    $(document).on('input', 'input.txtprice', function () {
-        updateTotalSum();
-    });
-
-    $(document).ready(function () {
-        $('#FileName').on('change', function () {
-            var fileName = $(this).val(); // Get the file name
-            var ext = fileName.split('.').pop().toLowerCase(); // Get the file extension
-
-            // Check if the file extension is not allowed
-            if ($.inArray(ext, ['pdf', 'xlsx', 'xls']) === -1) {
-                alert('Please select a PDF or Excel file.');
-                $(this).val(''); // Clear the file input
-            }
-        });
-    });
-
 
 </script>

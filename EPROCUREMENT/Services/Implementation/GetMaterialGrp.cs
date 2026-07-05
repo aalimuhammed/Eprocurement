@@ -1,4 +1,6 @@
-﻿using EPROCUREMENT.Infrastructure.Persistence;
+﻿using EPROCUREMENT.DTO;
+using EPROCUREMENT.Enums;
+using EPROCUREMENT.Infrastructure.Persistence;
 using EPROCUREMENT.Services.Interfaces;
 using EPROCUREMENT.ViewModel;
 using Microsoft.EntityFrameworkCore;
@@ -75,6 +77,22 @@ namespace EPROCUREMENT.Services.Implementation
 
 			return industry;
 		}
+        public async Task<List<SelectedMaterialServicesDTO>> GetMTROrService(
+            IndustryType type, 
+            CancellationToken cancellationToken = default)
+        {
+            var prefix = type == IndustryType.Material ? "M" : "S";
 
+            return await _procurementDBContext.services_industries
+                .AsNoTracking()
+                .Where(ind => ind.industry_code.StartsWith(prefix))
+                .Select(ind => new SelectedMaterialServicesDTO
+                {
+                    Id = ind.id,
+                    headerId = ind.header_id,
+                    Name = $"{ind.industry_code} - {ind.descr} - {ind.english_desc}"
+                })
+                .ToListAsync(cancellationToken);
+        }
     }
 }

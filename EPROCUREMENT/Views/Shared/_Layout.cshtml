@@ -282,6 +282,24 @@
 								</li>
 							</ul>
 						</li>
+						<br />
+						<li class="dropdown">
+							<a href="javascript:;" class="dropdown-toggle">
+								<span class="micon dw dw-house-1"></span><span class="mtext">Config</span>
+							</a>
+							<ul class="submenu">
+								<li>
+									<a href="@Url.Action("AssignMaterialGrp", "Admin")" class="dropdown-toggle no-arrow">
+
+										<span class="micon dw dw-user"></span><span class="mtext">
+											Assing New Material Group
+										</span>
+									</a>
+
+
+								</li>
+							</ul>
+						</li>
 						<li>
 
 						</li>
@@ -314,6 +332,8 @@
 	<script src="~/vendors/scripts/script.min.js"></script>
 	<script src="~/vendors/scripts/process.js"></script>
 	<script src="~/vendors/scripts/layout-settings.js"></script>
+	@RenderSection("Scripts", required: false)
+
 	<script>
 		document.addEventListener('DOMContentLoaded', function () {
 			// Get all dropdown-toggle elements

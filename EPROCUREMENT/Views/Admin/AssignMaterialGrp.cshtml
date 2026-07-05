@@ -1,0 +1,260 @@
+﻿@{
+    ViewData["Title"] = "AssignMaterialGrp";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h4>Assign Material Group</h4>
+
+<div class="pd-20 card-box mb-30">
+    <div class="clearfix mb-20">
+        <div class="pull-left">
+            <h4 class="text-blue h4">Selection Criteria</h4>
+        </div>
+    </div>
+
+    <form id="selectionForm">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="typeSelect">Select Resource Type <span style="color:red">*</span></label>
+                    <select class="form-control" id="typeSelect" style="width:100%; height:38px;">
+                        <option value="">-- Please Select Resource Type --</option>
+                        <option value="Material">Material</option>
+                        <option value="Service">Service</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="mtrgrp">Select Industry <span style="color:red">*</span></label>
+                    <div style="position:relative;">
+                        <select class="custom-select2 form-control" id="mtrgrp" style="width:100%; height:38px;" disabled>
+                            <option value="">Please select Type first</option>
+                        </select>
+                        <span id="mtrgrpSpinner"
+                              class="spinner-border spinner-border-sm text-primary"
+                              style="display:none; position:absolute; right:32px; top:10px; pointer-events:none;">
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="headerNameRow" style="display:none;">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="headerName">Header Name</label>
+                    <div style="position:relative;">
+                        <input type="text" id="headerName" class="form-control" readonly
+                               style="background:#f8f9fa;" />
+                        <span id="headerSpinner"
+                              class="spinner-border spinner-border-sm text-primary"
+                              style="display:none; position:absolute; right:12px; top:10px; pointer-events:none;">
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" id="extraFieldsRow" style="display:none;">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="materialGroup">Material Group <span style="color:red">*</span></label>
+                    <input type="text" id="materialGroup" class="form-control"
+                           placeholder="Enter Material Group" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="description">Description <span style="color:red">*</span></label>
+                    <input type="text" id="description" class="form-control"
+                           placeholder="Enter Description" />
+                </div>
+            </div>
+        </div>
+
+        <div id="alertArea" class="mt-2" style="display:none;"></div>
+
+        <div class="text-center mt-3">
+            <button type="button" id="btnAssign" class="btn btn-primary px-4">
+                <i class="fa fa-check-circle mr-1"></i> Assign
+            </button>
+            <button type="button" id="btnReset" class="btn btn-secondary px-4 ml-2">
+                <i class="fa fa-undo mr-1"></i> Reset
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+
+        var selectedIndustryId = null;
+
+        $(function () {
+
+            function showAlert(message, type) {
+                $('#alertArea')
+                    .removeClass('alert alert-danger alert-warning alert-success')
+                    .addClass('alert alert-' + type)
+                    .html('<i class="fa fa-exclamation-circle mr-1"></i>' + message)
+                    .fadeIn(200);
+            }
+
+            function clearAlert() {
+                $('#alertArea').fadeOut(150).html('');
+            }
+
+            function resetIndustry() {
+                selectedIndustryId = null;
+                $('#mtrgrp')
+                    .prop('disabled', true)
+                    .html('<option value="">Please select Type first</option>');
+            }
+
+            function resetHeaderAndExtras() {
+                selectedIndustryId = null;
+                $('#headerName').val('');
+                $('#headerNameRow').hide();
+                $('#extraFieldsRow').hide();
+                $('#materialGroup').val('');
+                $('#description').val('');
+            }
+
+            $('#typeSelect').on('change', function () {
+                clearAlert();
+                resetIndustry();
+                resetHeaderAndExtras();
+
+                var type = $(this).val();
+                if (!type) return;
+
+                $('#mtrgrpSpinner').show();
+
+                $.ajax({
+                    url: '/ViewOnly/GetMTROrServices',
+                    type: 'GET',
+                    data: { type: type },
+                    success: function (data) {
+                        var $sel = $('#mtrgrp');
+                        $sel.html('<option value="">-- Select Industry --</option>');
+
+                        if (!data || data.length === 0) {
+                            showAlert('No industries found for the selected type.', 'warning');
+                            return;
+                        }
+
+                        $.each(data, function (_, item) {
+                            $sel.append($('<option>', { value: item.id, text: item.name , 'data-header-id': item.headerId }));
+                        });
+
+                        $sel.prop('disabled', false);
+                    },
+                    error: function (xhr) {
+                        showAlert('Failed to load industries. (' + (xhr.statusText || 'Network error') + ')', 'danger');
+                    },
+                    complete: function () {
+                        $('#mtrgrpSpinner').hide();
+                    }
+                });
+            });
+
+            $('#mtrgrp').on('change', function () {
+                clearAlert();
+                resetHeaderAndExtras();
+
+                var selectedOption = $(this).find(':selected');
+                var headerId = selectedOption.data('header-id');
+     
+                if (!headerId) return;
+
+                var industryId = $(this).val();
+
+                selectedIndustryId = parseInt(industryId);
+
+                $('#headerSpinner').show();
+                $('#headerNameRow').show();
+                $('#headerName').val('');
+
+                $.ajax({
+                    url: '/ViewOnly/GetMTRORServiceHeaderName',
+                    type: 'GET',
+                    data: { header_id: headerId },
+                    success: function (name) {
+                        if (!name) {
+                            showAlert('No header name found for the selected industry.', 'warning');
+                            $('#headerNameRow').hide();
+                            selectedIndustryId = null;
+                            return;
+                        }
+
+                        $('#headerName').val(name);
+                        $('#extraFieldsRow').fadeIn(250);
+                    },
+                    error: function (xhr) {
+                        showAlert('Failed to load header name. (' + (xhr.statusText || 'Network error') + ')', 'danger');
+                        $('#headerNameRow').hide();
+                        selectedIndustryId = null;
+                    },
+                    complete: function () {
+                        $('#headerSpinner').hide();
+                    }
+                });
+            });
+
+            $('#btnReset').on('click', function () {
+                clearAlert();
+                $('#typeSelect').val('');
+                resetIndustry();
+                resetHeaderAndExtras();
+            });
+
+           $('#btnAssign').on('click', function () {
+            clearAlert();
+
+            if (!$('#typeSelect').val())               { showAlert('Please select a Resource Type.', 'warning'); return; }
+            if (!selectedIndustryId)                   { showAlert('Please select an Industry.',     'warning'); return; }
+            if (!$('#materialGroup').val().trim())      { showAlert('Please enter a Material Group.', 'warning'); return; }
+            if (!$('#description').val().trim())        { showAlert('Please enter a Description.',    'warning'); return; }
+
+            var payload = {
+                IndustryId:     selectedIndustryId,
+                MaterialGroup:  $('#materialGroup').val().trim(),
+                Description:    $('#description').val().trim()
+            };
+
+
+            console.log(payload)
+
+            var $btn = $(this);
+            $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm mr-1"></span> Saving...');
+
+            $.ajax({
+                url:         '/ServicesMaterial/AssignNewMaterialGroup',
+                type:        'POST',
+                contentType: 'application/json',
+                data:        JSON.stringify(payload),
+                headers:     { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+                success: function () {
+                    showAlert('Material group assigned successfully.', 'success');
+                    $('#typeSelect').val('');
+                    resetIndustry();
+                    resetHeaderAndExtras();
+                },
+                error: function (xhr) {
+                    var message = xhr.responseText || 'An unexpected error occurred.';
+                    showAlert(message, 'danger');
+                },
+                complete: function () {
+                    $btn.prop('disabled', false).html('<i class="fa fa-check-circle mr-1"></i> Assign');
+                }
+            });
+        });
+
+        });
+
+    </script>
+}

@@ -33,7 +33,6 @@ namespace EPROCUREMENT.Controllers
 				{
 					await file.CopyToAsync(stream);
 				}
-				// Alternatively, you can pass the file data to your service method if needed.
 				createPackageDTO.filePath = relativePath;
 			}
 			var result = await _createPackage.CreateSapPackage(createPackageDTO);
@@ -41,9 +40,12 @@ namespace EPROCUREMENT.Controllers
 		}
 
         [HttpPost]
-        public async Task<IActionResult> SavePackageManual(CreatePackageManualDTO createPackageManualDTO, IFormFile file)
+        [RequestFormLimits(ValueCountLimit = 20000)]
+        [RequestSizeLimit(50_000_000)]
+        public async Task<IActionResult> SavePackageManual(
+            [FromForm] CreatePackageManualDTO createPackageManualDTO, 
+			IFormFile file)
 		{
-           // var adminId = HttpContext.Session.GetInt32("AdminId");
             createPackageManualDTO.assigned_by = 1;
 
 			if (file != null)

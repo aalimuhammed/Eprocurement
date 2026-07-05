@@ -1,4 +1,5 @@
-﻿using EPROCUREMENT.Models;
+﻿using EPROCUREMENT.DTO;
+using EPROCUREMENT.Enums;
 using EPROCUREMENT.ViewModel;
 using System.Collections.Generic;
 using System.Threading;
@@ -13,6 +14,8 @@ namespace EPROCUREMENT.Services.Interfaces
          Task<List<MaterialGrpViewModel>> GetServices(CancellationToken cancellationToken = default);
 
         Task<List<MaterialGrpViewModel>> GetMaterials(CancellationToken cancellationToken = default);
+
+        Task<List<SelectedMaterialServicesDTO>> GetMTROrService(IndustryType industryType, CancellationToken cancellationToken = default);
 
         Task<IndustryViewModel> Get_Industry(int mtr_id);
     }

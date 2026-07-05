@@ -15,7 +15,6 @@ namespace EPROCUREMENT.Services.Implementation
 	public class Bidding : IBidding
 	{
 		private readonly ProcurementDBContext _procurementDBContext;
-
         public Bidding(ProcurementDBContext procurementDBContext)
         {
 			_procurementDBContext = procurementDBContext;	
@@ -41,14 +40,6 @@ namespace EPROCUREMENT.Services.Implementation
 		public async Task<List<packages_header>> GetAcceptedOffers(
 			int project_id, int industry_id , CancellationToken cancellationToken)
         {
-            //var accepted = await _procurementDBContext.accepted_offers.Select(z => z.pkg_header_id).ToListAsync();
-
-            //var pack_header = await _procurementDBContext.packages_header
-            //	                      .Where(y => y.project_id == project_id 
-            //						  && y.industry_id == industry_id
-            //						  && accepted.Contains(y.id))
-            //						  .ToListAsync();
-
             var query =
                     from ao in _procurementDBContext.accepted_offers
                     join ph in _procurementDBContext.packages_header
@@ -65,7 +56,6 @@ namespace EPROCUREMENT.Services.Implementation
                 .Distinct()
 				.AsNoTracking()
                 .ToListAsync(cancellationToken);
-
         }
 
         public async Task<IQueryable<Awarded_Packages_ViewModel>> GetAwarded_Packages(int user_id)
@@ -132,31 +122,30 @@ namespace EPROCUREMENT.Services.Implementation
 					vendor_biddings.transportation = vendorBiddingDTO.transportation;
 
                     await _procurementDBContext.vendor_biddings.AddAsync(vendor_biddings);
-
-					returned_result =  await _procurementDBContext.SaveChangesAsync();
 				}
+                returned_result = await _procurementDBContext.SaveChangesAsync();
 
-				if (returned_result > 0)
+                if (returned_result > 0)
 				{
 					var biddings = await GetBiddingCount(pkg_id);
 
 					var biddingList = await biddings.ToListAsync();
 
-					foreach (var item in biddingList)
-					{
+                    var tasks = biddingList.Select(item =>
+                    {
+                        var biddingViewModel = new SapBiddingViewModel
+                        {
+                            ITEM = int.Parse(item.line_item),
+                            NO_OF_QOTS = item.bidding_count.ToString(),
+                            PR = item.pr_num
+                        };
 
-						var biddingViewModel = new SapBiddingViewModel
-						{
-							ITEM = int.Parse(item.line_item),
-							NO_OF_QOTS = item.bidding_count.ToString(),
-							PR = item.pr_num
-						};
+                        return SapApi.UpdatBiddingToSAPAsync(biddingViewModel);
+                    });
 
-						await SapApi.UpdatBiddingToSAPAsync(biddingViewModel);
-					}
+                    await Task.WhenAll(tasks);
 
-
-				}
+                }
 			}
 
 			return returned_result;
@@ -165,27 +154,28 @@ namespace EPROCUREMENT.Services.Implementation
 
         public async Task<int> VendorRebidding(VendorRebiddingDTO vendorRebiddingDTO)
         {
-			int result = 0;
-           foreach (var item in vendorRebiddingDTO.biddingSelectedRowsDTOs)
-			{
-                var vendor_bidded = await _procurementDBContext.vendor_biddings
-                                        .Where(x => x.id == item.bid_id)
-                                        .FirstOrDefaultAsync();
+			   int result = 0;
 
-                vendor_bidded.price = item.price;
+			   foreach (var item in vendorRebiddingDTO.biddingSelectedRowsDTOs)
+				{
+					var vendor_bidded = await _procurementDBContext.vendor_biddings
+											.Where(x => x.id == item.bid_id)
+											.FirstOrDefaultAsync();
 
-				vendor_bidded.advanced_payment = vendorRebiddingDTO.advanced_payment;
-				vendor_bidded.delivery_date = vendorRebiddingDTO.delivery_date;
-				vendor_bidded.material_payment = vendorRebiddingDTO.materialworks;
-				vendor_bidded.transportation = vendorRebiddingDTO.transportation;
-				vendor_bidded.duration_days = vendorRebiddingDTO.durationdays;
-				vendor_bidded.works_payment = vendorRebiddingDTO.workspayment;
-				vendor_bidded.file_path = vendorRebiddingDTO.filePath;
+					vendor_bidded.price = item.price;
 
-                _procurementDBContext.Entry(vendor_bidded).State = EntityState.Modified;
+					vendor_bidded.advanced_payment = vendorRebiddingDTO.advanced_payment;
+					vendor_bidded.delivery_date = vendorRebiddingDTO.delivery_date;
+					vendor_bidded.material_payment = vendorRebiddingDTO.materialworks;
+					vendor_bidded.transportation = vendorRebiddingDTO.transportation;
+					vendor_bidded.duration_days = vendorRebiddingDTO.durationdays;
+					vendor_bidded.works_payment = vendorRebiddingDTO.workspayment;
+					vendor_bidded.file_path = vendorRebiddingDTO.filePath;
 
-                result = await _procurementDBContext.SaveChangesAsync();
-            }
+					_procurementDBContext.Entry(vendor_bidded).State = EntityState.Modified;
+
+					result = await _procurementDBContext.SaveChangesAsync();
+				}
 
 		   return result;
         }

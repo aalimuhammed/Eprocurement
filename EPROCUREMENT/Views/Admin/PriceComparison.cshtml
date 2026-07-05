@@ -804,44 +804,36 @@
     document.getElementById('exporttoExcl').addEventListener('click', function () {
         exportToExcel();
     });
-
     function exportToExcel() {
-        // Get reference to the table
         var originalTable = document.getElementById('shortlisted');
-
-        // Create a copy of the table
         var tableCopy = originalTable.cloneNode(true);
 
-        // Remove elements with the class 'vendor-offer'
-        var elementsToRemove = tableCopy.querySelectorAll('.vendor-offer');
-        elementsToRemove.forEach(function (element) {
+        // Remove vendor-offer elements
+        tableCopy.querySelectorAll('.vendor-offer').forEach(function (element) {
             element.parentNode.removeChild(element);
         });
 
-        // Include hidden elements by temporarily removing the hidden attribute
-        var hiddenElements = tableCopy.querySelectorAll('[hidden]');
-        hiddenElements.forEach(function (element) {
+        // Reveal hidden elements
+        tableCopy.querySelectorAll('[hidden]').forEach(function (element) {
             element.removeAttribute('hidden');
         });
 
-        // Adjust the header cells to span the correct number of columns for export
-        var headerCells = tableCopy.querySelectorAll('th .vendorHname');
-        headerCells.forEach(function (headerCell) {
-            var th = headerCell.parentElement;  // Get the parent <th> element
-            th.setAttribute('colspan', 6);
+        // --- Remove the hidden line_item cell (this was shifting every column) ---
+        tableCopy.querySelectorAll('.lineitem').forEach(function (cell) {
+            cell.parentNode.removeChild(cell);
         });
+        // ---------------------------------------------------------------------
 
-        var grandTotalCells = tableCopy.querySelectorAll('th#fgrandtotal, th#sgrandtotal, th#thgrandtotal');
-        grandTotalCells.forEach(function (cell) {
+        // Adjust colspans for export
+        tableCopy.querySelectorAll('th .vendorHname').forEach(function (headerCell) {
+            headerCell.parentElement.setAttribute('colspan', 6);
+        });
+        tableCopy.querySelectorAll('th#fgrandtotal, th#sgrandtotal, th#thgrandtotal').forEach(function (cell) {
             cell.setAttribute('colspan', 6);
         });
-        // Convert the modified table to workbook
-        var wb = XLSX.utils.table_to_book(tableCopy, { sheet: "Sheet1" });
 
-        // Save workbook to file
+        var wb = XLSX.utils.table_to_book(tableCopy, { sheet: "Sheet1" });
         XLSX.writeFile(wb, 'price_comparison.xlsx');
     }
-
-
 
 </script>

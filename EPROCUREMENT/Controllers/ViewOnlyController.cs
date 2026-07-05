@@ -1,4 +1,5 @@
-﻿using EPROCUREMENT.Services.Interfaces;
+﻿using EPROCUREMENT.Enums;
+using EPROCUREMENT.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,9 +9,13 @@ namespace EPROCUREMENT.Controllers
 	public class ViewOnlyController : Controller
     {
         private readonly IGetMaterialGrp _getMaterialGrp;
-        public ViewOnlyController(IGetMaterialGrp getMaterialGrp)
+        private readonly IServiceMaterials _serviceMaterials;
+        public ViewOnlyController(
+            IGetMaterialGrp getMaterialGrp, 
+            IServiceMaterials serviceMaterials)
         {
             _getMaterialGrp = getMaterialGrp;
+            _serviceMaterials = serviceMaterials;
         }
 		public IActionResult CheckInudstryByMaterialGrp()
 		{
@@ -40,9 +45,23 @@ namespace EPROCUREMENT.Controllers
                 var materials = await _getMaterialGrp.GetMaterials(cancellationToken);
 				return Ok(materials);
             }
+
             var services = await _getMaterialGrp.GetServices(cancellationToken);
             return Ok(services);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetMTROrServices(IndustryType type, CancellationToken cancellationToken)
+        {
+            var result = await _getMaterialGrp.GetMTROrService(type, cancellationToken);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetMTRORServiceHeaderName(int header_id, CancellationToken cancellationToken)
+        {
+            var result = await _serviceMaterials.GetHeaderName(header_id, cancellationToken);
+            return Ok(result);
+        }
     }
 }

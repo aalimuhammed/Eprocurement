@@ -15,7 +15,6 @@ namespace EPROCUREMENT.Services.Implementation
 	{
 		private readonly ProcurementDBContext _procurementDBContext;
         private readonly IEmailService _emailService;
-
         public CreatePackage(
             ProcurementDBContext procurementDBContext , 
             IEmailService emailService)
@@ -60,6 +59,7 @@ namespace EPROCUREMENT.Services.Implementation
 				industry_id = createPackageDTO.industry_id,
 				assigned_by = createPackageDTO.assigned_by,
 				file_path = createPackageDTO.filePath,
+                currency = createPackageDTO.currency,
 				pkg_num = pkg_id + 1
 			};
 
@@ -150,6 +150,7 @@ namespace EPROCUREMENT.Services.Implementation
 				industry_id = createPackageManualDTO.industry_id,
 				assigned_by = createPackageManualDTO.assigned_by,
 				file_path = createPackageManualDTO.filePath,
+                currency = createPackageManualDTO.currency,
 				pkg_num = pkg_id + 1
 			};
 
@@ -177,8 +178,6 @@ namespace EPROCUREMENT.Services.Implementation
 							user_id = userId
 						}));
 
-
-                // send an email notification to the users in the user_id list
                 await _procurementDBContext.packages_details.AddRangeAsync(packageDetails);
                 returnedvalue = await _procurementDBContext.SaveChangesAsync();
 
@@ -293,7 +292,6 @@ namespace EPROCUREMENT.Services.Implementation
 
 			return returnedvalue;
 		}
-
         public async Task<int> CreateSapSrvPackage(CreateSrvPackageDTO createSrvPackageDTO)
         {
             int returnedvalue = 0;
@@ -329,6 +327,7 @@ namespace EPROCUREMENT.Services.Implementation
                 industry_id = createSrvPackageDTO.industry_id,
                 assigned_by = createSrvPackageDTO.assigned_by,
                 file_path = createSrvPackageDTO.filePath,
+                currency = createSrvPackageDTO.currency,
                 is_service = true,
                 pkg_num = pkg_id + 1
             };
@@ -422,6 +421,7 @@ namespace EPROCUREMENT.Services.Implementation
                 is_service = true,
                 assigned_by = createSrvPackageDTOManual.assigned_by,
                 file_path = createSrvPackageDTOManual.filePath,
+                currency = createSrvPackageDTOManual.currency,
                 pkg_num = pkg_id + 1
             };
 
