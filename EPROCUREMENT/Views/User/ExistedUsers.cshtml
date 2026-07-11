@@ -69,20 +69,21 @@
             <th scope="col" class="sortable" data-column="CombinedUser">FullName <span class="sort-icon"></span></th>
             <th scope="col" class="sortable" data-column="Company">Company <span class="sort-icon"></span></th>
             <th scope="col" class="sortable" data-column="Email">Email <span class="sort-icon"></span></th>
-            <th scope="col" class="sortable" data-column="Phone">Phone <span class="sort-icon"></span></th>
-            <th scope="col" class="sortable" data-column="Fax">FAX <span class="sort-icon"></span></th>
             <th scope="col" class="sortable" data-column="KeyPersonName">KeyPerson Name <span class="sort-icon"></span></th>
             <th scope="col" class="sortable" data-column="KeyPersonMail">KeyPerson Email <span class="sort-icon"></span></th>
             <th scope="col" class="sortable" data-column="KeyPersonPhone">KeyPerson Phone <span class="sort-icon"></span></th>
-            <th scope="col" class="sortable" data-column="CAPITAL">CAPITAL <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="CAPITAL">Paid Capital <span class="sort-icon"></span></th>
             <th scope="col" class="sortable" data-column="EngineersNo">Engineers No. <span class="sort-icon"></span></th>
-            <th scope="col" class="sortable" data-column="EquipmentNo">Equipment No. <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="EquipmentNo">Equipment Value <span class="sort-icon"></span></th>
+            <th scope="col" class="sortable" data-column="Pro">Projects Value <span class="sort-icon"></span></th>
             <th scope="col" class="sortable" data-column="Category">Category <span class="sort-icon"></span></th>
+           
             <th scope="col">TaxID File</th>
             <th scope="col">Commerical Register</th>
             <th scope="col">Income Tax</th>
             <th scope="col">Electronic Invoice</th>
             <th scope="col">Pre-Qualification</th>
+            <th scope="col">ISO</th>
         </tr>
     </thead>
     <tbody id="myTable">
@@ -95,20 +96,21 @@
                 <td>@Html.DisplayFor(modelItem => item.CombinedUser)</td>
                 <td>@Html.DisplayFor(modelItem => item.Company)</td>
                 <td>@Html.DisplayFor(modelItem => item.Email)</td>
-                <td>@Html.DisplayFor(modelItem => item.Phone)</td>
-                <td>@Html.DisplayFor(modelItem => item.Fax)</td>
                 <td>@Html.DisplayFor(modelItem => item.keyperson_name)</td>
                 <td>@Html.DisplayFor(modelItem => item.KeyPersonMail)</td>
                 <td>@Html.DisplayFor(modelItem => item.KeyPersonPhone)</td>
                 <td>@Html.DisplayFor(modelItem => item.CAPITAL)</td>
                 <td>@Html.DisplayFor(modelItem => item.EngineersNo)</td>
-                <td>@Html.DisplayFor(modelItem => item.EquipmentNo)</td>
+                <td>@Html.DisplayFor(modelItem => item.EquipmentNo)</td>.
+                <td>@Html.DisplayFor(modelItem => item.ProjectValue)</td>
                 <td>@Html.DisplayFor(modelItem => item.category)</td>
                 <td><a asp-controller="User" asp-action="Download" asp-route-filename="@item.taxid_document_file_path">@Html.DisplayFor(modelItem => item.taxid_document_file_path)</a></td>
                 <td><a asp-controller="User" asp-action="Download" asp-route-filename="@item.commercial_register_document_file_path">@Html.DisplayFor(modelItem => item.commercial_register_document_file_path)</a></td>
                 <td><a asp-controller="User" asp-action="Download" asp-route-filename="@item.income_tax_file_path">@Html.DisplayFor(modelItem => item.income_tax_file_path)</a></td>
                 <td><a asp-controller="User" asp-action="Download" asp-route-filename="@item.electronic_invoice_file_path">@Html.DisplayFor(modelItem => item.electronic_invoice_file_path)</a></td>
                 <td><a asp-controller="User" asp-action="Download" asp-route-filename="@item.prev_work_file_path">@Html.DisplayFor(modelItem => item.prev_work_file_path)</a></td>
+
+                <td><a asp-controller="User" asp-action="Download" asp-route-filename="@item.iso_document_file_path">@Html.DisplayFor(modelItem => item.iso_document_file_path)</a></td>
             </tr>
         }
     </tbody>

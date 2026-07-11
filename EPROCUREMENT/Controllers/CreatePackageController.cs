@@ -19,12 +19,16 @@ namespace EPROCUREMENT.Controllers
 			_environment = hostingEnvironment;
 		}
 
-
 		[HttpPost]
 		public async Task<IActionResult> SavePackage(CreatePackageDTO createPackageDTO, IFormFile file)
 		{
-			//var adminId = HttpContext.Session.GetInt32("AdminId");
-			createPackageDTO.assigned_by = 1;
+			var adminId = HttpContext.Session.GetInt32("AdminId");
+
+            if (adminId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            createPackageDTO.assigned_by = adminId.HasValue ? adminId.Value : 0;
 			if (file != null)
 			{
 				string filePath = Path.Combine(this._environment.WebRootPath, "packages", file.FileName);
@@ -46,7 +50,13 @@ namespace EPROCUREMENT.Controllers
             [FromForm] CreatePackageManualDTO createPackageManualDTO, 
 			IFormFile file)
 		{
-            createPackageManualDTO.assigned_by = 1;
+            var adminId = HttpContext.Session.GetInt32("AdminId");
+
+            if (adminId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            createPackageManualDTO.assigned_by = adminId.HasValue ? adminId.Value : 0;
 
 			if (file != null)
 			{
@@ -67,7 +77,13 @@ namespace EPROCUREMENT.Controllers
 		[HttpPost]
         public async Task<IActionResult> SaveSrvPackage(CreateSrvPackageDTO createSrvPackageDTO, IFormFile file)
         {
-            createSrvPackageDTO.assigned_by = 1;
+            var adminId = HttpContext.Session.GetInt32("AdminId");
+
+            if (adminId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            createSrvPackageDTO.assigned_by = adminId.HasValue ? adminId.Value : 0;
             if (file != null)
             {
                 string filePath = Path.Combine(this._environment.WebRootPath, "packages", file.FileName);
@@ -86,8 +102,13 @@ namespace EPROCUREMENT.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveSrvPackageManual(CreateSrvPackageDTOManual createPackageManualDTO, IFormFile file)
         {
-            // var adminId = HttpContext.Session.GetInt32("AdminId");
-            createPackageManualDTO.assigned_by = 1;
+            var adminId = HttpContext.Session.GetInt32("AdminId");
+
+            if (adminId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            createPackageManualDTO.assigned_by = adminId.HasValue ? adminId.Value : 0;
 
             if (file != null)
             {

@@ -1,5 +1,6 @@
 ﻿using EPROCUREMENT.DTO;
 using EPROCUREMENT.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,7 +17,12 @@ namespace EPROCUREMENT.Controllers
 
 		public IActionResult RevokePackages()
 		{
-			return View();
+            var userId = HttpContext.Session.GetInt32("AdminId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            return View();
 		}
 
         [HttpPost]

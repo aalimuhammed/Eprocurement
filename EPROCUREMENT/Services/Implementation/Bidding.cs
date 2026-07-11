@@ -120,6 +120,7 @@ namespace EPROCUREMENT.Services.Implementation
 					vendor_biddings.works_payment = vendorBiddingDTO.workspayment;
 					vendor_biddings.material_payment = vendorBiddingDTO.materialworks;
 					vendor_biddings.transportation = vendorBiddingDTO.transportation;
+					vendor_biddings.comment = vendorBiddingDTO.comment ?? string.Empty;
 
                     await _procurementDBContext.vendor_biddings.AddAsync(vendor_biddings);
 				}
@@ -151,7 +152,6 @@ namespace EPROCUREMENT.Services.Implementation
 			return returned_result;
 
 		}
-
         public async Task<int> VendorRebidding(VendorRebiddingDTO vendorRebiddingDTO)
         {
 			   int result = 0;

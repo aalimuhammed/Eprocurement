@@ -1,5 +1,4 @@
-﻿using EPROCUREMENT.sap;
-using EPROCUREMENT.Services.Helper;
+﻿using EPROCUREMENT.Services.Helper;
 using EPROCUREMENT.Services.Interfaces;
 using EPROCUREMENT.ViewModel;
 using MailKit.Net.Smtp;
@@ -17,13 +16,17 @@ namespace EPROCUREMENT.Controllers
     public class UserController : Controller
     {
         private readonly IUsersActions usersActions;
-
         public UserController(IUsersActions usersActions)
         {
             this.usersActions = usersActions;
         }
         public IActionResult UsersList()
         {
+            var userId = HttpContext.Session.GetInt32("AdminId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login" , "Admin");
+            }
             var user_list = usersActions.AppliedUsers();
             return View(user_list);
         }
@@ -35,7 +38,12 @@ namespace EPROCUREMENT.Controllers
             bool isEProcurementVendorChecked = false,
             CancellationToken cancellationToken = default)
         {
-            var count = await usersActions.CountVendors(isSapVendorChecked , isEProcurementVendorChecked); 
+            var userId = HttpContext.Session.GetInt32("AdminId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            var count = await usersActions.CountVendors(isSapVendorChecked , isEProcurementVendorChecked);
             var sapUsers =  await usersActions.ExistedUsers(page , pageSize , isSapVendorChecked , isEProcurementVendorChecked);
 
             var model = sapUsers.AsEnumerable().ToList();
@@ -57,6 +65,11 @@ namespace EPROCUREMENT.Controllers
             bool isSapVendorChecked = false, 
             bool isEProcurementVendorChecked = false)
         {
+            var userId = HttpContext.Session.GetInt32("AdminId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
             var count = await usersActions.CountVendors(isSapVendorChecked , isEProcurementVendorChecked);
             var sapUsers = await usersActions.ExistedUsers(page, pageSize, isSapVendorChecked, isEProcurementVendorChecked);
 
@@ -66,7 +79,11 @@ namespace EPROCUREMENT.Controllers
 
             return Json(values);
         }
-        public async Task<IActionResult> CheckBoxFilters(int page = 1, int pageSize = 10, bool isSapVendorChecked = false, bool isEProcurementVendorChecked = false)
+        public async Task<IActionResult> CheckBoxFilters(
+            int page = 1, 
+            int pageSize = 10, 
+            bool isSapVendorChecked = false, 
+            bool isEProcurementVendorChecked = false)
         {
             var sapUsers = await usersActions.ExistedUsers(page, pageSize, isSapVendorChecked, isEProcurementVendorChecked);
             var model = sapUsers.AsEnumerable().ToList();
@@ -429,9 +446,8 @@ namespace EPROCUREMENT.Controllers
             message.To.Add(new MailboxAddress("", userEntity.email));
             message.Subject = "Confirmation from SIAC E-Procurement";
 
-            builder.TextBody = $"Messrs. {userEntity.FullName}\n\nDear {userEntity.keyperson_name},\n\nThis email has been sent to you from the SIAC E-Procurement Platform to notify you that your submitted application has been accepted. Accordingly, you have been registered in SIAC’s Vendors Database.\n\nBest Regards,\n\nSIAC E-Procurement";
+            builder.TextBody = $"Dear Mr./Miss {userEntity.FullName}\n\nDear {userEntity.keyperson_name},\n\nThis email has been sent to you from the SIAC E-Procurement Platform to notify you that your submitted application has been accepted. Accordingly, you have been registered in SIAC’s Vendors Database.\n\nBest Regards,\n\nSIAC E-Procurement";
             
-          
 			//builder.Attachments.Add(extractedTaxPath);
              //builder.Attachments.Add(extractedCommercialPath);
 

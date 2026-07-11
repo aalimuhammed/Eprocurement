@@ -27,5 +27,7 @@ namespace EPROCUREMENT.ViewModel
 		public string transportation { get; set; }
 
 		public string line_item { get; set; }
+
+		public string? comment { get; set; }
     }
 }

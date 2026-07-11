@@ -474,6 +474,15 @@
                        required
                        onkeydown="return false;" />
             </div>
+
+
+            <div class="col-sm-12 col-md-6">
+                <p class="col-form-label">Comment</p>
+                <input class="form-control"
+                       placeholder="Write your comment"
+                       type="text"
+                       id="txtcomment" />
+            </div>
         </div>
     </form>
 
@@ -921,6 +930,7 @@
             var materialworks = $('#materialworks').val();
             var transportation = $('#transportation').val();
             var duration = $('#duration').val();
+            var comment = $('#txtcomment').val();
 
             var formData = new FormData();
 
@@ -930,6 +940,7 @@
             formData.append('materialworks', materialworks);
             formData.append('transportation', transportation);
             formData.append('durationdays', duration);
+            formData.append('comment' , comment);
             formData.append('file', $('#FileName')[0].files[0]);
 
             $.each(BiddingSelectedRowsDTO, function (index, rowData) {

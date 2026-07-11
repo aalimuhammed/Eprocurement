@@ -1,5 +1,6 @@
 ﻿using EPROCUREMENT.Enums;
 using EPROCUREMENT.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +20,12 @@ namespace EPROCUREMENT.Controllers
         }
 		public IActionResult CheckInudstryByMaterialGrp()
 		{
-			return View();
+            var userId = HttpContext.Session.GetInt32("AdminId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            return View();
 		}
 
 		[HttpGet]

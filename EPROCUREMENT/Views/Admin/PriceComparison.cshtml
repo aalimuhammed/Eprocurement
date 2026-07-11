@@ -156,6 +156,7 @@
         <th hidden>delivery_date</th>
         <th hidden>advanced_payment</th>
         <th hidden>transportation</th>
+        <th hidden>comment</th>
 
         <th>Unit Price</th>
         <th>Total Price</th>
@@ -163,6 +164,7 @@
         <th hidden>delivery_date</th>
         <th hidden>advanced_payment</th>
         <th hidden>transportation</th>
+        <th hidden>comment</th>
 
         <th>Unit Price</th>
         <th>Total Price</th>
@@ -170,6 +172,7 @@
         <th hidden>delivery_date</th>
         <th hidden>advanced_payment</th>
         <th hidden>transportation</th>
+        <th hidden>comment</th>
     </tr>
     @*     <tr id="actualdata">
     </tr> *@
@@ -543,6 +546,7 @@
                     var ftransporation = $('<td hidden class="ftrans">').text("");
                     var fdate = $('<td hidden class="fdate">').text("");
                     var fadvancedpayment = $('<td hidden class="fadvancedpayment">').text("");
+                    var fcomment = $('<td hidden class="fcomment">').text("");
                    // var fline_itm = $('<td hidden class="flineitem">').text("");
 
                     var sprice = $('<td class="sprice">').text("");
@@ -551,6 +555,7 @@
                     var stransporation = $('<td hidden class="strans">').text("");
                     var sdate = $('<td hidden class="sdate">').text("");
                     var sadvancedpayment = $('<td hidden class="sadvancedpayment">').text("");
+                    var scomment = $('<td hidden class="scomment">').text("");
                    // var sline_itm = $('<td hidden class="slineitem">').text("");
 
                     var thprice = $('<td class="thprice">').text("");
@@ -559,11 +564,19 @@
                     var thtransporation = $('<td hidden class="thtrans">').text("");
                     var thdate = $('<td hidden class="thdate">').text("");
                     var thadvancedpayment = $('<td hidden class="thadvancedpayment">').text("");
+                    var thcomment = $('<td hidden class="thcomment">').text("");
+
                    // var thline_itm = $('<td hidden class="thlineitem">').text("");
 
 
                     // Append the new <td> elements to the new row
-                    newRow.append(lineitem, mtrdesc, uom, mtrqty, fprice, ftotal, fduration, fdate, fadvancedpayment, ftransporation, sprice, stotal, sduration, sdate, sadvancedpayment, stransporation, thprice, thtotal, thduration, thdate, thadvancedpayment, thtransporation);
+                    //newRow.append(lineitem, mtrdesc, uom, mtrqty, fprice, ftotal, fduration, fdate, fadvancedpayment, ftransporation, sprice, stotal, sduration, sdate, sadvancedpayment, stransporation, thprice, thtotal, thduration, thdate, thadvancedpayment, thtransporation);
+                     newRow.append(
+                            lineitem, mtrdesc, uom, mtrqty,
+                            fprice, ftotal, fduration, fdate, fadvancedpayment, ftransporation, fcomment,
+                            sprice, stotal, sduration, sdate, sadvancedpayment, stransporation, scomment,
+                            thprice, thtotal, thduration, thdate, thadvancedpayment, thtransporation, thcomment
+                        );
                     // Append the new row to the table
                     // Append the new row after the last inserted row
                     lastInsertedRow.after(newRow);
@@ -606,6 +619,7 @@
                                 var firsttrans = currentRow.find('.ftrans');
                                 var fdate = currentRow.find('.fdate');
                                 var fadvancedpayment = currentRow.find('.fadvancedpayment');
+                                currentRow.find('.fcomment').text(vendor.comment);
 
                                 // Update the content of the cell
                                 unitPriceCell.text(vendorPrice);
@@ -634,6 +648,7 @@
                                 sdate.text(vendor.delivery_date);
                                 sadvancedpayment.text(vendor.advanced_payment);
                                 strans.text(vendor.transportation);
+                                 currentRow.find('.scomment').text(vendor.comment);
                                 // Break the loop since we found the price
                             }
 
@@ -655,6 +670,7 @@
                                 thdate.text(vendor.delivery_date);
                                 thadvancedpayment.text(vendor.advanced_payment);
                                 thtrans.text(vendor.transportation);
+                                currentRow.find('.thcomment').text(vendor.comment);
                                 // Break the loop since we found the price
                             }
                         });
@@ -826,10 +842,10 @@
 
         // Adjust colspans for export
         tableCopy.querySelectorAll('th .vendorHname').forEach(function (headerCell) {
-            headerCell.parentElement.setAttribute('colspan', 6);
+            headerCell.parentElement.setAttribute('colspan', 7);
         });
         tableCopy.querySelectorAll('th#fgrandtotal, th#sgrandtotal, th#thgrandtotal').forEach(function (cell) {
-            cell.setAttribute('colspan', 6);
+            cell.setAttribute('colspan', 7);
         });
 
         var wb = XLSX.utils.table_to_book(tableCopy, { sheet: "Sheet1" });

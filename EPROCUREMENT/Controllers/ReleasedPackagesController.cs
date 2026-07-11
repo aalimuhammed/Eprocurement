@@ -1,5 +1,6 @@
 ﻿using EPROCUREMENT.Services.Interfaces;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
 using System.Threading;
@@ -19,7 +20,12 @@ namespace EPROCUREMENT.Controllers
 		}
 		public IActionResult Released()
 		{
-			return View();
+            var userId = HttpContext.Session.GetInt32("AdminId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+            return View();
 		}
 
 		[HttpGet]

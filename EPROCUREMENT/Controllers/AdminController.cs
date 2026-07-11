@@ -29,50 +29,93 @@ namespace EPROCUREMENT.Controllers
 
         public IActionResult SapPackages()
         {
+            var userId = HttpContext.Session.GetInt32("AdminId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
             return View();
         }
 
         public IActionResult ShortListed()
         {
+            var userId = HttpContext.Session.GetInt32("AdminId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
             return View();
         }
 
         public IActionResult PriceComparison()
         {
+            var userId = HttpContext.Session.GetInt32("AdminId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
             return View();
         }
 
         public IActionResult AllApplied()
         {
+            var userId = HttpContext.Session.GetInt32("AdminId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
             return View();
         }
 
         public IActionResult AcceptedOffers()
         {
+            var userId = HttpContext.Session.GetInt32("AdminId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
             return View();
         }
         public IActionResult AssignMaterialGrp()
         {
+            var userId = HttpContext.Session.GetInt32("AdminId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Admin");
+            }
             return View();
         }
 
         [HttpPost]
         public async Task<IActionResult> Login(LoginModel loginModel)
         {
-            var account = await procurementDBContext.siac_admin.FirstOrDefaultAsync
-                                (x => x.username == loginModel.username
-                                && x.password == loginModel.password);
+            if (!ModelState.IsValid)
+            {
+                return View(loginModel);
+            }
 
-            if (account != null)
+            var account = await procurementDBContext.siac_admin
+                .FirstOrDefaultAsync(x => x.username == loginModel.username);
+
+            if (account == null)
             {
-                HttpContext.Session.SetInt32("AdminId", account.id);
-                return RedirectToAction("UsersList", "User");
+                ModelState.AddModelError("", "Invalid username or password.");
+                return View(loginModel);
             }
-            else
+
+            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(
+                loginModel.password,
+                account.password);
+
+            if (!isPasswordValid)
             {
-                ModelState.AddModelError("", "Invalid login attempt.");
-                return View();
+                ModelState.AddModelError("", "Invalid username or password.");
+                return View(loginModel);
             }
+
+            HttpContext.Session.SetInt32("AdminId", account.id);
+
+            return RedirectToAction("UsersList", "User");
         }
 
         // GET: /Admin/Register
@@ -114,13 +157,15 @@ namespace EPROCUREMENT.Controllers
                 return RedirectToAction("Register");
             }
 
-            admin.password = "123456";
+            admin.password = BCrypt.Net.BCrypt.HashPassword(admin.password);
             procurementDBContext.siac_admin.Add(admin);
             await procurementDBContext.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Admin registered successfully. Default password is 123456.";
+            TempData["SuccessMessage"] = "Admin registered successfully.";
             return RedirectToAction("Register");
         }
+
+
 
         // POST: /Admin/EditAdmin
         [HttpPost]

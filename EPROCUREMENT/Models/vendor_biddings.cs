@@ -26,5 +26,6 @@ namespace EPROCUREMENT.Models
         public string duration_days { get; set; }
 
         public string price { get; set; }
+        public string? comment { get; set; }
     }
 }

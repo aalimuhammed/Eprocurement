@@ -26,13 +26,13 @@
 
         public string EquipmentNo { get; set; }
 
-        public string Phone { get; set; }
-
-        public string Fax { get; set; } 
+        public string ProjectValue { get; set; }
 
 		public string sap_code { get; set; }
 
         public string category { get; set; }
+
+        public string iso_document_file_path { get; set; }
 
 		public string taxid_document_file_path { get; set; }
 
