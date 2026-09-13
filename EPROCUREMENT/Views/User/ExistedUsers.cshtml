@@ -39,7 +39,7 @@
     <div class="col-md-6">
         <input type="text" id="filterInput" class="form-control" placeholder="Search..." style="width: 100%;">
     </div>
-    <div class="col-md-6 d-flex align-items-center">
+ @*    <div class="col-md-6 d-flex align-items-center">
         <div class="me-4">
             <label class="me-2">SAP Vendors</label>
             <input type="checkbox" id="sapVendorCheckbox" onchange="filterChanged()">
@@ -48,7 +48,7 @@
             <label class="me-2">E-Procurement Vendors</label>
             <input type="checkbox" id="eProcurementVendorCheckbox" onchange="filterChanged()">
         </div>
-    </div>
+    </div> *@
 </div>
 
 
@@ -90,12 +90,14 @@
         @foreach (var item in Model)
         {
             <tr>
+
                 <td>@Html.DisplayFor(modelItem => item.Area)</td>
                 <td>@Html.DisplayFor(modelItem => item.sap_code)</td>
                 <td>@Html.DisplayFor(modelItem => item.TaxID)</td>
                 <td>@Html.DisplayFor(modelItem => item.CombinedUser)</td>
                 <td>@Html.DisplayFor(modelItem => item.Company)</td>
                 <td>@Html.DisplayFor(modelItem => item.Email)</td>
+
                 <td>@Html.DisplayFor(modelItem => item.keyperson_name)</td>
                 <td>@Html.DisplayFor(modelItem => item.KeyPersonMail)</td>
                 <td>@Html.DisplayFor(modelItem => item.KeyPersonPhone)</td>
@@ -104,6 +106,7 @@
                 <td>@Html.DisplayFor(modelItem => item.EquipmentNo)</td>.
                 <td>@Html.DisplayFor(modelItem => item.ProjectValue)</td>
                 <td>@Html.DisplayFor(modelItem => item.category)</td>
+
                 <td><a asp-controller="User" asp-action="Download" asp-route-filename="@item.taxid_document_file_path">@Html.DisplayFor(modelItem => item.taxid_document_file_path)</a></td>
                 <td><a asp-controller="User" asp-action="Download" asp-route-filename="@item.commercial_register_document_file_path">@Html.DisplayFor(modelItem => item.commercial_register_document_file_path)</a></td>
                 <td><a asp-controller="User" asp-action="Download" asp-route-filename="@item.income_tax_file_path">@Html.DisplayFor(modelItem => item.income_tax_file_path)</a></td>
@@ -151,6 +154,8 @@
 
                 $('#myTable').empty();
 
+                console.log(users);
+
                 users.forEach(function (user) {
                     $('#myTable').append(`
                             <tr>
@@ -160,20 +165,22 @@
                                 <td>${user.combinedUser || ''}</td>
                                 <td>${user.company || ''}</td>
                                 <td>${user.email || ''}</td>
-                                <td>${user.Phone || ''}</td>
-                                <td>${user.Fax || ''}</td>
                                 <td>${user.keyperson_name || ''}</td>
                                 <td>${user.keyPersonMail || ''}</td>
                                 <td>${user.keyPersonPhone || ''}</td>
                                 <td>${user.capital || ''}</td>
                                 <td>${user.engineersNo || ''}</td>
                                 <td>${user.equipmentNo || ''}</td>
+                                <td>${user.projectValue || ''}</td>
                                 <td>${user.category || ''}</td>
+
                                 <td><a href="/User/Download?filename=${user.taxid_document_file_path || ''}">${user.taxid_document_file_path || ''}</a></td>
                                 <td><a href="/User/Download?filename=${user.commercial_register_document_file_path || ''}">${user.commercial_register_document_file_path || ''}</a></td>
                                 <td><a href="/User/Download?filename=${user.income_tax_file_path || ''}">${user.income_tax_file_path || ''}</a></td>
                                 <td><a href="/User/Download?filename=${user.electronic_invoice_file_path || ''}">${user.electronic_invoice_file_path || ''}</a></td>
                                 <td><a href="/User/Download?filename=${user.prev_work_file_path || ''}">${user.prev_work_file_path || ''}</a></td>
+                                <td><a href="/User/Download?filename=${user.iso_document_file_path || ''}">${user.iso_document_file_path || ''}</a></td>
+
                             </tr>
                         `);
                 });
@@ -211,20 +218,20 @@
                             <td>${user.combinedUser || ''}</td>
                             <td>${user.company || ''}</td>
                             <td>${user.email || ''}</td>
-                            <td>${user.Phone || ''}</td>
-                            <td>${user.Fax || ''}</td>
                             <td>${user.keyperson_name || ''}</td>
                             <td>${user.keyPersonMail || ''}</td>
                             <td>${user.keyPersonPhone || ''}</td>
                             <td>${user.capital || ''}</td>
                             <td>${user.engineersNo || ''}</td>
                             <td>${user.equipmentNo || ''}</td>
+                            <td>${user.projectValue || ''}</td>
                             <td>${user.category || ''}</td>
                             <td><a href="/User/Download?filename=${user.taxid_document_file_path || ''}">${user.taxid_document_file_path || ''}</a></td>
                             <td><a href="/User/Download?filename=${user.commercial_register_document_file_path || ''}">${user.commercial_register_document_file_path || ''}</a></td>
                             <td><a href="/User/Download?filename=${user.income_tax_file_path || ''}">${user.income_tax_file_path || ''}</a></td>
                             <td><a href="/User/Download?filename=${user.electronic_invoice_file_path || ''}">${user.electronic_invoice_file_path || ''}</a></td>
                             <td><a href="/User/Download?filename=${user.prev_work_file_path || ''}">${user.prev_work_file_path || ''}</a></td>
+                            <td><a href="/User/Download?filename=${user.iso_document_file_path || ''}">${user.iso_document_file_path || ''}</a></td>
                         </tr>
                     `);
                 });
@@ -300,8 +307,9 @@
         $('#filterInput').on('keypress', function (event) {
             
             if (event.which === 13) {  // 13 is the key code for Enter
-                isSapVendorChecking = document.getElementById('sapVendorCheckbox').checked;
-                isEProcurementVendorChecking = document.getElementById('eProcurementVendorCheckbox').checked;
+                isSapVendorChecking = false;
+                isEProcurementVendorChecking = false;
+
                 var inputValue = $(this).val();
                 $.ajax({
                     url: '/User/SearchFilter',
@@ -325,20 +333,20 @@
                                                 <td>${user.combinedUser || ''}</td>
                                                 <td>${user.company || ''}</td>
                                                 <td>${user.email || ''}</td>
-                                                <td>${user.Phone || ''}</td>
-                                                <td>${user.Fax || ''}</td>
                                                 <td>${user.keyperson_name || ''}</td>
                                                 <td>${user.keyPersonMail || ''}</td>
                                                 <td>${user.keyPersonPhone || ''}</td>
                                                 <td>${user.capital || ''}</td>
                                                 <td>${user.engineersNo || ''}</td>
                                                 <td>${user.equipmentNo || ''}</td>
+                                                <td>${user.projectValue || ''}</td>
                                                 <td>${user.category || ''}</td>
                                                 <td><a href="/User/Download?filename=${user.taxid_document_file_path || ''}">${user.taxid_document_file_path || ''}</a></td>
                                                 <td><a href="/User/Download?filename=${user.commercial_register_document_file_path || ''}">${user.commercial_register_document_file_path || ''}</a></td>
                                                 <td><a href="/User/Download?filename=${user.income_tax_file_path || ''}">${user.income_tax_file_path || ''}</a></td>
                                                 <td><a href="/User/Download?filename=${user.electronic_invoice_file_path || ''}">${user.electronic_invoice_file_path || ''}</a></td>
                                                 <td><a href="/User/Download?filename=${user.prev_work_file_path || ''}">${user.prev_work_file_path || ''}</a></td>
+                                                <td><a href="/User/Download?filename=${user.iso_document_file_path || ''}">${user.iso_document_file_path || ''}</a></td>
                                             </tr>
                                    `);
 

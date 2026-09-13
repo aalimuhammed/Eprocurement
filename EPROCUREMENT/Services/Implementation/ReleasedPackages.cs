@@ -341,11 +341,13 @@ namespace EPROCUREMENT.Services.Implementation
             return await Task.Run(() => _procurementDBContext.Released_Headers_Vms.FromSqlRaw("CALL released_headers({0}, {1});", project_id , industry_id));
         }
 
-        public async Task<List<packages_details>> GetReleased_Packages(int pkg_id)
+        public async Task<List<packages_details>> GetReleased_Packages(
+			int pkg_id ,
+			CancellationToken cancellationToken = default)
 		{
             var result = await _procurementDBContext.packages_details
                                 .Where(x => x.pkg_id == pkg_id)
-                                .ToListAsync();
+                                .ToListAsync(cancellationToken);
 
 			var groupedData = result.GroupBy(x => new
 			                                {
@@ -368,7 +370,13 @@ namespace EPROCUREMENT.Services.Implementation
 
 
 			var packagesDetailsList = groupedData.SelectMany(y => y.packages_details)
-                                                  .DistinctBy(x => x.line_item)
+                                                  .DistinctBy(x => new
+                                                  {
+                                                      x.pkg_id,
+                                                      x.pr_num,
+                                                      x.line_item,
+                                                      x.mtr_code
+                                                  })
                                                   .ToList();
 
 			return packagesDetailsList;
@@ -409,12 +417,14 @@ namespace EPROCUREMENT.Services.Implementation
 										 detail => detail.user_id,
 										 header => header.id,
 										 (detail, header) => new { detail, header })
+
 								   .Select(x => new UserAssignedDTO
 								   {
 									   UserId = x.header.id,
 									   TaxId = x.header.tax_id,
 									   CompanyName = x.header.company
 								   })
+								   .Distinct()
 								   .ToListAsync(cancellationToken);
 
             return usersAssigned;

@@ -11,7 +11,7 @@ namespace EPROCUREMENT.Services.Interfaces
 {
 	public interface IReleasedPackages
 	{
-		 Task<List<packages_details>> GetReleased_Packages(int pkg_id);
+		 Task<List<packages_details>> GetReleased_Packages(int pkg_id , CancellationToken cancellationToken = default);
 
 		 Task<List<packages_header>> GetPackages_Headers
 			(int project_id, int industry_id , CancellationToken cancellationToken = default);

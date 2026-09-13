@@ -14,7 +14,6 @@ namespace EPROCUREMENT.Controllers
         {
 			_revokePackages = revokePackages;
         }
-
 		public IActionResult RevokePackages()
 		{
             var userId = HttpContext.Session.GetInt32("AdminId");

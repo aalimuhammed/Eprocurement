@@ -2,7 +2,6 @@
 using EPROCUREMENT.Services.Interfaces;
 using EPROCUREMENT.ViewModel;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,7 +17,7 @@ namespace EPROCUREMENT.Services.Implementation
         }
         public async Task<IQueryable<AlreadyApplied_Header_ViewModel>> AlreadyAppliedHeader(int user_id)
 		{
-			  return await Task.Run(() => _procurementDBContext.AlreadyApplied_Header_ViewModels.FromSqlRaw("CALL AlreadyApplied_Header({0});", user_id)); ;
+			  return await Task.Run(() => _procurementDBContext.AlreadyApplied_Header_ViewModels.FromSqlRaw("CALL AlreadyApplied_Header({0});", user_id));
 		}
 	}
 }

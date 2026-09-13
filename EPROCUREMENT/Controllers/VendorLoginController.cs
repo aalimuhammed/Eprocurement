@@ -1,6 +1,7 @@
 ﻿using EPROCUREMENT.DTO;
 using EPROCUREMENT.Infrastructure.Persistence;
 using EPROCUREMENT.Models;
+using EPROCUREMENT.ViewModel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,8 +12,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using BCrypt.Net;
-using EPROCUREMENT.ViewModel;
 
 namespace EPROCUREMENT.Controllers
 {
@@ -37,8 +36,6 @@ namespace EPROCUREMENT.Controllers
 
             return View();
         }
-
-
         public IActionResult ResetPassword()
         {
             string errorMessage = TempData["ErrorMessage"] as string;
@@ -71,7 +68,10 @@ namespace EPROCUREMENT.Controllers
         public async Task<IActionResult> ExternalVendorProfile()
         {
 			var userId = HttpContext.Session.GetInt32("UserId");
-
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "VendorLogin");
+            }
             string errorMessage = TempData["ErrorMessageCode"] as string;
 
             ViewBag.ErrorMessageCode = errorMessage;
@@ -663,7 +663,7 @@ namespace EPROCUREMENT.Controllers
                 using (var client = new MailKit.Net.Smtp.SmtpClient())
                 {
                     client.Connect("smtp.office365.com", 587, false);
-                    client.Authenticate("it-solutions@siac-construction.com", "It@siac$0L2025");
+                    client.Authenticate("it-solutions@siac-construction.com", "M&584666642409anTb12");
 
                     client.Send(message);
                     client.Disconnect(true);

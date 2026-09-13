@@ -69,13 +69,13 @@
             isValid = false;
         }
         else {
-            const emailRegex = /^[a-zA-Z0-9._%+-]+@@(siac - construction\.com | siacholding\.com)$/;
+               const emailRegex = /^[a-zA-Z0-9._%+-]+@@(siac-construction\.com|siacholding\.com)$/i;
 
-            if (!emailRegex.test(username)) {
-                document.getElementById("usernameError").innerText =
-                    "Only siac-construction.com and siacholding.com emails are allowed.";
-                isValid = false;
-            }
+                if (!emailRegex.test(username)) {
+                    document.getElementById("usernameError").innerText =
+                        "Only siac-construction.com and siacholding.com emails are allowed.";
+                    isValid = false;
+                }
         }
 
         if (password === "") {

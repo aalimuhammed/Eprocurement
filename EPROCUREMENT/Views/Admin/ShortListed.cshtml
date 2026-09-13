@@ -932,76 +932,89 @@
                         var line = currentRow.find('.lineitem').text().trim();
                         var vendorPrice = ''; // Initialize the price as empty string
 
-                        dataprice.forEach(function (vendor) {
-                            if (vendor.fname === vendorName && vendor.mtr_desc.trim() === mtrDesc && vendor.mtr_qty === qty && index == 0 && vendor.line_item === line) {
-                                vendorPrice = vendor.price; // Assign the price
-                                // console.log(vendorPrice);
-                                $('#acceptofferone').val(vendor.userid);
-                                // Get the cell under the "Unit Price" column
-                                var unitPriceCell = currentRow.find('.fprice');
-                                var fqty = currentRow.find('.mtqty').text().trim();
-                                var firsttotal = currentRow.find('.ftotal');
-                                var firstduration = currentRow.find('.fduration');
-                                var firsttrans = currentRow.find('.ftrans');
-                                var fdate = currentRow.find('.fdate');
-                                var fadvancedpayment = currentRow.find('.fadvancedpayment');
+                            dataprice.forEach(function (vendor) {
+        // Convert both to strings and trim for reliable comparison
+        var vendorQty = String(vendor.mtr_qty).trim();
+        var vendorLineItem = String(vendor.line_item).trim();
 
-                                // Update the content of the cell
-                                unitPriceCell.text(vendorPrice);
-                                firsttotal.text(vendorPrice * fqty);
-                                firstduration.text(vendor.duration_days);
-                                fdate.text(vendor.delivery_date);
-                                fadvancedpayment.text(vendor.advanced_payment);
-                                firsttrans.text(vendor.transportation);
-                                currentRow.find('.fcomment').text(vendor.comment);
-                            }
+        if (vendor.fname === vendorName &&
+            vendor.mtr_desc.trim() === mtrDesc &&
+            vendorQty === qty &&
+            vendorLineItem === line &&
+            index == 0) {
+            vendorPrice = vendor.price;
+            $('#acceptofferone').val(vendor.userid);
 
-                            if (vendor.fname === vendorName && vendor.mtr_desc.trim() === mtrDesc && vendor.mtr_qty === qty && index == 1 && vendor.line_item === line) {
-                                vendorPrice = vendor.price; // Assign the price
+            var unitPriceCell = currentRow.find('.fprice');
+            var fqty = currentRow.find('.mtqty').text().trim();
+            var firsttotal = currentRow.find('.ftotal');
+            var firstduration = currentRow.find('.fduration');
+            var firsttrans = currentRow.find('.ftrans');
+            var fdate = currentRow.find('.fdate');
+            var fadvancedpayment = currentRow.find('.fadvancedpayment');
+            var fcomment = currentRow.find('.fcomment');
 
-                                // Get the cell under the "Unit Price" column
-                                var unitPriceCell = currentRow.find('.sprice');
-                                var fqty = currentRow.find('.mtqty').text().trim();
-                                var secondtotal = currentRow.find('.stotal');
-                                $('#acceptoffertwo').val(vendor.userid);
-                                var sduration = currentRow.find('.sduration');
-                                var strans = currentRow.find('.strans');
-                                var sdate = currentRow.find('.sdate');
-                                var sadvancedpayment = currentRow.find('.sadvancedpayment');
-                                // Update the content of the cell
-                                unitPriceCell.text(vendorPrice);
-                                secondtotal.text(vendorPrice * fqty);
-                                sduration.text(vendor.duration_days);
-                                sdate.text(vendor.delivery_date);
-                                sadvancedpayment.text(vendor.advanced_payment);
-                                strans.text(vendor.transportation);
-                                 currentRow.find('.scomment').text(vendor.comment);
-                                // Break the loop since we found the price
-                            }
+            unitPriceCell.text(vendorPrice);
+            firsttotal.text(vendorPrice * fqty);
+            firstduration.text(vendor.duration_days);
+            fdate.text(vendor.delivery_date);
+            fadvancedpayment.text(vendor.advanced_payment);
+            firsttrans.text(vendor.transportation);
+            fcomment.text(vendor.comment);
+        }
 
-                            if (vendor.fname === vendorName && vendor.mtr_desc.trim() === mtrDesc && vendor.mtr_qty === qty && index == 2 && vendor.line_item === line) {
-                                vendorPrice = vendor.price; // Assign the price
+        if (vendor.fname === vendorName &&
+            vendor.mtr_desc.trim() === mtrDesc &&
+            vendorQty === qty &&
+            vendorLineItem === line &&
+            index == 1) {
+            vendorPrice = vendor.price;
+            $('#acceptoffertwo').val(vendor.userid);
 
-                                // Get the cell under the "Unit Price" column
-                                var unitPriceCell = currentRow.find('.thprice');
-                                var fqty = currentRow.find('.mtqty').text().trim();
-                                var thirtdtotal = currentRow.find('.thtotal');
-                                $('#acceptofferthree').val(vendor.userid);
-                                var thduration = currentRow.find('.thduration');
-                                var thtrans = currentRow.find('.thtrans');
-                                var thdate = currentRow.find('.thdate');
-                                var thadvancedpayment = currentRow.find('.thadvancedpayment');
-                                // Update the content of the cell
-                                unitPriceCell.text(vendorPrice);
-                                thirtdtotal.text(vendorPrice * fqty);
-                                thduration.text(vendor.duration_days);
-                                thdate.text(vendor.delivery_date);
-                                thadvancedpayment.text(vendor.advanced_payment);
-                                thtrans.text(vendor.transportation);
-                                currentRow.find('.thcomment').text(vendor.comment);
-                                // Break the loop since we found the price
-                            }
-                        });
+            var unitPriceCell = currentRow.find('.sprice');
+            var fqty = currentRow.find('.mtqty').text().trim();
+            var secondtotal = currentRow.find('.stotal');
+            var sduration = currentRow.find('.sduration');
+            var strans = currentRow.find('.strans');
+            var sdate = currentRow.find('.sdate');
+            var sadvancedpayment = currentRow.find('.sadvancedpayment');
+            var scomment = currentRow.find('.scomment');
+
+            unitPriceCell.text(vendorPrice);
+            secondtotal.text(vendorPrice * fqty);
+            sduration.text(vendor.duration_days);
+            sdate.text(vendor.delivery_date);
+            sadvancedpayment.text(vendor.advanced_payment);
+            strans.text(vendor.transportation);
+            scomment.text(vendor.comment);
+        }
+
+        if (vendor.fname === vendorName &&
+            vendor.mtr_desc.trim() === mtrDesc &&
+            vendorQty === qty &&
+            vendorLineItem === line &&
+            index == 2) {
+            vendorPrice = vendor.price;
+            $('#acceptofferthree').val(vendor.userid);
+
+            var unitPriceCell = currentRow.find('.thprice');
+            var fqty = currentRow.find('.mtqty').text().trim();
+            var thirtdtotal = currentRow.find('.thtotal');
+            var thduration = currentRow.find('.thduration');
+            var thtrans = currentRow.find('.thtrans');
+            var thdate = currentRow.find('.thdate');
+            var thadvancedpayment = currentRow.find('.thadvancedpayment');
+            var thcomment = currentRow.find('.thcomment');
+
+            unitPriceCell.text(vendorPrice);
+            thirtdtotal.text(vendorPrice * fqty);
+            thduration.text(vendor.duration_days);
+            thdate.text(vendor.delivery_date);
+            thadvancedpayment.text(vendor.advanced_payment);
+            thtrans.text(vendor.transportation);
+            thcomment.text(vendor.comment);
+        }
+    });
                     }
                 });
 

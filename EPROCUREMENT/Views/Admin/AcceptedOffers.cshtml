@@ -1,147 +1,478 @@
-﻿
-<style>
-    .highlighted {
-        background-color: #ffff99; /* or any other color */
+﻿<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+    .procurement-console {
+        --pc-bg: #F3F5F6;
+        --pc-surface: #FFFFFF;
+        --pc-ink: #182531;
+        --pc-ink-soft: #5A6B78;
+        --pc-border: #DCE2E6;
+        --pc-accent: #1F5D4C;
+        --pc-accent-dark: #143F33;
+        --pc-accent-tint: #EAF2EF;
+        --pc-gold: #A9782F;
+        --pc-danger: #B23A34;
+        --pc-radius: 8px;
+        background: var(--pc-bg);
+        color: var(--pc-ink);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        padding: 28px 32px 60px;
+        line-height: 1.5;
     }
 
+    .procurement-console h2,
+    .procurement-console h3,
+    .procurement-console h4,
+    .procurement-console h5 {
+        font-family: 'Source Serif 4', Georgia, serif;
+        color: var(--pc-ink);
+        letter-spacing: 0.01em;
+    }
+
+    .procurement-console .mono {
+        font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    }
+
+    /* ---------- Page header ---------- */
+    .procurement-console .page-header {
+        border-bottom: 1px solid var(--pc-border);
+        padding-bottom: 16px;
+        margin-bottom: 24px;
+    }
+
+        .procurement-console .page-header .title h4 {
+            font-size: 26px;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+            .procurement-console .page-header .title h4::before {
+                content: "";
+                display: inline-block;
+                width: 6px;
+                height: 26px;
+                background: var(--pc-accent);
+                border-radius: 2px;
+            }
+
+    .procurement-console .page-eyebrow {
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--pc-accent);
+        font-weight: 600;
+        margin: 0 0 4px 18px;
+    }
+
+    /* ---------- Cards ---------- */
+    .procurement-console .card-box {
+        background: var(--pc-surface);
+        border: 1px solid var(--pc-border);
+        border-radius: var(--pc-radius);
+        box-shadow: 0 1px 2px rgba(24, 37, 49, 0.04);
+    }
+
+        .procurement-console .card-box.pd-20 {
+            padding: 24px;
+        }
+
+        .procurement-console .card-box.mb-30 {
+            margin-bottom: 24px;
+        }
+
+    .procurement-console .text-blue.h4 {
+        font-family: 'Source Serif 4', serif;
+        font-size: 17px;
+        font-weight: 600;
+        color: var(--pc-ink) !important;
+        margin: 0 0 18px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--pc-border);
+    }
+
+    /* ---------- Form controls ---------- */
+    .procurement-console label {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--pc-ink-soft);
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .procurement-console .form-control,
+    .procurement-console select.form-control {
+        border: 1px solid var(--pc-border);
+        border-radius: 6px;
+        font-size: 14px;
+        color: var(--pc-ink);
+        box-shadow: none;
+        transition: border-color .15s ease, box-shadow .15s ease;
+    }
+
+        .procurement-console .form-control:focus {
+            border-color: var(--pc-accent);
+            box-shadow: 0 0 0 3px var(--pc-accent-tint);
+            outline: none;
+        }
+
+    /* ---------- Buttons ---------- */
+    .procurement-console .btn {
+        font-weight: 600;
+        font-size: 13.5px;
+        border-radius: 6px;
+        padding: 9px 22px;
+        letter-spacing: 0.01em;
+        transition: transform .06s ease, box-shadow .15s ease, background-color .15s ease;
+    }
+
+        .procurement-console .btn:active {
+            transform: translateY(1px);
+        }
+
+    .procurement-console .btn-primary {
+        background: var(--pc-accent);
+        border-color: var(--pc-accent);
+    }
+
+        .procurement-console .btn-primary:hover,
+        .procurement-console .btn-primary:focus {
+            background: var(--pc-accent-dark);
+            border-color: var(--pc-accent-dark);
+            box-shadow: 0 2px 8px rgba(31, 93, 76, 0.28);
+        }
+
+    .procurement-console .btn-success {
+        background: var(--pc-gold);
+        border-color: var(--pc-gold);
+        color: #fff;
+    }
+
+        .procurement-console .btn-success:hover {
+            background: #8E6421;
+            border-color: #8E6421;
+        }
+
+    .procurement-console .btn-secondary {
+        background: transparent;
+        border-color: var(--pc-border);
+        color: var(--pc-ink-soft);
+    }
+
+        .procurement-console .btn-secondary:hover {
+            background: var(--pc-bg);
+            color: var(--pc-ink);
+        }
+
+    /* ---------- Package list ---------- */
+    .procurement-console #pkgtble a {
+        display: block;
+        padding: 12px 14px;
+        color: var(--pc-ink);
+        font-weight: 500;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: background-color .12s ease, padding-left .12s ease;
+    }
+
+        .procurement-console #pkgtble a::before {
+            content: "\1F4C4";
+            margin-right: 10px;
+            opacity: 0.6;
+            font-size: 13px;
+        }
+
+        .procurement-console #pkgtble a:hover {
+            background: var(--pc-accent-tint);
+            color: var(--pc-accent-dark);
+            padding-left: 18px;
+        }
+
+    .procurement-console #pkgtble tr {
+        border-bottom: 1px solid var(--pc-border);
+    }
+
+        .procurement-console #pkgtble tr:last-child {
+            border-bottom: none;
+        }
+
+    /* ---------- Vendor name banner ---------- */
+    .procurement-console #vendorname {
+        font-family: 'Source Serif 4', serif;
+        font-size: 18px;
+        font-weight: 600;
+        background: var(--pc-accent-tint);
+        border: 1px solid var(--pc-border);
+        border-left: 4px solid var(--pc-accent);
+        border-radius: 6px;
+        padding: 14px 18px;
+        margin: 0 0 18px;
+    }
+
+        .procurement-console #vendorname a {
+            color: var(--pc-accent-dark);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+    /* ---------- Ledger / data tables ---------- */
+    .procurement-console table.table {
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+
+        .procurement-console table.table thead th {
+            background: var(--pc-ink);
+            color: #fff;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-weight: 600;
+            border: none;
+            padding: 12px 14px;
+            white-space: nowrap;
+        }
+
+            .procurement-console table.table thead th:first-child {
+                border-top-left-radius: 6px;
+            }
+
+            .procurement-console table.table thead th:last-child {
+                border-top-right-radius: 6px;
+            }
+
+        .procurement-console table.table tbody td {
+            padding: 11px 14px;
+            border-top: 1px solid var(--pc-border);
+            font-size: 13.5px;
+            vertical-align: middle;
+        }
+
+        .procurement-console table.table tbody tr:nth-child(even) {
+            background: #FAFBFC;
+        }
+
+        .procurement-console table.table tbody tr:hover {
+            background: var(--pc-accent-tint);
+        }
+
+        .procurement-console table.table tbody td:nth-child(3),
+        .procurement-console table.table tbody td:nth-child(4),
+        .procurement-console table.table tbody td.total {
+            font-family: 'IBM Plex Mono', monospace;
+            text-align: right;
+        }
+
+        .procurement-console table.table tbody td.total {
+            font-weight: 600;
+            color: var(--pc-accent-dark);
+        }
+
+    .procurement-console tr.highlighted td {
+        background: #FCF3DE !important;
+    }
+
+    /* ---------- Grand total, ledger style ---------- */
+    .procurement-console #grandtotal {
+        font-family: 'Source Serif 4', serif;
+        font-size: 20px;
+        font-weight: 700;
+        text-align: right;
+        border-top: 2px solid var(--pc-ink);
+        margin-top: 14px;
+        padding-top: 14px;
+        color: var(--pc-accent-dark);
+    }
+
+        .procurement-console #grandtotal::before {
+            content: "";
+        }
+
+    /* ---------- Modal ---------- */
+    .procurement-console .modal-content {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 20px 60px rgba(24, 37, 49, 0.25);
+    }
+
+    .procurement-console .modal-header {
+        background: var(--pc-ink);
+        color: #fff;
+        border-radius: 10px 10px 0 0;
+        padding: 16px 22px;
+    }
+
+        .procurement-console .modal-header .modal-title {
+            font-family: 'Source Serif 4', serif;
+            font-weight: 600;
+        }
+
+        .procurement-console .modal-header .close {
+            color: #fff;
+            opacity: 0.8;
+            text-shadow: none;
+        }
+
+            .procurement-console .modal-header .close:hover {
+                opacity: 1;
+            }
+
+    .procurement-console .modal-body {
+        padding: 22px;
+    }
+
+        .procurement-console .modal-body h4 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--pc-ink-soft);
+            margin: 20px 0 10px;
+        }
+
+    .procurement-console #searchTextBox {
+        padding: 10px 14px;
+    }
 </style>
 
-<h2></h2>
+<div class="procurement-console">
 
-<div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="alertModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="alertModalLabel">Manual Assign</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <input type="text" id="searchTextBox" class="form-control" placeholder="Search by Namr Or Tax-ID">
+    <div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="alertModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="alertModalLabel">Manual Assign</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Vendor Name</th>
-                            <th>Tax ID</th>
-                            <th>Select</th>
-                        </tr>
-                    </thead>
-                    <tbody id="searchResultsBody"></tbody>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="text" id="searchTextBox" class="form-control" placeholder="Search by name or tax ID">
+                    </div>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Vendor Name</th>
+                                <th>Tax ID</th>
+                                <th>Select</th>
+                            </tr>
+                        </thead>
+                        <tbody id="searchResultsBody"></tbody>
+                    </table>
 
-                </table>
+                    <!-- Area to display selected values -->
+                    <h4>Selected Values</h4>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Vendor Name</th>
+                                <th>Tax ID</th>
+                                <th>Cancel</th>
+                            </tr>
+                        </thead>
+                        <tbody id="selectedValues"></tbody>
+                    </table>
 
-                <!-- Area to display selected values -->
-                <h4>Selected Values</h4>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Vendor Name</th>
-                            <th>Tax ID</th>
-                            <th>Cancel</th>
-                        </tr>
-                    </thead>
-                    <tbody id="selectedValues"></tbody>
-                </table>
+                    <button type="button" id="btnrelease" class="btn btn-success">Release</button>
+                </div>
 
-
-                <button type="button" id="btnrelease" class="btn btn-success">Release</button>
-            </div>
-
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="page-header">
-    <div class="row">
-        <div class="col-md-12 col-sm-12">
-            <div class="title">
-                <h4>Accepted Vendors</h4>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="pd-20 card-box mb-30">
-    <div class="clearfix">
-        <div class="pull-left">
-            <h4 class="text-blue h4">Selection Criteria</h4>
-        </div>
-    </div>
-    <form>
+    <div class="page-header">
         <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label>Select Project</label>
-                    <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
-                    </select>
+            <div class="col-md-12 col-sm-12">
+                <p class="page-eyebrow">Bidding &amp; Procurement</p>
+                <div class="title">
+                    <h4>Accepted Vendors</h4>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label>Select Industry</label>
-                    <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
-                    </select>
+    <div class="pd-20 card-box mb-30">
+        <div class="clearfix">
+            <div class="pull-left">
+                <h4 class="text-blue h4">Selection Criteria</h4>
+            </div>
+        </div>
+        <form>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Select Project</label>
+                        <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Select Industry</label>
+                        <select class="custom-select2 form-control" name="state" style="width: 100%; height: 38px;">
+                        </select>
+                    </div>
                 </div>
             </div>
+            <br />
+            <div class="text-center">
+                <button type="button" id="btnsearch" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+    </div>
 
-        </div>
-        <br />
-        <div class="text-center">
-            <!-- This div centers its content -->
-            <button type="button" id="btnsearch" class="btn btn-primary">Search</button>
-        </div>
-    </form>
-</div>
+    <div class="pd-20 card-box mb-30">
+        <h4 class="text-blue h4">Available Packages</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Package Name</th>
+                </tr>
+            </thead>
+            <tbody id="pkgtble">
+            </tbody>
+        </table>
+    </div>
 
+    <h3 id="vendorname"></h3>
 
+    <div class="pd-20 card-box mb-30">
+        <table id="shortlisted" class="table">
+            <thead>
+                <tr>
+                    <th scope="col">Material Desc</th>
+                    <th scope="col">UOM</th>
+                    <th scope="col">QTY</th>
+                    <th scope="col">Price</th>
+                    <th scope="col">Total</th>
+                    <th scope="col">Duration Days</th>
+                    <th scope="col">Advanced Payment</th>
+                    <th scope="col">Material Payment</th>
+                    <th scope="col">Works Payment</th>
+                    <th scope="col">Transportation</th>
+                </tr>
+            </thead>
+            <tbody id="detailstble">
+            </tbody>
+        </table>
 
-<div class="pd-20 card-box mb-30">
-    <table class="table">
-        <thead>
-            <tr>
-                <th scope="col">Package Name</th>
-            </tr>
-        </thead>
-        <tbody id="pkgtble">
-        </tbody>
-    </table>
-</div>
+        <h3 id="grandtotal"></h3>
+    </div>
 
-
-<br />
-<h3 id="vendorname"></h3>
-
-<div class="pd-20 card-box mb-30">
-<table id="shortlisted" class="table">
-    <thead>
-        <tr>
-                <th scope="col">Material Desc</th>
-                <th scope="col">UOM</th>
-                <th scope="col">QTY</th>
-                <th scope="col">Price</th>
-                <th scope="col">Total</th>
-                <th scope="col">Duration Days</th>
-                <th scope="col">Advanced Payment</th>
-                <th scope="col">Material Payment</th>
-                <th scope="col">Works Payment</th>
-                <th scope="col">Transportation</th>
-        </tr>
-      
-    </thead>
-
-    <tbody id="detailstble">
-    </tbody>
-</table>
-
-<h3 id="grandtotal"></h3>
-</div>
+</div><!-- /.procurement-console -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
 
@@ -268,7 +599,7 @@
 
     $(document).on('click', '#pkgtble a', function () {
         var rowId = $(this).data('id');
-   
+
         $('html, body').animate({ scrollTop: $(document).height() }, 'slow');
 
         // Make an AJAX request to your endpoint
@@ -284,7 +615,7 @@
 
                 var fname = response[0].fname;
                 var filename = response[0].filename;
-                
+
                 console.log(fname);
 
                 $('#detailstble').empty();
@@ -458,6 +789,4 @@
         // Save workbook to file
         XLSX.writeFile(wb, 'shortListed_vendors_exported_data.xlsx');
     }
-
-
 </script>

@@ -227,7 +227,22 @@ namespace EPROCUREMENT.Controllers
 							   idcardresult, filename);
 			}
 
-			var memory = new MemoryStream();
+            if (input.Contains("iso_file/"))
+            {
+                string searchString = "iso_file/";
+
+                int index = input.IndexOf(searchString);
+                if (index != -1)
+                {
+                    idcardresult = input.Substring(0, index + searchString.Length);
+                }
+
+                path = Path.Combine(
+                               file_path,
+                               idcardresult, filename);
+            }
+
+            var memory = new MemoryStream();
                 using (var stream = new FileStream(path, FileMode.Open))
                 {
                     await stream.CopyToAsync(memory);
@@ -383,7 +398,7 @@ namespace EPROCUREMENT.Controllers
             using (var client = new SmtpClient())
             {
                 client.Connect("smtp.office365.com", 587, false);
-                client.Authenticate("it-solutions@siac-construction.com", "It@siac$0L2025");
+                client.Authenticate("it-solutions@siac-construction.com", "M&584666642409anTb12");
 
                 client.Send(message);
                 
@@ -456,7 +471,7 @@ namespace EPROCUREMENT.Controllers
 			using (var client = new SmtpClient())
             {
                 client.Connect("smtp.office365.com", 587, false);
-                client.Authenticate("it-solutions@siac-construction.com", "It@siac$0L2025");
+                client.Authenticate("it-solutions@siac-construction.com", "M&584666642409anTb12");
 
                 client.Send(message);
                 client.Disconnect(true);

@@ -18,6 +18,10 @@ namespace EPROCUREMENT.Controllers
         public async Task<IActionResult> AlreadyAppliedHeader()
         {
 			var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "VendorLogin");
+            }
             return Ok(await _alreadyApplied.AlreadyAppliedHeader(userId.Value));
 		}
     }

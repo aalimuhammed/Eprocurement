@@ -32,13 +32,10 @@ namespace EPROCUREMENT.Controllers
         {
             return View();
         }
-
-
         public IActionResult AwardedPackages()
         {
             return View();
         }
-
         public IActionResult NotAwardedPackages()
         {
             return View();
@@ -48,6 +45,10 @@ namespace EPROCUREMENT.Controllers
         public async Task<IActionResult> GetAwardedPackages()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "VendorLogin");
+            }
             var awarded_pkgs = await _bidding.GetAwarded_Packages(userId.Value);
             return Ok(awarded_pkgs);
         }
@@ -56,6 +57,10 @@ namespace EPROCUREMENT.Controllers
         public async Task<IActionResult> GetNotAwarded()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "VendorLogin");
+            }
             var not_awarded_pkgs = await _bidding.GetNotAwarded_Packages(userId.Value);
             return Ok(not_awarded_pkgs);
         }
@@ -64,6 +69,10 @@ namespace EPROCUREMENT.Controllers
         public async Task<IActionResult> GetPackagesForRebidding()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction("Index" , "VendorLogin");
+            }
             var rebidded_packgs = await _bidding.GetPackgesForRebedding(userId.Value);
             return Ok(rebidded_packgs);
         }
@@ -72,6 +81,11 @@ namespace EPROCUREMENT.Controllers
         public async Task<IActionResult> GetPackagesRebiddedDetails(int pkg_id)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "VendorLogin");
+            }
+
             var details = await _bidding.GetPackgesDetailsRebidded(userId.Value , pkg_id);
             return Ok(details);
         }
@@ -92,6 +106,12 @@ namespace EPROCUREMENT.Controllers
         public async Task<IActionResult> VendorBidding(VendorBiddingDTO vendorBiddingDTO , IFormFile file)
         {
 			var userId = HttpContext.Session.GetInt32("UserId");
+
+            if (userId == null)
+            {
+                return RedirectToAction("Index", "VendorLogin");
+            }
+
             if (userId.HasValue)
             {
 				vendorBiddingDTO.user_id = userId.Value;
@@ -167,7 +187,7 @@ namespace EPROCUREMENT.Controllers
             using (var client = new SmtpClient())
             {
                 client.Connect("smtp.office365.com", 587, false);
-                client.Authenticate("it-solutions@siac-construction.com", "It@siac$0L2025");
+                client.Authenticate("it-solutions@siac-construction.com", "M&584666642409anTb12");
 
                 await client.SendAsync(message);
                 client.Disconnect(true);
