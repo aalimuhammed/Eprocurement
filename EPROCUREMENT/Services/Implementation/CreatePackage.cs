@@ -14,14 +14,15 @@ namespace EPROCUREMENT.Services.Implementation
     public class CreatePackage : ICreatePackage
 	{
 		private readonly ProcurementDBContext _procurementDBContext;
-        private readonly IEmailService _emailService;
+        private readonly IGraphEmailService _graphEmailService;
+
         public CreatePackage(
             ProcurementDBContext procurementDBContext , 
-            IEmailService emailService)
+            IGraphEmailService graphEmailService)
 		{
 			_procurementDBContext = procurementDBContext;
-            _emailService = emailService;
-		}
+            _graphEmailService = graphEmailService;
+        }
 
 		public async Task<int> CreateSapPackage(CreatePackageDTO createPackageDTO)
 		{
@@ -284,7 +285,7 @@ namespace EPROCUREMENT.Services.Implementation
                         </body>
                         </html>";
 
-                    return _emailService.SendEmailAsync(user.email, subject, body);
+                    return _graphEmailService.SendEmailAsync(user.email, subject, body);
                 });
 
                 await Task.WhenAll(emailTasks);

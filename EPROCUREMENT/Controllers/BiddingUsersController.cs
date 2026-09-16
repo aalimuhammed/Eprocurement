@@ -1,9 +1,10 @@
-﻿using EPROCUREMENT.Services.Interfaces;
+﻿using EPROCUREMENT.Services.Implementation;
+using EPROCUREMENT.Services.Interfaces;
+using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Mvc;
 using MimeKit;
 using System.Collections.Generic;
 using System.IO;
-using MailKit.Net.Smtp;
 using System.Threading.Tasks;
 
 namespace EPROCUREMENT.Controllers
@@ -11,9 +12,12 @@ namespace EPROCUREMENT.Controllers
     public class BiddingUsersController : Controller
     {
         private readonly IUsersActions usersActions;
-        public BiddingUsersController(IUsersActions usersActions)
+        private readonly IGraphEmailService _graphEmailService;
+
+        public BiddingUsersController(IUsersActions usersActions , IGraphEmailService graphEmailService)
         {
             this.usersActions = usersActions;
+            _graphEmailService = graphEmailService;
         }
         public IActionResult Users()
         {
@@ -73,40 +77,54 @@ namespace EPROCUREMENT.Controllers
 		}
 
 
-		public IActionResult RefuseEmail(int id , string project_name , string PackageName)
+        public async Task<IActionResult> RefuseEmail(
+		int id,
+		string project_name,
+		string PackageName)
 		{
-			var email_to_refuse = usersActions.Email(id).Result;
-			var message = new MimeMessage();
-			message.From.Add(new MailboxAddress("Rejection Mail", "procerp@outlook.com"));
-			message.To.Add(new MailboxAddress("", email_to_refuse));
-			message.Subject = "Rejection from SIAC E-Procurement";
+				var email_to_refuse = await usersActions.Email(id);
 
-			message.Body = new TextPart("plain")
-			{
-				Text = "Hello,Your offer for applying this package '"+PackageName+"' with Project '"+project_name+"'  is refused .Thanks",
-			};
+				var emailBody = $@"
+				<html>
+				<body>
+					<p>Hello,</p>
 
-			using (var client = new SmtpClient())
-			{
-				client.Connect("smtp.office365.com", 587, false);
-				client.Authenticate("procerp@outlook.com", "Pr0cErp@2023");
+					<p>
+						Your offer for applying this package
+						<strong>{PackageName}</strong>
+						with Project
+						<strong>{project_name}</strong>
+						is refused.
+					</p>
 
-				client.Send(message);
+					<p>Thanks</p>
+				</body>
+				</html>";
 
-				client.Disconnect(true);
-			}
-			var refused_user = usersActions.Refused(id).Result;
+            var emailSent = await _graphEmailService.SendEmailAsync(
+                email_to_refuse,
+                "Rejection from SIAC E-Procurement",
+                emailBody
+            );
 
-			if (refused_user == true)
-			{
-				TempData["message"] = "Rejection Mail has been sent!";
-				return RedirectToAction("ProjectsHome", "ProjectOprations");
-			}
-			return RedirectToAction("ProjectsHome", "ProjectOprations");
-		}
+            if (emailSent)
+            {
+                var refused_user = await usersActions.Refused(id);
+
+                if (refused_user)
+                {
+                    TempData["message"] = "Rejection Mail has been sent!";
+                }
+            }
+
+            return RedirectToAction("ProjectsHome", "ProjectOprations");
+        }
 
 
-		public IActionResult AcceptEmail(int id, string project_name, string PackageName)
+        public IActionResult AcceptEmail(
+			int id, 
+			string project_name,
+			string PackageName)
 		{
 			var email_to_refuse = usersActions.Email(id).Result;
 			var message = new MimeMessage();
