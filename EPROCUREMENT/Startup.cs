@@ -11,7 +11,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
 
 using System;
 using System.IO;
@@ -27,44 +26,26 @@ namespace EPROCUREMENT
         }
 
         public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime.
-        // Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // MVC + API Controllers
             services.AddControllersWithViews();
 
-            // Swagger
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Title = "E-Procurement API",
-                    Version = "v1"
-                });
-            });
 
-            // Authentication
             services.AddAuthentication(
                 CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie();
 
-            // Old Email Settings
             services.Configure<EmailSettings>(
                 Configuration.GetSection("EmailSettings"));
 
-            // Graph Settings
             services.Configure<GraphSettings>(
                 Configuration.GetSection("GraphSettings"));
 
-            // Session
             services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromHours(2);
             });
 
-            // Database
             var defaultConnectionString =
                 Configuration.GetConnectionString("DefaultConnection");
 
@@ -84,15 +65,8 @@ namespace EPROCUREMENT
             services.AddAutoMapper(
                 Assembly.GetExecutingAssembly());
 
-            // Old Email Service
-            services.AddTransient<IEmailService, EmailService>();
+            services.AddTransient<IEmailService, EmailService>();           
 
-            // Graph Email Service
-            services.AddScoped<
-                IGraphEmailService,
-                GraphEmailService>();
-
-            // Existing Services
             services.AddScoped<IProjectsList, ProjectServices>();
             services.AddScoped<IRetrievePackage, RetrieveProjectPackages>();
             services.AddScoped<IAddPackages, InsertPackages>();
@@ -115,11 +89,9 @@ namespace EPROCUREMENT
             services.AddScoped<IExcelDataImporter, ExcelDataService>();
             services.AddScoped<IPackageHeader, PackageHeader>();
             services.AddScoped<IGetMaterialGrp, GetMaterialGrp>();
+            services.AddScoped<IGraphEmailService,GraphEmailService>();
         }
 
-
-        // This method gets called by the runtime.
-        // Use this method to configure the HTTP request pipeline.
         public void Configure(
             IApplicationBuilder app,
             IWebHostEnvironment env)
@@ -142,34 +114,15 @@ namespace EPROCUREMENT
 
             app.UseRouting();
 
-            // Swagger
-            app.UseSwagger();
-
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint(
-                    "/swagger/v1/swagger.json",
-                    "E-Procurement API V1");
-
-                c.RoutePrefix = "swagger";
-            });
-
-            // Authentication
             app.UseAuthentication();
 
-            // Authorization
             app.UseAuthorization();
 
-            // Endpoints
             app.UseEndpoints(endpoints =>
             {
-                // Existing MVC routes
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=VendorLogin}/{action=Index}/{id?}");
-
-                // API Controllers
-                endpoints.MapControllers();
             });
         }
     }
