@@ -14,14 +14,14 @@ namespace EPROCUREMENT.Services.Implementation
     public class CreatePackage : ICreatePackage
 	{
 		private readonly ProcurementDBContext _procurementDBContext;
-        private readonly IEmailService _emailService;
+        private readonly IGraphEmailService _graphEmailService;
         public CreatePackage(
             ProcurementDBContext procurementDBContext , 
-            IEmailService emailService)
+            IGraphEmailService graphEmailService)
 		{
 			_procurementDBContext = procurementDBContext;
-            _emailService = emailService;
-		}
+            _graphEmailService = graphEmailService;
+        }
 
 		public async Task<int> CreateSapPackage(CreatePackageDTO createPackageDTO)
 		{
@@ -60,6 +60,11 @@ namespace EPROCUREMENT.Services.Implementation
 				assigned_by = createPackageDTO.assigned_by,
 				file_path = createPackageDTO.filePath,
                 currency = createPackageDTO.currency,
+                //credit_period = createPackageDTO.credit_period,
+                //credit_periodType = createPackageDTO.credit_periodType,
+                //delivery_duration = createPackageDTO.delivery_duration,
+                //delivery_durationType = createPackageDTO.delivery_durationType,
+                //expiration_date = createPackageDTO.expiration_date,
 				pkg_num = pkg_id + 1
 			};
 
@@ -284,7 +289,7 @@ namespace EPROCUREMENT.Services.Implementation
                         </body>
                         </html>";
 
-                    return _emailService.SendEmailAsync(user.email, subject, body);
+                    return _graphEmailService.SendEmailAsync(user.email, subject, body);
                 });
 
                 await Task.WhenAll(emailTasks);

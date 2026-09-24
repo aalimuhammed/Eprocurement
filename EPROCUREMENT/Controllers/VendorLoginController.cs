@@ -1,6 +1,7 @@
 ﻿using EPROCUREMENT.DTO;
 using EPROCUREMENT.Infrastructure.Persistence;
 using EPROCUREMENT.Models;
+using EPROCUREMENT.Services.Interfaces;
 using EPROCUREMENT.ViewModel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,9 +19,14 @@ namespace EPROCUREMENT.Controllers
     public class VendorLoginController : Controller
     {
         private readonly ProcurementDBContext procurementDBContext;
-        public VendorLoginController(ProcurementDBContext procurementDBContext)
+        private readonly IGraphEmailService _graphEmailService;
+
+        public VendorLoginController(
+            ProcurementDBContext procurementDBContext,
+            IGraphEmailService graphEmailService)
         {
             this.procurementDBContext = procurementDBContext;
+            _graphEmailService = graphEmailService;
         }
         public IActionResult Index()
         {
@@ -621,12 +627,44 @@ namespace EPROCUREMENT.Controllers
 
             if (save > 0)
             {
-                SendingMail(resetPasswordVendorDTO.Email, guid);
-                TempData["SuccessMsgCode"] = "The Code has been sent to your email.";
-                return RedirectToAction("CheckCode");
+                var emailBody = $@"
+                    <html>
+                    <body>
+                        <p>Hello,</p>
+
+                        <p>Here is the code to reset your password:</p>
+
+                        <h2>{guid}</h2>
+
+                        <p>Please click on the following link to enter the code:</p>
+
+                        <p>
+                            <a href='https://eproc.siac-construction.com:9443/VendorLogin/CheckCode'>
+                                Reset Password
+                            </a>
+                        </p>
+
+                        <p>Regards,<br/>
+                        SIAC E-Procurement Team</p>
+                    </body>
+                    </html>";
+
+                var emailSent = await _graphEmailService.SendEmailAsync(
+                    resetPasswordVendorDTO.Email,
+                    "Reset Password from SIAC E-Procurement",
+                    emailBody
+                );
+
+                if (emailSent)
+                {
+                    TempData["SuccessMsgCode"] = "The Code has been sent to your email.";
+                    return RedirectToAction("CheckCode");
+                }
+
+                TempData["ErrorMessage"] = "Failed to send the email.";
+                return RedirectToAction("ResetPassword");
             }
             return BadRequest();
-
         }
 
         [HttpPost]

@@ -1,9 +1,8 @@
 using EPROCUREMENT.Infrastructure.Persistence;
-
 using EPROCUREMENT.Services.Implementation;
-
 using EPROCUREMENT.Services.Interfaces;
 using EPROCUREMENT.Settings;
+
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+
 using System;
 using System.IO;
 using System.Reflection;
@@ -26,54 +26,46 @@ namespace EPROCUREMENT
         }
 
         public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
-
-            services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
 
 
-            services.AddSession(options => {
+            services.AddAuthentication(
+                CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie();
+
+            services.Configure<EmailSettings>(
+                Configuration.GetSection("EmailSettings"));
+
+            services.Configure<GraphSettings>(
+                Configuration.GetSection("GraphSettings"));
+
+            services.AddSession(options =>
+            {
                 options.IdleTimeout = TimeSpan.FromHours(2);
             });
 
-            //services.AddAutoMapper(typeof(MappingProfile));
+            var defaultConnectionString =
+                Configuration.GetConnectionString("DefaultConnection");
 
-            var defaultConnectionString = Configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<ProcurementDBContext>(options =>
+                options.UseMySql(
+                    defaultConnectionString,
+                    ServerVersion.AutoDetect(defaultConnectionString)));
 
-
-            services.AddDbContext<ProcurementDBContext>(options => options.UseMySql(
-                defaultConnectionString, ServerVersion.AutoDetect(defaultConnectionString)));
-
-            //var mappingconfig = new MapperConfiguration(o =>
-            //{
-            //    o.AddProfile(new MappingProfile());
-            //});
-
-            //IMapper mapper = mappingconfig.CreateMapper();
-
-
-            //services.AddSingleton(mapper);
-
+            // File Provider
             services.AddSingleton<IFileProvider>(
-           new PhysicalFileProvider(
-               Path.Combine(Directory.GetCurrentDirectory(), "Resources/PackagesFiles")));
+                new PhysicalFileProvider(
+                    Path.Combine(
+                        Directory.GetCurrentDirectory(),
+                        "Resources/PackagesFiles")));
 
-            //services.Configure<CookiePolicyOptions>(options =>
-            //{
-            //    // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-            //    //options.CheckConsentNeeded = context => true;
-            //    options.MinimumSameSitePolicy = SameSiteMode.None;
-            //});
+            // AutoMapper
+            services.AddAutoMapper(
+                Assembly.GetExecutingAssembly());
 
-          //  turn off options.CheckConsentNeeded = context => true;
-
-            services.AddAutoMapper(Assembly.GetExecutingAssembly());
-
-            services.AddTransient<IEmailService, EmailService>();
+            services.AddTransient<IEmailService, EmailService>();           
 
             services.AddScoped<IProjectsList, ProjectServices>();
             services.AddScoped<IRetrievePackage, RetrieveProjectPackages>();
@@ -97,11 +89,12 @@ namespace EPROCUREMENT
             services.AddScoped<IExcelDataImporter, ExcelDataService>();
             services.AddScoped<IPackageHeader, PackageHeader>();
             services.AddScoped<IGetMaterialGrp, GetMaterialGrp>();
-
+            services.AddScoped<IGraphEmailService,GraphEmailService>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(
+            IApplicationBuilder app,
+            IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -110,24 +103,20 @@ namespace EPROCUREMENT
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
             app.UseHttpsRedirection();
+
             app.UseStaticFiles();
 
             app.UseSession();
 
-            app.UseAuthentication();
-
             app.UseRouting();
 
-            app.UseAuthorization();
+            app.UseAuthentication();
 
-            //cookiePolicyOptions = new CookiePolicyOptions
-            //{
-            //    MinimumSameSitePolicy = SameSiteMode.Lax
-            //};
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

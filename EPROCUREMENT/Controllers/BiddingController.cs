@@ -15,17 +15,19 @@ namespace EPROCUREMENT.Controllers
 		private readonly IBidding _bidding;
         private readonly IUsersActions _usersActions;
         private readonly IPackageHeader _packageHeader;
+        private readonly IGraphEmailService _graphEmailService;
         private IWebHostEnvironment _environment;
         public BiddingController(
             IBidding bidding , 
             IWebHostEnvironment environment, 
             IUsersActions usersActions , 
-            IPackageHeader packageHeader)
+            IPackageHeader packageHeader,IGraphEmailService graphEmailService)
         {
             _bidding = bidding;
             _environment = environment;
             _usersActions = usersActions;
             _packageHeader = packageHeader;
+            _graphEmailService = graphEmailService;
         }
 
         public IActionResult ReBidding()
@@ -169,30 +171,45 @@ namespace EPROCUREMENT.Controllers
             return Ok(result);
         }
 
-        private async Task<int> SendAnEmail(int user_id , int pkg_id)
+        private async Task<bool> SendAnEmail(int user_id, int pkg_id)
         {
             var userEntity = await _usersActions.EmailAndFiles(user_id);
             var packgHeader = await _packageHeader.GetPackagesHeaderAsync(pkg_id);
 
-            var builder = new BodyBuilder();
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Acceptance of Offer Mail ", "it-solutions@siac-construction.com"));
-            message.To.Add(new MailboxAddress("", userEntity.email));
-            message.Subject = "Confirmation from SIAC E-Procurement";
+            var emailBody = $@"
+                    <html>
+                    <body>
+                        <p>Messrs. {userEntity.FullName}</p>
 
-            builder.TextBody = $"Messrs. {userEntity.FullName}\n\nDear {userEntity.keyperson_name},\n\nThis email has been sent to you from the SIAC E-Procurement Platform to inform you that your submitted Quotation was accepted. Accordingly, you have been awarded:\n\nThe Package: {packgHeader.PackageName}\nof the Works: {packgHeader.Industry_Name}\nin Project: {packgHeader.ProjectName}\n\nBest Regards,\n\nSIAC E-Procurement";
+                        <p>Dear {userEntity.keyperson_name},</p>
 
-            message.Body = builder.ToMessageBody();
+                        <p>
+                            This email has been sent to you from the SIAC E-Procurement
+                            Platform to inform you that your submitted Quotation was accepted.
+                        </p>
 
-            using (var client = new SmtpClient())
-            {
-                client.Connect("smtp.office365.com", 587, false);
-                client.Authenticate("it-solutions@siac-construction.com", "M&584666642409anTb12");
+                        <p>Accordingly, you have been awarded:</p>
 
-                await client.SendAsync(message);
-                client.Disconnect(true);
-                return 1;
-            }
+                        <p>
+                            <strong>The Package:</strong> {packgHeader.PackageName}<br />
+                            <strong>of the Works:</strong> {packgHeader.Industry_Name}<br />
+                            <strong>in Project:</strong> {packgHeader.ProjectName}
+                        </p>
+
+                        <p>
+                            Best Regards,<br />
+                            SIAC E-Procurement
+                        </p>
+                    </body>
+                    </html>";
+
+            var emailSent = await _graphEmailService.SendEmailAsync(
+                userEntity.email,
+                "Confirmation from SIAC E-Procurement",
+                emailBody
+            );
+
+            return emailSent ? true : false;
         }
     }
 

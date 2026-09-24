@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using EPROCUREMENT.Enums;
+using System;
+using System.Collections.Generic;
 
 namespace EPROCUREMENT.DTO
 {
@@ -16,6 +18,12 @@ namespace EPROCUREMENT.DTO
 
 		public string filePath { get; set; }
         public string currency { get; set; }
+
+		//public int credit_period { get; set; }
+		//public PeriodType credit_periodType { get; set; }
+		//public int delivery_duration { get; set; }
+		//public PeriodType delivery_durationType { get; set; }
+		//public DateTime expiration_date { get; set; }
 
         public List<SelectedRowsDTO> selected_rows { get; set; }
 	}

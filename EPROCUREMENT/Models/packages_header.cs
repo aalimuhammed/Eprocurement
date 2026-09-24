@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using EPROCUREMENT.Enums;
+using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace EPROCUREMENT.Models
 {
@@ -25,5 +27,10 @@ namespace EPROCUREMENT.Models
 		public int? assigned_by { get; set; }
 		public bool is_service { get; set; }
         public string currency { get; set; }
+        //public int credit_period { get; set; }
+        //public PeriodType credit_periodType { get; set; }
+        //public int delivery_duration { get; set; }
+        //public PeriodType delivery_durationType { get; set; }
+        //public DateTime expiration_date { get; set; }
     }
 }
