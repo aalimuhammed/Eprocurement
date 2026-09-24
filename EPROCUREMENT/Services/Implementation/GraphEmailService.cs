@@ -21,9 +21,9 @@ namespace EPROCUREMENT.Services.Implementation
             _graphSettings = graphOptions.Value;
 
             _credential = new ClientSecretCredential(
-                "d9f3a701-c6ac-487c-8640-b6305c099d66",
-                "2e223149-dc05-4625-93e4-5e9ff1bcfc94",
-                "D9H8Q~Ob1XPGD13SW14~.x4PKEnAtVnLbBcRjaKN");
+                "",
+                "",
+                "");
 
             var scopes = new[] { "https://graph.microsoft.com/.default" };
 
