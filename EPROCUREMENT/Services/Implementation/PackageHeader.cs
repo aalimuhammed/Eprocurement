@@ -1,6 +1,5 @@
 ﻿using EPROCUREMENT.DTO;
 using EPROCUREMENT.Infrastructure.Persistence;
-using EPROCUREMENT.Models;
 using EPROCUREMENT.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -14,6 +13,13 @@ namespace EPROCUREMENT.Services.Implementation
         public PackageHeader(ProcurementDBContext procurementDBContext)
         {
             _procurementDBContext = procurementDBContext;
+        }
+        public async Task<int> GetMaxPackageId(int project_id, int industry_id)
+        {
+            return await _procurementDBContext.packages_header
+                            .Where(x => x.project_id == project_id
+                                     && x.industry_id == industry_id)
+                            .MaxAsync(u => u.pkg_num);
         }
         public async Task<PackageProjectIndustryDTO> GetPackagesHeaderAsync(int pkg_id)
         {

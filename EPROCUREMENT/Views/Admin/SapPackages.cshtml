@@ -208,6 +208,46 @@
         padding: 18px;
     }
 
+    /* ── NEW: Duration input group (number + type dropdown) ──
+           Used for Credit Period and Delivery Duration fields.
+           Presents a single joined control: number entry + a type
+           select (Days / Months / Years), matching the existing
+           form-control styling used elsewhere on this page.       */
+    .duration-input-group {
+        display: flex;
+        align-items: stretch;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+        .duration-input-group .duration-number {
+            flex: 1 1 58%;
+            border-top-right-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+            border-right: none;
+            text-align: left;
+        }
+
+        .duration-input-group .duration-type-select {
+            flex: 1 1 42%;
+            max-width: 130px;
+            border-top-left-radius: 0 !important;
+            border-bottom-left-radius: 0 !important;
+            border-left: 1px solid #ced4da;
+            background-color: #f7f9fb;
+            font-weight: 500;
+            color: #495057;
+        }
+
+            .duration-input-group .duration-number:focus,
+            .duration-input-group .duration-type-select:focus {
+                position: relative;
+                z-index: 1;
+                border-color: #80bdff;
+                box-shadow: 0 0 0 3px rgba(0,123,255,.15);
+                outline: none;
+            }
+
     /* ── NEW: Responsive tweaks ── */
     @@media (max-width: 991px) {
         .pd-20 {
@@ -251,6 +291,10 @@
 
         .col-filter {
             font-size: 11px;
+        }
+
+        .duration-input-group .duration-type-select {
+            max-width: 110px;
         }
     }
 
@@ -429,17 +473,71 @@
         <div class="row">
             <div class="col-md-6 col-sm-12">
                 <div class="form-group">
-                    <label>Date From : <span style="color:red">*</span></label>
+                    <label>PR Date From : <span style="color:red">*</span></label>
                     <input type="text" class="form-control date-picker" id="datefrom" placeholder="Select Date">
                 </div>
             </div>
             <div class="col-md-6 col-sm-12">
                 <div class="form-group">
-                    <label>Date To : <span style="color:red">*</span></label>
+                    <label>PR Date To : <span style="color:red">*</span></label>
                     <input type="text" class="form-control date-picker" id="dateto" placeholder="Select Date">
                 </div>
             </div>
         </div>
+
+        <!-- ── NEW ROW: Credit Period / Delivery Duration / Expiration Date ── -->
+        <div class="row">
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Credit Period <span style="color:red">*</span></label>
+                    <div class="duration-input-group">
+                        <input type="text"
+                               inputmode="numeric"
+                               autocomplete="off"
+                               class="form-control duration-number"
+                               id="creditPeriod"
+                               placeholder="e.g. 30"
+                               maxlength="5">
+                        <select class="form-control duration-type-select" id="creditPeriodType">
+                            <option value="">Type</option>
+                            <option value="Days">Days</option>
+                            <option value="Months">Months</option>
+                            <option value="Years">Years</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Delivery Duration <span style="color:red">*</span></label>
+                    <div class="duration-input-group">
+                        <input type="text"
+                               inputmode="numeric"
+                               autocomplete="off"
+                               class="form-control duration-number"
+                               id="deliveryDuration"
+                               placeholder="e.g. 15"
+                               maxlength="5">
+                        <select class="form-control duration-type-select" id="deliveryDurationType">
+                            <option value="">Type</option>
+                            <option value="Days">Days</option>
+                            <option value="Months">Months</option>
+                            <option value="Years">Years</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-sm-12">
+                <div class="form-group">
+                    <label>Expiration Date <span style="color:red">*</span></label>
+                    <input type="date" class="form-control" id="expirationDate" style="height: 38px;">
+                </div>
+            </div>
+        </div>
+        <!-- ── END NEW ROW ── -->
+
         <br />
         <div class="text-center">
             <button type="button" id="btnsearch" class="btn btn-primary">Search</button>
@@ -743,6 +841,13 @@
         $('#datefrom').val('');
         $('#dateto').val('');
 
+        // Reset the NEW credit period / delivery duration / expiration date fields
+        $('#creditPeriod').val('');
+        $('#creditPeriodType').val('');
+        $('#deliveryDuration').val('');
+        $('#deliveryDurationType').val('');
+        $('#expirationDate').val('');
+
         // Reset project selection
         $('select[name="state"]:eq(0)').val('').trigger('change');
 
@@ -982,6 +1087,37 @@
 
 
     /* ─────────────────────────────────────────────────────────────
+       SECTION 1E – NEW: Credit Period / Delivery Duration / Expiration
+       Date field behaviour.
+         • digits-only enforcement on the two number inputs
+         • Expiration Date can never be set earlier than today
+    ───────────────────────────────────────────────────────────── */
+    $(document).ready(function () {
+        // Restrict Credit Period & Delivery Duration to digits only
+        $(document).on('input', '#creditPeriod, #deliveryDuration', function () {
+            var cleaned = $(this).val().replace(/[^0-9]/g, '');
+            $(this).val(cleaned);
+        });
+
+        // Also block non-digit keystrokes for a snappier feel (paste is still
+        // sanitized by the 'input' handler above)
+        $(document).on('keypress', '#creditPeriod, #deliveryDuration', function (e) {
+            var charCode = e.which ? e.which : e.keyCode;
+            if (charCode < 48 || charCode > 57) {
+                e.preventDefault();
+            }
+        });
+
+        // Expiration Date: minimum selectable date is today
+        var today = new Date();
+        var yyyy  = today.getFullYear();
+        var mm    = String(today.getMonth() + 1).padStart(2, '0');
+        var dd    = String(today.getDate()).padStart(2, '0');
+        $('#expirationDate').attr('min', yyyy + '-' + mm + '-' + dd);
+    });
+
+
+    /* ─────────────────────────────────────────────────────────────
        SECTION 3 – override the existing select[name="state"]:eq(1)
        .val() call so it returns the FIRST selected industry value,
        preserving backward-compat with all downstream AJAX calls.
@@ -1123,6 +1259,26 @@
             var industry     = $('select[name="state"]:eq(1)').val();
             var currencySelect = $('#currencySelect').val();
 
+            // ── NEW: Credit Period / Delivery Duration / Expiration Date ──
+            var creditPeriod         = $('#creditPeriod').val();
+            var creditPeriodType     = $('#creditPeriodType').val();
+            var deliveryDuration     = $('#deliveryDuration').val();
+            var deliveryDurationType = $('#deliveryDurationType').val();
+            var expirationDate       = $('#expirationDate').val();
+
+            if (!creditPeriod || !creditPeriodType) {
+                alert('Please enter a Credit Period and select its type (Days/Months/Years).');
+                return;
+            }
+            if (!deliveryDuration || !deliveryDurationType) {
+                alert('Please enter a Delivery Duration and select its type (Days/Months/Years).');
+                return;
+            }
+            if (!expirationDate) {
+                alert('Please select an Expiration Date.');
+                return;
+            }
+
             var project_name  = $('select[name="state"]:eq(0) option:selected').text();
             // For multi-select, show first selected industry label in pack_name
             var industry_name = $('select[name="state"]:eq(1) option:selected').first().text();
@@ -1162,6 +1318,12 @@
                 formData.append('project_id', projectId);
                 formData.append('industry_id', industryId);
                 formData.append('currency', currencySelect);
+                // ── NEW: credit period / delivery duration / expiration date ──
+                formData.append('credit_period', creditPeriod);
+                formData.append('credit_periodType', creditPeriodType);
+                formData.append('delivery_duration', deliveryDuration);
+                formData.append('delivery_durationType', deliveryDurationType);
+                formData.append('expiration_date', expirationDate);
                 $.each(selectedRowsData, function (index, rowData) {
                     formData.append('selected_rows[' + index + '].pr',          rowData.pr);
                     formData.append('selected_rows[' + index + '].pR_ITEM',     rowData.pR_ITEM);
@@ -1223,6 +1385,12 @@
                 formData.append('project_id', projectId);
                 formData.append('industry_id', industryId);
                 formData.append('currency', currencySelect);
+                // ── NEW: credit period / delivery duration / expiration date ──
+                formData.append('credit_period', creditPeriod);
+                formData.append('credit_periodType', creditPeriodType);
+                formData.append('delivery_duration', deliveryDuration);
+                formData.append('delivery_durationType', deliveryDurationType);
+                formData.append('expiration_date', expirationDate);
                 $.each(selectedRowsData, function (index, rowData) {
                     formData.append('selected_rows[' + index + '].pr',          rowData.pr);
                     formData.append('selected_rows[' + index + '].pr_item',     rowData.pr_item);

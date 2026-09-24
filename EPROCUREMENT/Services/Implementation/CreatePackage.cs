@@ -15,7 +15,6 @@ namespace EPROCUREMENT.Services.Implementation
 	{
 		private readonly ProcurementDBContext _procurementDBContext;
         private readonly IGraphEmailService _graphEmailService;
-
         public CreatePackage(
             ProcurementDBContext procurementDBContext , 
             IGraphEmailService graphEmailService)
@@ -61,6 +60,11 @@ namespace EPROCUREMENT.Services.Implementation
 				assigned_by = createPackageDTO.assigned_by,
 				file_path = createPackageDTO.filePath,
                 currency = createPackageDTO.currency,
+                //credit_period = createPackageDTO.credit_period,
+                //credit_periodType = createPackageDTO.credit_periodType,
+                //delivery_duration = createPackageDTO.delivery_duration,
+                //delivery_durationType = createPackageDTO.delivery_durationType,
+                //expiration_date = createPackageDTO.expiration_date,
 				pkg_num = pkg_id + 1
 			};
 

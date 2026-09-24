@@ -421,7 +421,7 @@ namespace EPROCUREMENT.Controllers
             string extractedTax = null;
             string extractedCommercial = null;
 
-            var userEntity = usersActions.EmailAndFiles(id).Result;
+            var userEntity = await usersActions.EmailAndFiles(id);
 
             var tax_file = Path.Combine(file_path, userEntity.taxid_document_file_path);
             var commercial_file = Path.Combine(file_path, userEntity.commercial_register_document_file_path);
